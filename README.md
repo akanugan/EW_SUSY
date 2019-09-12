@@ -11,7 +11,7 @@ cmsenv
 
 ## Using the code
 ```
-git clone https://github.com/vhegde91/EW_SUSY
+git clone https://github.com/akanugan/EW_SUSY
 cd EW_SUSY
 ```
 

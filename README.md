@@ -59,9 +59,7 @@ This creates a pdf file with stacked BG and signal. If you want to plot some oth
 
 ## To clean the directory off many condor files
 
-Use 
-'''
-./cleaUpBatchFiles.sh
-'''
+Use  ```./cleaUpBatchFiles.sh```
+
 
 

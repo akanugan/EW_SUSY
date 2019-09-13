@@ -24,6 +24,9 @@ void splitRunList(string infile,int nfPerJob){
 
   if(fileName.Contains("TChiWZ_1000_100")) datasetAna = "TChiWZ_1000_100_"+datasetAna;
   if(fileName.Contains("TChiWZ_800_100")) datasetAna = "TChiWZ_800_100_"+datasetAna;
+  if(fileName.Contains("TChiWZ_1000_1")) datasetAna = "TChiWZ_1000_1_"+datasetAna;
+  if(fileName.Contains("TChiWZ_800_1")) datasetAna = "TChiWZ_800_1_"+datasetAna;
+  if(fileName.Contains("TChiWZ_600_1")) datasetAna = "TChiWZ_600_1_"+datasetAna;
   //---------------------------------------------------
   cout<<"executable at worker node : "<<exeCondor<<endl
       <<"Analysis executable : "<<exeAna<<endl

@@ -57,4 +57,11 @@ root -l -b -q plotKinStack.C
 
 This creates a pdf file with stacked BG and signal. If you want to plot some other variables, open plotKinStack.C file and edit `varName`, `xLabel`, `rebin`.
 
+## To clean the directory off many condor files
+
+Use 
+'''
+./cleaUpBatchFiles.sh
+'''
+
 

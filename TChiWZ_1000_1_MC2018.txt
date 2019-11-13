@@ -1,0 +1,1 @@
+root://cmseos.fnal.gov//store/user/vhegde/RA2bTrees_V17/EW_SUSY/skims/tree_signal/tree_TChiWZ_NLSP1000_LSP1_MC2018_private.root

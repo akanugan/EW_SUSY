@@ -1,0 +1,1 @@
+root://cmseos.fnal.gov//store/user/vhegde/RA2bTrees_V17/EW_SUSY/Autumn18Fast.TChiWZ_NLSP600_LSP1_Autumn18_Private_0_RA2AnalysisTree.root

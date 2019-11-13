@@ -42,12 +42,12 @@ void SignalReg::EventLoop(const char *data,const char *inputFileList) {
   int decade = 0;
 
   bool isFastSim = false;
-  float xsec = 0.0, numEvents = 0.0;
+  // float xsec = 0.0, numEvents = 0.0;
   if(s_data.Contains("TChiWZ")){
     isFastSim = true;
-    if(s_data.Contains("TChiWZ_1000")){ xsec = 1.34352e-3; numEvents = 28771;}
-    else if(s_data.Contains("TChiWZ_800")){ xsec = 4.75843e-3; numEvents = 34036;}
-    cout<<"Assigning xsec as: "<<xsec<<endl;
+    //   if(s_data.Contains("TChiWZ_1000")){ xsec = 1.34352e-3; numEvents = 28771;}
+    //   else if(s_data.Contains("TChiWZ_800")){ xsec = 4.75843e-3; numEvents = 34036;}
+    //   cout<<"Assigning xsec as: "<<xsec<<endl;
   }
   Long64_t nEvtSurv = 0;
   int ak8J1Idx = -1;
@@ -109,11 +109,11 @@ void SignalReg::EventLoop(const char *data,const char *inputFileList) {
     // if(dataRun==-2016 || dataRun==-2017) wt=Weight*1000.0*lumiInfb*NonPrefiringProb;
     // else if(dataRun <=0) wt=Weight*1000.0*lumiInfb;
     //    else wt = 1.0;
-    if(isFastSim && NumEvents==1 && CrossSection==1){
-      CrossSection = xsec;
-      NumEvents = numEvents;
-      Weight = xsec/numEvents;
-    }
+    // if(isFastSim && NumEvents==1 && CrossSection==1){
+    //   CrossSection = xsec;
+    //   NumEvents = numEvents;
+    //   Weight = xsec/numEvents;
+    // }
     wt=Weight*1000.0*lumiInfb;
 
     h_cutflow->Fill("0",1);
@@ -151,7 +151,7 @@ void SignalReg::EventLoop(const char *data,const char *inputFileList) {
       if((*Photons)[i].Pt() > 100 && (*Photons_fullID)[i] && (!(*Photons_hasPixelSeed)[i]) ){ nPhotons++; break;}
     }
     if(nPhotons>0) continue;
-    //    if(Photons->size()!=0) continue;
+    //if(Photons->size()!=0) continue;
     h_cutflow->Fill("photonVeto",wt);
 
     h_filters->Fill("TotEvnts",1);
@@ -199,7 +199,9 @@ void SignalReg::EventLoop(const char *data,const char *inputFileList) {
     }
     //--------------------------end of triggers
     //----MT
-    //    double mt = sqrt(2*(*JetsAK8)[ak8J1Idx].Pt()*MET*(1-cos(DeltaPhi(METPhi,(*JetsAK8)[ak8J1Idx].Phi()))));
+    double mt = 0, mt2j = 0;
+    if(JetsAK8->size()) mt = sqrt(2*(*JetsAK8)[0].Pt()*MET*(1-cos(DeltaPhi(METPhi,(*JetsAK8)[0].Phi()))));
+    if(JetsAK8->size()>=2) mt2j = sqrt(2*(*JetsAK8)[1].Pt()*MET*(1-cos(DeltaPhi(METPhi,(*JetsAK8)[1].Phi()))));
 
     if(HEMaffected){
       h_cutflow->Fill("HEMaffected",wt);
@@ -215,12 +217,24 @@ void SignalReg::EventLoop(const char *data,const char *inputFileList) {
     h_dPhi2->Fill(DeltaPhi2,wt);
     h_dPhi3->Fill(DeltaPhi3,wt);
     h_dPhi4->Fill(DeltaPhi4,wt);
-    
+
     if(JetsAK8->size()){
       h_AK8J1Pt->Fill(((*JetsAK8)[0].Pt()),wt);
       h_AK8J1Eta->Fill(((*JetsAK8)[0].Eta()),wt);
       h_AK8J1Mass->Fill((*JetsAK8_softDropMass)[0],wt);
       h_AK8J1Tau21->Fill(((*JetsAK8_NsubjettinessTau2)[0])/((*JetsAK8_NsubjettinessTau1)[0]),wt);
+      h_MT->Fill(mt,wt);
+      h_MT2J->Fill(mt2j,wt);
+      h_dPhiMETAK8->Fill(abs(DeltaPhi(METPhi,(*JetsAK8)[0].Phi())),wt);
+    }
+    if(JetsAK8->size() >=2){
+      h_AK8J2Pt->Fill(((*JetsAK8)[1].Pt()),wt);
+      h_AK8J2Eta->Fill(((*JetsAK8)[1].Eta()),wt);
+      h_AK8J2Mass->Fill((*JetsAK8_softDropMass)[1],wt);
+      h_AK8J2Tau21->Fill(((*JetsAK8_NsubjettinessTau2)[1])/((*JetsAK8_NsubjettinessTau1)[1]),wt);
+      h_dPhiAK8J1J2->Fill(abs(DeltaPhi((*JetsAK8)[0].Phi(),(*JetsAK8)[1].Phi())),wt);
+    
+      h2_AK8J1J2Tau21->Fill(((*JetsAK8_NsubjettinessTau2)[0])/((*JetsAK8_NsubjettinessTau1)[0]),((*JetsAK8_NsubjettinessTau2)[1])/((*JetsAK8_NsubjettinessTau1)[1]),wt);
     }
     nEvtSurv++;
     h_cutflow->Fill("NEvtsNoWtLeft",1);

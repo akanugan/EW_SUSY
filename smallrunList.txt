@@ -1,2 +1,2 @@
-root://cmseos.fnal.gov//store/user/lpcsusyhad/SusyRA2Analysis2015/Skims/Run2ProductionV17/tree_signal/tree_WJetsToLNu_HT-200to400_MC2018.root
+/uscms/home/vhegde/nobackup/Physics/makeRA2bSkims/CMSSW_8_0_30/src/Analysis/test/tree_signal/tree_TChiWZ_NLSP1000_LSP100_MC2018_private.root
 

@@ -25,32 +25,6 @@ class SignalReg : public NtupleVariables{
   void print(Long64_t);
 
   //Variables defined
-  bool isMC=true;
-  double wt=0,lumiInfb=35.815165;
-
-  TH1D *h_filters;
-  TH1D *h_MET;
-  TH1D *h_MHT;
-  TH1D *h_HT;
-  TH1D *h_NJets;
-  TH1D *h_BTags;
-
-  TH1D *h_MT;
-  TH1D *h_MT2J;
-  TH1D *h_dPhiMETAK8;
-  TH1D *h_dPhiAK8J1J2;
-
-  TH1D *h_AK8J1Pt, *h_AK8J1Mass, *h_AK8J1Eta, *h_AK8J1Tau21;
-  TH1D *h_AK8J2Pt, *h_AK8J2Mass, *h_AK8J2Eta, *h_AK8J2Tau21;
-
-  TH2D *h2_AK8J1J2Tau21;
-
-  TH1D *h_dPhi1;
-  TH1D *h_dPhi2;
-  TH1D *h_dPhi3;
-  TH1D *h_dPhi4;
-
-  TH1F *h_cutflow;
   TFile *oFile;
   
 };
@@ -66,46 +40,15 @@ void SignalReg::BookHistogram(const char *outFileName) {
   TString name,title;
  
   oFile = new TFile(outFileName, "recreate");
+  oFile->mkdir("TreeMaker2");
+  oFile->cd("TreeMaker2");
   TH1::SetDefaultSumw2(1);
-
-  h_cutflow = new TH1F("CutFlow","cut flow",25,0,25);
-  h_filters = new TH1D("Filters","Filters: Bin1 : all nEvnts, other bins: filter pass/fail",10,0,10);
-  
-  h_MET = new TH1D("MET","MET",200,0,2000);
-  h_MHT = new TH1D("MHT","MHT",200,0,2000);
-  h_HT = new TH1D("HT","HT",100,0,5000);
-  h_NJets = new TH1D("NJets","NJets with pT > 30, |eta| < 20.4",20,0,20);  
-  h_BTags = new TH1D("BTags","BTags with DeepCSV MedWP",10,0,10);  
-  
-  h_MT = new TH1D("mT","mT(MET,AK8J)",200,0,2000);
-  h_MT2J = new TH1D("mT2J","mT(MET,AK8J2)",200,0,2000);  
-  h_dPhiMETAK8 = new TH1D("dPhiMETAK8","dPhi(MET,AK8J)",40,0,4);
-  h_dPhiAK8J1J2 = new TH1D("dPhiAK8J1J2","dPhi(AK8J1,AK8J2)",40,0,4);
-
-  h_AK8J1Pt = new TH1D("AK8Pt","Leading AK8 jets Pt",200,0,2000);
-  h_AK8J1Eta = new TH1D("AK8Eta","AK8 Eta",120,-6,6);
-  h_AK8J1Mass = new TH1D("AK8Mass","AK8 Mass",60,0,300);
-  h_AK8J1Tau21 = new TH1D("AK8Tau21","AK8 Tau21",20,0,1);
-
-  h_AK8J2Pt = new TH1D("AK8J2Pt","2nd leading AK8 jets Pt",200,0,2000);
-  h_AK8J2Eta = new TH1D("AK8J2Eta","AK8J2 Eta",120,-6,6);
-  h_AK8J2Mass = new TH1D("AK8J2Mass","AK8J2 Mass",60,0,300);
-  h_AK8J2Tau21 = new TH1D("AK8J2Tau21","AK8J2 Tau21",20,0,1);
-  
-  h2_AK8J1J2Tau21 = new TH2D("AK8J1J2Tau21","x:AK8J1 #tau21 vs y:AK8J2 #tau21",20,0,2,20,0,2);
-  
-  h_dPhi1 = new TH1D("DeltaPhi1","DeltaPhi1",40,0,4);
-  h_dPhi2 = new TH1D("DeltaPhi2","DeltaPhi2",40,0,4);
-  h_dPhi3 = new TH1D("DeltaPhi3","DeltaPhi3",40,0,4);
-  h_dPhi4 = new TH1D("DeltaPhi4","DeltaPhi4",40,0,4);
-
 }
 
 SignalReg::SignalReg(const TString &inputFileList, const char *outFileName, const char* dataset) {
   string nameData=dataset;
   TString nameData2 = nameData;
-  TChain *tree = new TChain("tree");
-  //  if(nameData2.Contains("TChiWZ")) tree = new TChain("TreeMaker2/PreSelection");
+  TChain *tree = new TChain("TreeMaker2/PreSelection");
   if( ! FillChain(tree, inputFileList) ) {
     std::cerr << "Cannot get the tree " << std::endl;
   } else {
@@ -159,7 +102,6 @@ SignalReg::~SignalReg() {
 
   if (!fChain) return;
   delete fChain->GetCurrentFile();
-  oFile->cd();
   oFile->Write();
   oFile->Close();
 

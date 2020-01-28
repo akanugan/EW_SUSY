@@ -22,8 +22,13 @@ void splitRunList(string infile,int nfPerJob){
   if(fileName.Contains("MET_Run2017")) datasetAna = "2017";
   if(fileName.Contains("MET_Run2018")) datasetAna = "2018";
 
-  if(fileName.Contains("TChiWZ_1000_100")) datasetAna = "TChiWZ_1000_100_"+datasetAna;
-  if(fileName.Contains("TChiWZ_800_100")) datasetAna = "TChiWZ_800_100_"+datasetAna;
+  if(fileName.Contains("TChiWZ_1000_1")) datasetAna = "TChiWZ_1000_1_"+datasetAna;
+  if(fileName.Contains("TChiWZ_800_1")) datasetAna = "TChiWZ_800_1_"+datasetAna;
+  if(fileName.Contains("TChiWZ_600_1")) datasetAna = "TChiWZ_600_1_"+datasetAna;
+  if(fileName.Contains("TChipmWW_1000_100")) datasetAna = "TChipmWW_1000_100_"+datasetAna;
+  if(fileName.Contains("TChipmWW_800_100")) datasetAna = "TChipmWW_800_100_"+datasetAna;
+  if(fileName.Contains("TChipmWW_600_100")) datasetAna = "TChipmWW_600_100_"+datasetAna;
+  if(fileName.Contains("fastsim")) datasetAna = "fastsim_"+datasetAna;
   //---------------------------------------------------
   cout<<"executable at worker node : "<<exeCondor<<endl
       <<"Analysis executable : "<<exeAna<<endl

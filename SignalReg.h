@@ -35,8 +35,31 @@ class SignalReg : public NtupleVariables{
   TH1D *h_NJets;
   TH1D *h_BTags;
 
-  TH1D *h_AK8J1Pt, *h_AK8J1Mass, *h_AK8J1Eta, *h_AK8J1Tau21;
+  TH1D *h_MT;
+  TH1D *h_MT2J;
+  TH1D *h_dPhiMETAK8;
+  TH1D *h_dPhiAK8J1J2;
 
+  TH1D *h_AK8J1Pt, *h_AK8J1Mass1, *h_AK8J1Eta, *h_AK8J1Tau21, *h_AK8J1wDisDC, *h_AK8J1zhDisDC;
+  TH1D *h_AK8J2Pt, *h_AK8J2Mass1, *h_AK8J2Eta, *h_AK8J2Tau21, *h_AK8J2wDisDC, *h_AK8J2zhDisDC;
+  TH1D *h_AK8J1Mass2, *h_AK8J2Mass2;
+  TH1D *h_AK8J1Mass3, *h_AK8J2Mass3;
+  TH1D *h_AK8J1Mass4, *h_AK8J2Mass4;
+
+  TH1D *h_dRGenAK8J1, *h_dRGenAK8J2;
+  
+  TH1D *h_AK8J1wDis, *h_AK8J1zDis;
+  TH1D *h_AK8J2wDis, *h_AK8J2zDis;  
+  TH2D *h2_dRAK8J1J2;
+;
+  TH2D *h2_AK8J1J2Tau21;
+  TH2D *h2_DisdRAK8J1;
+  TH2D *h2_DisdRAK8J2;
+  TH2D *h2_Tau21dRAK8J1;
+  TH2D *h2_Tau21dRAK8J2;
+  TH2D *h2_AK8J1Mass_J1Tau21;
+  TH2D *h2_AK8J2Mass_J2Tau21;
+  
   TH1D *h_dPhi1;
   TH1D *h_dPhi2;
   TH1D *h_dPhi3;
@@ -68,12 +91,55 @@ void SignalReg::BookHistogram(const char *outFileName) {
   h_HT = new TH1D("HT","HT",100,0,5000);
   h_NJets = new TH1D("NJets","NJets with pT > 30, |eta| < 20.4",20,0,20);  
   h_BTags = new TH1D("BTags","BTags with DeepCSV MedWP",10,0,10);  
+  
+  h_MT = new TH1D("mT","mT(MET,AK8J)",200,0,2000);
+  h_MT2J = new TH1D("mT2J","mT(MET,AK8J2)",200,0,2000);  
+  h_dPhiMETAK8 = new TH1D("dPhiMETAK8","dPhi(MET,AK8J)",40,0,4);
+  h_dRGenAK8J1 = new TH1D("dRGenAK8J1","deltaR(WGen,AK8J1)",40,0,4);
+  h_dRGenAK8J2 = new TH1D("dRGenAK8J2","deltaR(WGen,AK8J2)",40,0,4);
+  h_dPhiAK8J1J2 = new TH1D("dPhiAK8J1J2","dPhi(AK8J1,AK8J2)",40,0,4);
 
   h_AK8J1Pt = new TH1D("AK8Pt","Leading AK8 jets Pt",200,0,2000);
-  h_AK8J1Eta = new TH1D("AK8Eta","AK8Eta",120,-6,6);
-  h_AK8J1Mass = new TH1D("AK8Mass","AK8Mass",60,0,300);
-  h_AK8J1Tau21 = new TH1D("AK8Tau21","Tau21",20,0,1);
+  h_AK8J1Eta = new TH1D("AK8Eta","AK8 Eta",120,-6,6);
+  h_AK8J1Mass1 = new TH1D("AK8Mass","AK8 Mass",60,0,300);
+  h_AK8J1Tau21 = new TH1D("AK8Tau21","AK8 Tau21",100,0,1);
+  h_AK8J1wDisDC = new TH1D("AK8J1wDisDC","AK8 J1 w Discr.DeepDecorelated",100,0,1);
+  h_AK8J1zhDisDC = new TH1D("AK8J1zhDisDC","AK8 J1 zh Discr.DeepDecorelated",100,0,1);
   
+  h_AK8J1wDis = new TH1D("AK8J1wDis","AK8 J1 w Discr.Deep Corelated",100,0,1);
+  //h_AK8J1zhDis = new TH1D("AK8J1zhDis","AK8 J1 zh Discr.Deep Corelated",20,0,1);
+  h_AK8J1zDis = new TH1D("AK8J1zDis","AK8 J1 z Discr.Deep Corelated",100,0,1);
+
+
+  h_AK8J2Pt = new TH1D("AK8J2Pt","2nd leading AK8 jets Pt",200,0,2000);
+  h_AK8J2Eta = new TH1D("AK8J2Eta","AK8J2 Eta",120,-6,6);
+  h_AK8J2Mass1 = new TH1D("AK8J2Mass","AK8J2 Mass",60,0,300);
+  h_AK8J2Tau21 = new TH1D("AK8J2Tau21","AK8J2 Tau21",100,0,1);
+  h_AK8J2wDisDC = new TH1D("h_AK8J2wDisDC","AK8 J2 w Discr.DeepDecorelated",100,0,1);
+  h_AK8J2zhDisDC = new TH1D("h_AK8J2zhDisDC","AK8 J2 zh Discr.DeepDecorelated",100,0,1);
+  
+  h_AK8J2wDis = new TH1D("AK8J2wDis","AK8 J2 w Discr.Deep Corelated",100,0,1);
+  //h_AK8J2zhDis = new TH1D("AK8J2zhDis","AK8 J2 zh Discr.Deep Corelated",20,0,1);
+  h_AK8J2zDis = new TH1D("AK8J2zDis","AK8 J2 z Discr.Deep Corelated",100,0,1);
+  //other mass histos
+  h_AK8J1Mass2 = new TH1D("AK8J1Mass2","AK8j1 Mass2",60,0,300);  
+  h_AK8J2Mass2 = new TH1D("AK8J2Mass2","AK8j2 Mass2",60,0,300);  
+  h_AK8J1Mass3 = new TH1D("AK8J1Mass3","AK8j1 Mass3",60,0,300);  
+  h_AK8J2Mass3 = new TH1D("AK8J2Mass3","AK8j2 Mass3",60,0,300);  
+  h_AK8J1Mass4 = new TH1D("AK8J1Mass4","AK8j1 Mass4",60,0,300);  
+  h_AK8J2Mass4 = new TH1D("AK8J2Mass4","AK8j2 Mass4",60,0,300);  
+  
+  
+  h2_dRAK8J1J2 = new TH2D("dRAK8J1J2","x:deltaR(GenW,AK8J2) vs y:deltaR(GenW,AK8J2)",50,0,5,50,0,5);
+  h2_AK8J1J2Tau21 = new TH2D("AK8J1J2Tau21","x:AK8J1 #tau21 vs y:AK8J2 #tau21",100,0,2,100,0,2);
+  h2_DisdRAK8J1 = new TH2D("disdRAK8J1","x:deltaR(GenW,AK8J1) vs y:deepDeCol w discr.",50,0,2,50,0,1);
+  h2_DisdRAK8J2 = new TH2D("disdRAK8J2","x:deltaR(GenW,AK8J2) vs y:deepDeCol w discr.",50,0,2,50,0,1);  
+  h2_Tau21dRAK8J1 = new TH2D("Tau21dRAK8J1","x:deltaR(GenW,AK8J1) vs y:AK8J1 #tau21",50,0,2,50,0,1);
+  h2_Tau21dRAK8J2 = new TH2D("Tau21dRAK8J2","x:deltaR(GenW,AK8J2) vs y:AK8J2 #tau21",50,0,2,50,0,1);
+  
+  h2_AK8J1Mass_J1Tau21 = new TH2D("h2_AK8J1Mass_J1Tau21","x:SoftdropmassJ1 vs y:AK8J1 #tau21",50,0,200,100,0,1);
+  h2_AK8J2Mass_J2Tau21 = new TH2D("h2_AK8J2Mass_J2Tau21","x:SoftdropmassJ2 vs y:AK8J2 #tau21",50,0,200,100,0,1);
+
   h_dPhi1 = new TH1D("DeltaPhi1","DeltaPhi1",40,0,4);
   h_dPhi2 = new TH1D("DeltaPhi2","DeltaPhi2",40,0,4);
   h_dPhi3 = new TH1D("DeltaPhi3","DeltaPhi3",40,0,4);
@@ -85,7 +151,7 @@ SignalReg::SignalReg(const TString &inputFileList, const char *outFileName, cons
   string nameData=dataset;
   TString nameData2 = nameData;
   TChain *tree = new TChain("tree");
-  if(nameData2.Contains("TChiWZ")) tree = new TChain("TreeMaker2/PreSelection");
+  //  if(nameData2.Contains("TChiWZ")) tree = new TChain("TreeMaker2/PreSelection");
   if( ! FillChain(tree, inputFileList) ) {
     std::cerr << "Cannot get the tree " << std::endl;
   } else {

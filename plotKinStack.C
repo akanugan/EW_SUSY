@@ -22,17 +22,19 @@ char name[100];
 char name2[100];
 TString name3;
 TLatex textOnTop,intLumiE;
-const int nfiles=8,nBG=6;    //Specify no. of files
+const int nfiles=9,nBG=6;    //Specify no. of files
 TFile *f[nfiles];
-int col[11]={kPink+1,kTeal+9,kGreen,kYellow,kOrange,kBlue,kCyan,kRed,kBlue+2,kMagenta,kPink+1};  //Specify Colors b's
+int col[14]={kPink+1,kTeal+9,kGreen,kYellow,kOrange,kBlue,kCyan,kRed,kBlue+2,kMagenta,kPink+1,kOrange+1,kGreen+3,kBlue+7};  //Specify Colors b's
 
-TCanvas *c_cA=new TCanvas("kinVar","plot of a kin var",1500,900);
+TCanvas *c_cA=new TCanvas("kinVar","",1500,900);
 
 void decorate(TH1D*,int,const char*);
 void decorate(THStack*,int,const char*);
 void drawlegend(TH1D*,int,const char*);
 void printInt(TH1D*,int,const char*);
 TLegend *legend1=new TLegend(0.4501, 0.65,  0.88, 0.88);
+//TLegend *legend1=new TLegend(0.1,0.7,0.48,0.9);
+//TLegend *legend1=new TLegend(0.1,0.7,0.48,0.9);
 
 //TLegend *legend2=new TLegend(0.7, 0.9,  0.90, 0.65);
 //TLegend *legend2=new TLegend(0.6, 0.90,  0.98, 0.45);
@@ -42,19 +44,27 @@ void plotKinStack(){
   TH1::SetDefaultSumw2(1);
   gStyle->SetOptStat(0);
   gStyle->SetTitle(0);
-  TString varName = "AK8Mass";
-  TString xLabel = "M^{AK8} (GeV)";
-  int rebin=1;
+  TString varName = "MET";
+  TString xLabel = "E_{T}^{miss} (GeV)";
+  int rebin=10;
 
-  f[0] = new TFile("ST__MC2018.root");
-  f[1] = new TFile("Rare_MC2018.root");
-  f[3] = new TFile("QCD_HT_MC2018.root");
-  f[2] = new TFile("TTJets_MC2018.root");
-  f[4] = new TFile("WJetsToLNu_HT_MC2018.root");
-  f[5] = new TFile("ZJetsToNuNu_HT_MC2018.root");
-  f[6] = new TFile("TChiWZ_800_100_MC2018.root");
-  f[7] = new TFile("TChiWZ_1000_100_MC2018.root");
+  f[0] = new TFile("BKGhistos_allcuts/ST__MC2018.root");
+  f[1] = new TFile("BKGhistos_allcuts/Rare_MC2018.root");
+  f[3] = new TFile("BKGhistos_allcuts/QCD_HT_MC2018.root");
+  f[2] = new TFile("BKGhistos_allcuts/TTJets_MC2018.root");
+  f[4] = new TFile("BKGhistos_allcuts/WJetsToLNu_HT_MC2018.root");
+  f[5] = new TFile("BKGhistos_allcuts/ZJetsToNuNu_HT_MC2018.root");
+
+
+  f[6] = new TFile("TChiWZ_600_100_MC2018.root");
+  f[7] = new TFile("TChiWZ_800_100_MC2018.root");
+  f[8] = new TFile("TChiWZ_1000_100_MC2018.root");
+  //  f[9] = new TFile("TChiWZ_800_500_MC2018.root");
+  //f[10] = new TFile("TChiWZ_800_700_MC2018.root");
+  //  f[12] = new TFile("TChiWZ_900_100_MC2018.root");
+  //f[11] = new TFile("TChiWZ_1000_1_MC2018.root");
   
+
 
   gStyle->SetTextSize(2);
   THStack *hs_var=new THStack("var_Stack","MET Stacked");
@@ -69,6 +79,7 @@ void plotKinStack(){
   TLatex tl1;
   for(int i=0;i<nfiles;i++){
         
+    printf("%d\n",i);
     TH1D *h_MET=(TH1D*)f[i]->FindObjectAny(varName);
     h_MET->Rebin(rebin);
     //    h_MET->GetYaxis()->SetRangeUser(100.5,20000);
@@ -80,6 +91,7 @@ void plotKinStack(){
     if(i==nBG-1) {
       c_cA->cd();
       hs_var->Draw("BAR HIST");
+      //hs_var->Draw("colz");
       hs_var->Draw("HIST");
       hs_var->SetMinimum(0.8);
       hs_var->SetMaximum(hs_var->GetMaximum()*10);
@@ -93,18 +105,22 @@ void plotKinStack(){
       h_MET->SetLineColor(col[i]);
       h_MET->SetLineWidth(3);
       h_MET->Draw("hist same");
+      //h_MET->Draw("colz");
       //      h_MET->GetYaxis()->SetRangeUser(0.5,20000);
       //      h_MET->GetYaxis()->SetRangeUser(100.5,20000);
     }
     drawlegend(h_MET,i,f[i]->GetName());
-    if(i==nfiles-1){ 
-      hs_var->GetXaxis()->SetTitleOffset(.90);
-      hs_var->GetXaxis()->SetTitle(xLabel); hs_var->GetYaxis()->SetTitle("Events");hs_var->SetTitle(0);
+    if(i==nfiles-1){
+      //hs_var->GetXaxis()->SetRangeUser(0,1500); 
+      //hs_var->GetXaxis()->SetTitleOffset(.90);
+      hs_var->GetXaxis()->SetTitle(xLabel); hs_var->GetYaxis()->SetTitle("# of events");hs_var->SetTitle(0);
     }
   }
   legend1->SetNColumns(2);
   legend1->SetBorderSize(0);
-  c_cA->cd(); gPad->SetLogy();legend1->Draw();
+  c_cA->cd();
+  gPad->SetLogy();
+  legend1->Draw();
   //  gPad->RedrawAxis();
   //  hs_var->GetXaxis()->SetTitle(xLabel);
   
@@ -124,10 +140,10 @@ void plotKinStack(){
 void decorate(THStack *hs,int i,const char* fname){
   //  hs->SetMinimum(0.5);
   //hs->SetTitle(0);
-  hs->GetXaxis()->SetLabelSize(.05);
-  hs->GetYaxis()->SetLabelSize(.05);
-  hs->GetXaxis()->SetTitleSize(0.05);
-  hs->GetYaxis()->SetTitleSize(0.05);
+  // hs->GetXaxis()->SetLabelSize(.05);
+  // hs->GetYaxis()->SetLabelSize(.05);
+  // hs->GetXaxis()->SetTitleSize(0.05);
+  //hs->GetYaxis()->SetTitleSize(0.05);
   //  drawlegend(hist,i,fname);
   //  gPad->Update();
   gStyle->SetOptStat(0);
@@ -168,8 +184,32 @@ void drawlegend(TH1D *hist,int i,const char* fname){
   else if(lName.Contains("TTGJets")){lName="t #bar{t}+ #gamma";}
   else if(lName.Contains("GJets")){lName="#gamma +jets";}
   else if(lName.Contains("Run2016")){lName="Data";}
-  else if(lName.Contains("TChiWZ_1000_100")){lName="TChiWZ_1000_100";}
-  else if(lName.Contains("TChiWZ_800_100")){lName="TChiWZ_800_100";}
+  // else if(lName.Contains("TChiWZ_1000_1")){lName="TChiWZ_1000_1";}
+  // else if(lName.Contains("TChiWZ_800_1")){lName="TChiWZ_800_1";}
+  // else if(lName.Contains("TChiWZ_600_1")){lName="TChiWZ_600_1";}
+  
+  else if(lName.Contains("TChiWZ_300_1")){lName="TChiWZ_300_1";}
+  
+  else if(lName.Contains("TChiWZ_500_1")){lName="TChiWZ_500_1";}
+  else if(lName.Contains("TChiWZ_600_100")){lName="TChiWZ(600,100)";}
+  //  else if(lName.Contains("TChiWZ_600_100")){lName="TChiWZ_600_100";}
+  else if(lName.Contains("TChiWZ_600_200")){lName="TChiWZ_600_200";}
+
+
+  else if(lName.Contains("TChiWZ_600_400")){lName="TChiWZ_600_400";}
+  else if(lName.Contains("TChiWZ_600_500")){lName="TChiWZ_600_500";}
+  //  else if(lName.Contains("TChiWZ_800_1")){lName="TChiWZ_800_1";}
+  else if(lName.Contains("TChiWZ_800_100")){lName="TChiWZ(800,100)";}
+  else if(lName.Contains("TChiWZ_1000_100")){lName="TChiWZ(1000,100)";}
+  else if(lName.Contains("TChiWZ_800_300")){lName="TChiWZ_800_300";}
+  else if(lName.Contains("TChiWZ_800_500")){lName="TChiWZ_800_500";}
+  else if(lName.Contains("TChiWZ_800_700")){lName="TChiWZ_800_700";}
+  else if(lName.Contains("TChipmWW_600_100")){lName="TChipmWW_600_100";}
+  else if(lName.Contains("TChipmWW_800_100")){lName="TChipmWW_800_100";}
+  else if(lName.Contains("TChipmWW_1000_100")){lName="TChipmWW_1000_100";}
+  // else if(lName.Contains("TChiWZ_900_100")){lName="TChiWZ_900_100";}
+  //else if(lName.Contains("TChiWZ_1000_1")){lName="TChiWZ_1000_1";}
+
   //  else if(lName.Contains("T5bbbbZg_1600_150")){lName="T5bbbbZG(1.6,0.15)";}
   //  else if(lName.Contains("T5bbbbZg_1600_150")){lName="#tilde{g}_{1600}#rightarrow b#bar{b}#tilde{#chi}_{1,150}^{0}";}
   else if(lName.Contains("T5bbbbZg_1600_1550")){lName="T5bbbb_ZG_1550";}

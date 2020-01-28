@@ -3,6 +3,7 @@
 #include <TH2.h>
 #include <TStyle.h>
 #include <TCanvas.h>
+#include <TLorentzVector.h>
 #include <iostream>
 #include <vector>
 #include <cstring>
@@ -10,7 +11,7 @@
 #include <fstream>
 
 using namespace std;
-
+//
 int main(int argc, char* argv[])
 {
 
@@ -42,12 +43,12 @@ void SignalReg::EventLoop(const char *data,const char *inputFileList) {
   int decade = 0;
 
   bool isFastSim = false;
-  float xsec = 0.0, numEvents = 0.0;
-  if(s_data.Contains("TChiWZ")){
+  // float xsec = 0.0, numEvents = 0.0;
+  if(s_data.Contains("fastsim")){
     isFastSim = true;
-    if(s_data.Contains("TChiWZ_1000")){ xsec = 1.34352e-3; numEvents = 28771;}
-    else if(s_data.Contains("TChiWZ_800")){ xsec = 4.75843e-3; numEvents = 34036;}
-    cout<<"Assigning xsec as: "<<xsec<<endl;
+    //   if(s_data.Contains("TChiWZ_1000")){ xsec = 1.34352e-3; numEvents = 28771;}
+    //   else if(s_data.Contains("TChiWZ_800")){ xsec = 4.75843e-3; numEvents = 34036;}
+    //   cout<<"Assigning xsec as: "<<xsec<<endl;
   }
   Long64_t nEvtSurv = 0;
   int ak8J1Idx = -1;
@@ -109,28 +110,45 @@ void SignalReg::EventLoop(const char *data,const char *inputFileList) {
     // if(dataRun==-2016 || dataRun==-2017) wt=Weight*1000.0*lumiInfb*NonPrefiringProb;
     // else if(dataRun <=0) wt=Weight*1000.0*lumiInfb;
     //    else wt = 1.0;
-    if(isFastSim && NumEvents==1 && CrossSection==1){
-      CrossSection = xsec;
-      NumEvents = numEvents;
-      Weight = xsec/numEvents;
-    }
+    // if(isFastSim && NumEvents==1 && CrossSection==1){
+    //   CrossSection = xsec;
+    //   NumEvents = numEvents;
+    //   Weight = xsec/numEvents;
+    // }
     wt=Weight*1000.0*lumiInfb;
 
     h_cutflow->Fill("0",1);
     h_cutflow->Fill("Weighted",wt);
     //--------------
     //    if(jentry>100) break;
-    //#################### RA2b cuts
+    //#################### EWK Planned baseline cuts
     if(isFastSim) JetID = true;
-    if(NJets < 2 || HT < 300 || MHT < 300 || NMuons!=0 || NElectrons!=0 || (MHT/HT > 1.0) || !JetID || !(DeltaPhi1 > 0.5 && DeltaPhi2 > 0.5 && DeltaPhi3 > 0.3 && DeltaPhi4 > 0.3) || isoMuonTracks!=0 || isoElectronTracks!=0 || isoPionTracks!=0) continue;  
-    //####################
+    if (JetsAK8->size()<2) continue;                                            
+    if(NJets < 2 || HT < 300 || MHT < 200 || MET <250                           // HT, MET, MHT cuts
+       || (*JetsAK8)[0].Pt() < 200 || (*JetsAK8)[1].Pt() < 200                  // pT >200
+       || abs((*JetsAK8)[0].Eta()) >2 || abs((*JetsAK8)[1].Eta()) >2            //  |Eta|<2
+       // || !( ((*JetsAK8_NsubjettinessTau2)[0]/(*JetsAK8_NsubjettinessTau1)[0]) >0.35 && ((*JetsAK8_NsubjettinessTau2)[0]/(*JetsAK8_NsubjettinessTau1)[0]) < 0.5)
+       //  || !( ((*JetsAK8_NsubjettinessTau2)[1]/(*JetsAK8_NsubjettinessTau1)[1]) >0.35 && ((*JetsAK8_NsubjettinessTau2)[1]/(*JetsAK8_NsubjettinessTau1)[1]) < 0.5)          
+       //|| !(100< (*JetsAK8_softDropMass)[0] && (*JetsAK8_softDropMass)[0] < 120) // Tight mass cut for J2
+       //|| !(100< (*JetsAK8_softDropMass)[1] && (*JetsAK8_softDropMass)[1] < 120) // Tight mass cut for J2
+       || NMuons!=0 || NElectrons!=0                                            // Veto e,muons
+       || (MHT/HT > 1.0) || !JetID                                              // MHT>HT and Veto JET ID
+       || !(DeltaPhi1 > 1.5 && DeltaPhi2 > 0.5 && DeltaPhi3 > 0.3 && DeltaPhi4 > 0.3)  //Angle cuts
+       //|| BTags!=0                                                                //Veto B jets
+       || isoMuonTracks!=0 || isoElectronTracks!=0 || isoPionTracks!=0) continue; //Veto isolated tracks
+    
+   //####################
     //----MET
     //    if(MET < 200) continue;
     //h_cutflow->Fill("MET>200",wt);
 
     float dphi1=4, dphi2=4, dphi3=4, dphi4=4;
-    if(Jets->size() > 0 && (*Jets)[0].Pt() > 30 && abs((*Jets)[0].Eta()) < 6.0)
-      dphi1 = (abs(DeltaPhi(METPhi,(*Jets)[0].Phi())));
+    //if(Jets->size() > 0 && (*Jets)[0].Pt() > 30 && abs((*Jets)[0].Eta()) < 6.0)
+    //  dphi1 = (abs(DeltaPhi(METPhi,(*Jets)[0].Phi())));
+    if(Jets->size() > 0){
+      if ((*Jets)[0].Pt() > 30 && abs((*Jets)[0].Eta()) < 6.0)
+	dphi1 = (abs(DeltaPhi(METPhi,(*Jets)[0].Phi())));
+    }
 
     if(Jets->size() > 1 && (*Jets)[1].Pt() > 30 && abs((*Jets)[1].Eta()) < 6.0)
       dphi2 = (abs(DeltaPhi(METPhi,(*Jets)[1].Phi())));
@@ -151,7 +169,7 @@ void SignalReg::EventLoop(const char *data,const char *inputFileList) {
       if((*Photons)[i].Pt() > 100 && (*Photons_fullID)[i] && (!(*Photons_hasPixelSeed)[i]) ){ nPhotons++; break;}
     }
     if(nPhotons>0) continue;
-    //    if(Photons->size()!=0) continue;
+    //if(Photons->size()!=0) continue;
     h_cutflow->Fill("photonVeto",wt);
 
     h_filters->Fill("TotEvnts",1);
@@ -199,7 +217,9 @@ void SignalReg::EventLoop(const char *data,const char *inputFileList) {
     }
     //--------------------------end of triggers
     //----MT
-    //    double mt = sqrt(2*(*JetsAK8)[ak8J1Idx].Pt()*MET*(1-cos(DeltaPhi(METPhi,(*JetsAK8)[ak8J1Idx].Phi()))));
+    double mt = 0, mt2j = 0;
+    if(JetsAK8->size() > 0) mt = sqrt(2*(*JetsAK8)[0].Pt()*MET*(1-cos(DeltaPhi(METPhi,(*JetsAK8)[0].Phi()))));
+    if(JetsAK8->size()>=2) mt2j = sqrt(2*(*JetsAK8)[1].Pt()*MET*(1-cos(DeltaPhi(METPhi,(*JetsAK8)[1].Phi()))));
 
     if(HEMaffected){
       h_cutflow->Fill("HEMaffected",wt);
@@ -216,18 +236,96 @@ void SignalReg::EventLoop(const char *data,const char *inputFileList) {
     h_dPhi3->Fill(DeltaPhi3,wt);
     h_dPhi4->Fill(DeltaPhi4,wt);
     
-    if(JetsAK8->size()){
-      h_AK8J1Pt->Fill(((*JetsAK8)[0].Pt()),wt);
-      h_AK8J1Eta->Fill(((*JetsAK8)[0].Eta()),wt);
-      h_AK8J1Mass->Fill((*JetsAK8_softDropMass)[0],wt);
-      h_AK8J1Tau21->Fill(((*JetsAK8_NsubjettinessTau2)[0])/((*JetsAK8_NsubjettinessTau1)[0]),wt);
+    cout<<"jets ak8 size "<<JetsAK8->size()<<endl;
+    cout<<"jets disc size "<<JetsAK8_zDiscriminatorDeep->size()<<endl;
+    cout<<"\n";
+    //
+    //---------------------------------------------------------------Gen W and AK8 jet matching
+
+    //if(abs(DeltaR((*GenParticles)[2].Eta(),(*GenParticles)[2].Phi(),(*JetsAK8)[1].Eta(),(*JetsAK8)[1].Phi())) <0.1){
+    
+    if(((*JetsAK8_wDiscriminatorDeep)[0]) > 0.9 && ((*JetsAK8_wDiscriminatorDeep)[1]) > 0.9){
+      if(JetsAK8->size() > 0){
+	h_AK8J1Pt->Fill(((*JetsAK8)[0].Pt()),wt);
+	h_AK8J1Eta->Fill(((*JetsAK8)[0].Eta()),wt);
+	h_AK8J1Mass1->Fill((*JetsAK8_softDropMass)[0],wt);
+	h_AK8J1Tau21->Fill(((*JetsAK8_NsubjettinessTau2)[0])/((*JetsAK8_NsubjettinessTau1)[0]),wt);
+	h_MT->Fill(mt,wt);
+	h_MT2J->Fill(mt2j,wt);
+	h_dPhiMETAK8->Fill(abs(DeltaPhi(METPhi,(*JetsAK8)[0].Phi())),wt);
+	//*GenParticles)[2] is verified to be a W with pdgID=24
+	// printf("HERE\n");
+	// printf("size of gen particles: %f\n",GenParticles->size());
+	// h_dRGenAK8J1->Fill(abs(DeltaR((*GenParticles)[2].Eta(),(*GenParticles)[2].Phi(),(*JetsAK8)[0].Eta(),(*JetsAK8)[0].Phi())),wt);
+	// printf("HERE\n");
+	// h2_DisdRAK8J1->Fill(abs(DeltaR((*GenParticles)[2].Eta(),(*GenParticles)[2].Phi(),(*JetsAK8)[0].Eta(),(*JetsAK8)[0].Phi())),((*JetsAK8_wDiscriminatorDeepDecorrel)[0]),wt);
+	// printf("HERE\n");
+	// h2_Tau21dRAK8J1->Fill(abs(DeltaR((*GenParticles)[2].Eta(),(*GenParticles)[2].Phi(),(*JetsAK8)[0].Eta(),(*JetsAK8)[0].Phi())),((*JetsAK8_NsubjettinessTau2)[0])/((*JetsAK8_NsubjettinessTau1)[0]),wt);
+	h2_AK8J1Mass_J1Tau21->Fill(((*JetsAK8_softDropMass)[0]),(((*JetsAK8_NsubjettinessTau2)[0])/((*JetsAK8_NsubjettinessTau1)[0])),wt);
+	h_AK8J1wDisDC->Fill(((*JetsAK8_wDiscriminatorDeepDecorrel)[0]),wt);
+	h_AK8J1zhDisDC->Fill(((*JetsAK8_zhDiscriminatorDeepDecorrel)[0]),wt);
+	
+	h_AK8J1wDis->Fill(((*JetsAK8_wDiscriminatorDeep)[0]),wt);
+	//h_AK8J1zhDis->Fill(((*JetsAK8_zhDiscriminatorDeep)[0]),wt);
+	h_AK8J1zDis->Fill(((*JetsAK8_zDiscriminatorDeep)[0]),wt);
+      }
+      if(JetsAK8->size() >=2){
+	
+	h_AK8J2Pt->Fill(((*JetsAK8)[1].Pt()),wt);
+	h_AK8J2Eta->Fill(((*JetsAK8)[1].Eta()),wt);
+	h_AK8J2Mass1->Fill((*JetsAK8_softDropMass)[1],wt);
+	h_AK8J2Tau21->Fill(((*JetsAK8_NsubjettinessTau2)[1])/((*JetsAK8_NsubjettinessTau1)[1]),wt);
+	h_dPhiAK8J1J2->Fill(abs(DeltaPhi((*JetsAK8)[0].Phi(),(*JetsAK8)[1].Phi())),wt);
+	// h_dRGenAK8J2->Fill(abs(DeltaR((*GenParticles)[2].Eta(),(*GenParticles)[2].Phi(),(*JetsAK8)[1].Eta(),(*JetsAK8)[1].Phi())),wt);
+	// h2_DisdRAK8J2->Fill(abs(DeltaR((*GenParticles)[2].Eta(),(*GenParticles)[2].Phi(),(*JetsAK8)[1].Eta(),(*JetsAK8)[1].Phi())),((*JetsAK8_wDiscriminatorDeepDecorrel)[1]),wt);
+	// h2_Tau21dRAK8J2->Fill(abs(DeltaR((*GenParticles)[2].Eta(),(*GenParticles)[2].Phi(),(*JetsAK8)[1].Eta(),(*JetsAK8)[1].Phi())),((*JetsAK8_NsubjettinessTau2)[1])/((*JetsAK8_NsubjettinessTau1)[1]),wt);
+	// h2_dRAK8J1J2->Fill(abs(DeltaR((*GenParticles)[2].Eta(),(*GenParticles)[2].Phi(),(*JetsAK8)[1].Eta(),(*JetsAK8)[1].Phi())),abs(DeltaR((*GenParticles)[2].Eta(),(*GenParticles)[2].Phi(),(*JetsAK8)[0].Eta(),(*JetsAK8)[0].Phi())),wt);
+	h2_AK8J2Mass_J2Tau21->Fill(((*JetsAK8_softDropMass)[1]),(((*JetsAK8_NsubjettinessTau2)[1])/((*JetsAK8_NsubjettinessTau1)[1])),wt);
+	h_AK8J2wDisDC->Fill(((*JetsAK8_wDiscriminatorDeepDecorrel)[1]),wt);
+	h_AK8J2zhDisDC->Fill(((*JetsAK8_zhDiscriminatorDeepDecorrel)[1]),wt);
+	
+	h_AK8J2wDis->Fill(((*JetsAK8_wDiscriminatorDeep)[1]),wt);
+	//h_AK8J2zhDis->Fill(((*JetsAK8_zhDiscriminatorDeep)[1]),wt);
+	h_AK8J2zDis->Fill(((*JetsAK8_zDiscriminatorDeep)[1]),wt);
+	
+	h2_AK8J1J2Tau21->Fill(((*JetsAK8_NsubjettinessTau2)[0])/((*JetsAK8_NsubjettinessTau1)[0]),((*JetsAK8_NsubjettinessTau2)[1])/((*JetsAK8_NsubjettinessTau1)[1]),wt);
+      }
     }
+    // side band for deep ak8wDisc.
+    if(((*JetsAK8_wDiscriminatorDeep)[0]) < 0.9 && ((*JetsAK8_wDiscriminatorDeep)[1]) < 0.9){
+      if(JetsAK8->size() > 0){  
+	h_AK8J1Mass2->Fill((*JetsAK8_softDropMass)[0],wt);
+      }
+      if(JetsAK8->size() >=2){  
+	h_AK8J2Mass2->Fill((*JetsAK8_softDropMass)[1],wt);
+      }
+    }
+    
+    if(((*JetsAK8_wDiscriminatorDeepDecorrel)[0]) > 0.5 && ((*JetsAK8_wDiscriminatorDeepDecorrel)[1]) > 0.5){
+      if(JetsAK8->size() > 0){  
+	h_AK8J1Mass3->Fill((*JetsAK8_softDropMass)[0],wt);
+      }
+      if(JetsAK8->size() >=2){  
+	h_AK8J2Mass3->Fill((*JetsAK8_softDropMass)[1],wt);
+      }
+    }
+    
+    if(((*JetsAK8_wDiscriminatorDeepDecorrel)[0]) < 0.5 && ((*JetsAK8_wDiscriminatorDeepDecorrel)[1]) < 0.5){
+      if(JetsAK8->size() > 0){  
+	h_AK8J1Mass4->Fill((*JetsAK8_softDropMass)[0],wt);
+      }
+      if(JetsAK8->size() >=2){  
+	h_AK8J2Mass4->Fill((*JetsAK8_softDropMass)[1],wt);
+      }
+    }
+
+
+    //}  // for ak8 jets gen matched
     nEvtSurv++;
     h_cutflow->Fill("NEvtsNoWtLeft",1);
   } // loop over entries
   cout<<"No. of entries survived: "<<nEvtSurv<<endl;
 }
-
 
 
 void SignalReg::print(Long64_t jentry){
@@ -236,9 +334,9 @@ void SignalReg::print(Long64_t jentry){
   cout<<"------------------------------------------------------------"<<endl;
   cout<<"MomMass:"<<SusyMotherMass<<" Kid Mass:"<<SusyLSPMass<<endl;
   for(int i=0;i<GenParticles->size();i++){  
-    //    cout<<EvtNum<<" "<<jentry<<" "<<GenParticles->size()<<" "<<i<<" PdgId:"<<(*GenParticles_PdgId)[i]<<" parentId:"<<(*GenParticles_ParentId)[i]<<" parentIndx:"<<(*GenParticles_ParentIdx)[i]<<" Status:"<<(*GenParticles_Status)[i]<<"\tPx :"<<(*GenParticles)[i].Px()<<" Py :"<<(*GenParticles)[i].Py()<<" Pz :"<<(*GenParticles)[i].Pz()<<" E: "<<(*GenParticles)[i].Energy()<<" M:"<<(*GenParticles)[i].M()<<endl;
+    cout<<EvtNum<<" "<<jentry<<" "<<GenParticles->size()<<" "<<i<<" PdgId:"<<(*GenParticles_PdgId)[i]<<" parentId:"<<(*GenParticles_ParentId)[i]<<" parentIndx:"<<(*GenParticles_ParentIdx)[i]<<" Status:"<<(*GenParticles_Status)[i]<<"\tPx :"<<(*GenParticles)[i].Px()<<" Py :"<<(*GenParticles)[i].Py()<<" Pz :"<<(*GenParticles)[i].Pz()<<" E: "<<(*GenParticles)[i].Energy()<<" M:"<<(*GenParticles)[i].M()<<endl;
     cout<<EvtNum<<" "<<jentry<<" "<<GenParticles->size()<<" "<<i<<" PdgId:"<<(*GenParticles_PdgId)[i]<<" parentId:"<<(*GenParticles_ParentId)[i]<<" parentIndx:"<<(*GenParticles_ParentIdx)[i]<<" Status:"<<(*GenParticles_Status)[i]<</*"\tPx:"<<(*GenParticles)[i].Px()<<" Py:"<<(*GenParticles)[i].Py()<<" Pz:"<<(*GenParticles)[i].Pz()<<*/"\tPt:"<<(*GenParticles)[i].Pt()<<" Eta:"<<(*GenParticles)[i].Eta()<<" Phi:"<<(*GenParticles)[i].Phi()<<" E:"<<(*GenParticles)[i].Energy()<<endl;
-
+    
   }
   for(int i=0;i<Photons->size();i++){
     double dR=0;//DeltaR( bestPhoton.Eta(),bestPhoton.Phi(),(*Photons)[i].Eta(),(*Photons)[i].Phi() );

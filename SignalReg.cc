@@ -8,6 +8,7 @@
 #include <vector>
 #include <cstring>
 #include <string>
+#include <tuple>
 #include <fstream>
 
 using namespace std;
@@ -25,9 +26,11 @@ int main(int argc, char* argv[])
 
   SignalReg ana(inputFileList, outFileName, data);
   cout << "dataset " << data << " " << endl;
-
-  ana.EventLoop(data,inputFileList);
-
+  vector<double> mass;
+  int idx;
+ ana.sortbymass(mass, idx);  
+ ana.EventLoop(data,inputFileList);
+  
   return 0;
 }
 
@@ -37,7 +40,7 @@ void SignalReg::EventLoop(const char *data,const char *inputFileList) {
   Long64_t nentries = fChain->GetEntriesFast();
   cout << "nentries " << nentries << endl;
   cout << "Analyzing dataset " << data << " " << endl;
-
+ 
   TString s_data=data;
   Long64_t nbytes = 0, nb = 0;
   int decade = 0;
@@ -129,8 +132,8 @@ void SignalReg::EventLoop(const char *data,const char *inputFileList) {
        || abs((*JetsAK8)[0].Eta()) >2 || abs((*JetsAK8)[1].Eta()) >2            //  |Eta|<2
        // || !( ((*JetsAK8_NsubjettinessTau2)[0]/(*JetsAK8_NsubjettinessTau1)[0]) >0.35 && ((*JetsAK8_NsubjettinessTau2)[0]/(*JetsAK8_NsubjettinessTau1)[0]) < 0.5)
        //  || !( ((*JetsAK8_NsubjettinessTau2)[1]/(*JetsAK8_NsubjettinessTau1)[1]) >0.35 && ((*JetsAK8_NsubjettinessTau2)[1]/(*JetsAK8_NsubjettinessTau1)[1]) < 0.5)          
-       //|| !(100< (*JetsAK8_softDropMass)[0] && (*JetsAK8_softDropMass)[0] < 120) // Tight mass cut for J2
-       //|| !(100< (*JetsAK8_softDropMass)[1] && (*JetsAK8_softDropMass)[1] < 120) // Tight mass cut for J2
+       // || !(65< (*JetsAK8_softDropMass)[0] && (*JetsAK8_softDropMass)[0] < 100) // Tight mass cut for J2
+       // || !(65< (*JetsAK8_softDropMass)[1] && (*JetsAK8_softDropMass)[1] < 100) // Tight mass cut for J2
        || NMuons!=0 || NElectrons!=0                                            // Veto e,muons
        || (MHT/HT > 1.0) || !JetID                                              // MHT>HT and Veto JET ID
        || !(DeltaPhi1 > 1.5 && DeltaPhi2 > 0.5 && DeltaPhi3 > 0.3 && DeltaPhi4 > 0.3)  //Angle cuts
@@ -225,7 +228,16 @@ void SignalReg::EventLoop(const char *data,const char *inputFileList) {
       h_cutflow->Fill("HEMaffected",wt);
       continue;
     }
+        
+    //---------------------------------------------------------------Gen W and AK8 jet matching
+    // for (int gen=0; gen < GenParticles_PdgId->size(); gen++){
+    //   if( abs((*GenParticles_PdgId)[gen]) == 24){
+    // 	cout << "W is here "<< endl;
+    // 	if(abs(DeltaR((*GenParticles)[gen].Eta(),(*GenParticles)[gen].Phi(),(*JetsAK8)[0].Eta(),(*JetsAK8)[0].Phi())) < 0.1){
+    //---------------------------------------------------------------
     
+    
+
     h_MET->Fill(MET,wt);
     h_MHT->Fill(MHT,wt);
     h_HT->Fill(HT,wt);
@@ -235,96 +247,144 @@ void SignalReg::EventLoop(const char *data,const char *inputFileList) {
     h_dPhi2->Fill(DeltaPhi2,wt);
     h_dPhi3->Fill(DeltaPhi3,wt);
     h_dPhi4->Fill(DeltaPhi4,wt);
-    
+	  
     cout<<"jets ak8 size "<<JetsAK8->size()<<endl;
-    cout<<"jets disc size "<<JetsAK8_zDiscriminatorDeep->size()<<endl;
+    cout<<"z disc size "<<JetsAK8_zDiscriminatorDeep->size()<<endl;
     cout<<"\n";
-    //
-    //---------------------------------------------------------------Gen W and AK8 jet matching
+	  
+    //if(((*JetsAK8_wDiscriminatorDeep)[0]) > 0.9 && ((*JetsAK8_wDiscriminatorDeep)[1]) > 0.9){
+    if(JetsAK8->size() > 0){
+	  
+      h_AK8J1Pt->Fill(((*JetsAK8)[0].Pt()),wt);
+      h_AK8J1Eta->Fill(((*JetsAK8)[0].Eta()),wt);
+      h_AK8J1Mass->Fill((*JetsAK8_softDropMass)[0],wt);
+      h_AK8J1Tau21->Fill(((*JetsAK8_NsubjettinessTau2)[0])/((*JetsAK8_NsubjettinessTau1)[0]),wt);
+      h_MT->Fill(mt,wt);
+      h_MT2J->Fill(mt2j,wt);
+      h_dPhiMETAK8->Fill(abs(DeltaPhi(METPhi,(*JetsAK8)[0].Phi())),wt);
+      printf("size of gen particles: %d\n",GenParticles->size());
+      
+      // h_dRGenAK8J1->Fill(abs(DeltaR((*GenParticles)[gen].Eta(),(*GenParticles)[gen].Phi(),(*JetsAK8)[0].Eta(),(*JetsAK8)[0].Phi())),wt);
+      // h2_DisdRAK8J1->Fill(abs(DeltaR((*GenParticles)[gen].Eta(),(*GenParticles)[gen].Phi(),(*JetsAK8)[0].Eta(),(*JetsAK8)[0].Phi())),((*JetsAK8_wDiscriminatorDeepDecorrel)[0]),wt);
+      // h2_Tau21dRAK8J1->Fill(abs(DeltaR((*GenParticles)[gen].Eta(),(*GenParticles)[gen].Phi(),(*JetsAK8)[0].Eta(),(*JetsAK8)[0].Phi())),((*JetsAK8_NsubjettinessTau2)[0])/((*JetsAK8_NsubjettinessTau1)[0]),wt);
 
-    //if(abs(DeltaR((*GenParticles)[2].Eta(),(*GenParticles)[2].Phi(),(*JetsAK8)[1].Eta(),(*JetsAK8)[1].Phi())) <0.1){
-    
-    if(((*JetsAK8_wDiscriminatorDeep)[0]) > 0.9 && ((*JetsAK8_wDiscriminatorDeep)[1]) > 0.9){
-      if(JetsAK8->size() > 0){
-	h_AK8J1Pt->Fill(((*JetsAK8)[0].Pt()),wt);
-	h_AK8J1Eta->Fill(((*JetsAK8)[0].Eta()),wt);
-	h_AK8J1Mass1->Fill((*JetsAK8_softDropMass)[0],wt);
-	h_AK8J1Tau21->Fill(((*JetsAK8_NsubjettinessTau2)[0])/((*JetsAK8_NsubjettinessTau1)[0]),wt);
-	h_MT->Fill(mt,wt);
-	h_MT2J->Fill(mt2j,wt);
-	h_dPhiMETAK8->Fill(abs(DeltaPhi(METPhi,(*JetsAK8)[0].Phi())),wt);
-	//*GenParticles)[2] is verified to be a W with pdgID=24
-	// printf("HERE\n");
-	// printf("size of gen particles: %f\n",GenParticles->size());
-	// h_dRGenAK8J1->Fill(abs(DeltaR((*GenParticles)[2].Eta(),(*GenParticles)[2].Phi(),(*JetsAK8)[0].Eta(),(*JetsAK8)[0].Phi())),wt);
-	// printf("HERE\n");
-	// h2_DisdRAK8J1->Fill(abs(DeltaR((*GenParticles)[2].Eta(),(*GenParticles)[2].Phi(),(*JetsAK8)[0].Eta(),(*JetsAK8)[0].Phi())),((*JetsAK8_wDiscriminatorDeepDecorrel)[0]),wt);
-	// printf("HERE\n");
-	// h2_Tau21dRAK8J1->Fill(abs(DeltaR((*GenParticles)[2].Eta(),(*GenParticles)[2].Phi(),(*JetsAK8)[0].Eta(),(*JetsAK8)[0].Phi())),((*JetsAK8_NsubjettinessTau2)[0])/((*JetsAK8_NsubjettinessTau1)[0]),wt);
-	h2_AK8J1Mass_J1Tau21->Fill(((*JetsAK8_softDropMass)[0]),(((*JetsAK8_NsubjettinessTau2)[0])/((*JetsAK8_NsubjettinessTau1)[0])),wt);
-	h_AK8J1wDisDC->Fill(((*JetsAK8_wDiscriminatorDeepDecorrel)[0]),wt);
-	h_AK8J1zhDisDC->Fill(((*JetsAK8_zhDiscriminatorDeepDecorrel)[0]),wt);
-	
-	h_AK8J1wDis->Fill(((*JetsAK8_wDiscriminatorDeep)[0]),wt);
-	//h_AK8J1zhDis->Fill(((*JetsAK8_zhDiscriminatorDeep)[0]),wt);
-	h_AK8J1zDis->Fill(((*JetsAK8_zDiscriminatorDeep)[0]),wt);
-      }
-      if(JetsAK8->size() >=2){
-	
-	h_AK8J2Pt->Fill(((*JetsAK8)[1].Pt()),wt);
-	h_AK8J2Eta->Fill(((*JetsAK8)[1].Eta()),wt);
-	h_AK8J2Mass1->Fill((*JetsAK8_softDropMass)[1],wt);
-	h_AK8J2Tau21->Fill(((*JetsAK8_NsubjettinessTau2)[1])/((*JetsAK8_NsubjettinessTau1)[1]),wt);
-	h_dPhiAK8J1J2->Fill(abs(DeltaPhi((*JetsAK8)[0].Phi(),(*JetsAK8)[1].Phi())),wt);
-	// h_dRGenAK8J2->Fill(abs(DeltaR((*GenParticles)[2].Eta(),(*GenParticles)[2].Phi(),(*JetsAK8)[1].Eta(),(*JetsAK8)[1].Phi())),wt);
-	// h2_DisdRAK8J2->Fill(abs(DeltaR((*GenParticles)[2].Eta(),(*GenParticles)[2].Phi(),(*JetsAK8)[1].Eta(),(*JetsAK8)[1].Phi())),((*JetsAK8_wDiscriminatorDeepDecorrel)[1]),wt);
-	// h2_Tau21dRAK8J2->Fill(abs(DeltaR((*GenParticles)[2].Eta(),(*GenParticles)[2].Phi(),(*JetsAK8)[1].Eta(),(*JetsAK8)[1].Phi())),((*JetsAK8_NsubjettinessTau2)[1])/((*JetsAK8_NsubjettinessTau1)[1]),wt);
-	// h2_dRAK8J1J2->Fill(abs(DeltaR((*GenParticles)[2].Eta(),(*GenParticles)[2].Phi(),(*JetsAK8)[1].Eta(),(*JetsAK8)[1].Phi())),abs(DeltaR((*GenParticles)[2].Eta(),(*GenParticles)[2].Phi(),(*JetsAK8)[0].Eta(),(*JetsAK8)[0].Phi())),wt);
-	h2_AK8J2Mass_J2Tau21->Fill(((*JetsAK8_softDropMass)[1]),(((*JetsAK8_NsubjettinessTau2)[1])/((*JetsAK8_NsubjettinessTau1)[1])),wt);
-	h_AK8J2wDisDC->Fill(((*JetsAK8_wDiscriminatorDeepDecorrel)[1]),wt);
-	h_AK8J2zhDisDC->Fill(((*JetsAK8_zhDiscriminatorDeepDecorrel)[1]),wt);
-	
-	h_AK8J2wDis->Fill(((*JetsAK8_wDiscriminatorDeep)[1]),wt);
-	//h_AK8J2zhDis->Fill(((*JetsAK8_zhDiscriminatorDeep)[1]),wt);
-	h_AK8J2zDis->Fill(((*JetsAK8_zDiscriminatorDeep)[1]),wt);
-	
-	h2_AK8J1J2Tau21->Fill(((*JetsAK8_NsubjettinessTau2)[0])/((*JetsAK8_NsubjettinessTau1)[0]),((*JetsAK8_NsubjettinessTau2)[1])/((*JetsAK8_NsubjettinessTau1)[1]),wt);
-      }
+      h2_AK8J1Mass_J1Tau21->Fill(((*JetsAK8_softDropMass)[0]),(((*JetsAK8_NsubjettinessTau2)[0])/((*JetsAK8_NsubjettinessTau1)[0])),wt);
+
+      h_AK8J1wDisDC->Fill(((*JetsAK8_wDiscriminatorDeepDecorrel)[0]),wt);
+      h_AK8J1zhDisDC->Fill(((*JetsAK8_zhDiscriminatorDeepDecorrel)[0]),wt);
+      h_AK8J1wDis->Fill(((*JetsAK8_wDiscriminatorDeep)[0]),wt);
+      h_AK8J1zDis->Fill(((*JetsAK8_zDiscriminatorDeep)[0]),wt);
     }
+	  
+    if(JetsAK8->size() >=2){
+      cout << "jets2 "<< endl;
+      h_AK8J2Pt->Fill(((*JetsAK8)[1].Pt()),wt);
+      h_AK8J2Eta->Fill(((*JetsAK8)[1].Eta()),wt);
+      h_AK8J2Mass->Fill((*JetsAK8_softDropMass)[1],wt);
+      h_AK8J2Tau21->Fill(((*JetsAK8_NsubjettinessTau2)[1])/((*JetsAK8_NsubjettinessTau1)[1]),wt);
+      h_dPhiAK8J1J2->Fill(abs(DeltaPhi((*JetsAK8)[0].Phi(),(*JetsAK8)[1].Phi())),wt);
+
+      // h_dRGenAK8J2->Fill(abs(DeltaR((*GenParticles)[gen].Eta(),(*GenParticles)[gen].Phi(),(*JetsAK8)[1].Eta(),(*JetsAK8)[1].Phi())),wt);
+      // h2_DisdRAK8J2->Fill(abs(DeltaR((*GenParticles)[gen].Eta(),(*GenParticles)[gen].Phi(),(*JetsAK8)[1].Eta(),(*JetsAK8)[1].Phi())),((*JetsAK8_wDiscriminatorDeepDecorrel)[1]),wt);
+      // h2_Tau21dRAK8J2->Fill(abs(DeltaR((*GenParticles)[gen].Eta(),(*GenParticles)[gen].Phi(),(*JetsAK8)[1].Eta(),(*JetsAK8)[1].Phi())),((*JetsAK8_NsubjettinessTau2)[1])/((*JetsAK8_NsubjettinessTau1)[1]),wt);
+      // h2_dRAK8J1J2->Fill(abs(DeltaR((*GenParticles)[gen].Eta(),(*GenParticles)[gen].Phi(),(*JetsAK8)[1].Eta(),(*JetsAK8)[1].Phi())),abs(DeltaR((*GenParticles)[2].Eta(),(*GenParticles)[2].Phi(),(*JetsAK8)[0].Eta(),(*JetsAK8)[0].Phi())),wt);
+      h2_AK8J2Mass_J2Tau21->Fill(((*JetsAK8_softDropMass)[1]),(((*JetsAK8_NsubjettinessTau2)[1])/((*JetsAK8_NsubjettinessTau1)[1])),wt);
+	    
+      h_AK8J2wDisDC->Fill(((*JetsAK8_wDiscriminatorDeepDecorrel)[1]),wt);
+      h_AK8J2zhDisDC->Fill(((*JetsAK8_zhDiscriminatorDeepDecorrel)[1]),wt);
+      h_AK8J2wDis->Fill(((*JetsAK8_wDiscriminatorDeep)[1]),wt);
+      h_AK8J2zDis->Fill(((*JetsAK8_zDiscriminatorDeep)[1]),wt);
+	    
+      h2_AK8J1J2Tau21->Fill(((*JetsAK8_NsubjettinessTau2)[0])/((*JetsAK8_NsubjettinessTau1)[0]),((*JetsAK8_NsubjettinessTau2)[1])/((*JetsAK8_NsubjettinessTau1)[1]),wt);
+    }
+    //     }
+    //   }
+    // }
+  
+  
+  //Uncomment the varibles in header file before using this
     // side band for deep ak8wDisc.
-    if(((*JetsAK8_wDiscriminatorDeep)[0]) < 0.9 && ((*JetsAK8_wDiscriminatorDeep)[1]) < 0.9){
-      if(JetsAK8->size() > 0){  
-	h_AK8J1Mass2->Fill((*JetsAK8_softDropMass)[0],wt);
-      }
-      if(JetsAK8->size() >=2){  
-	h_AK8J2Mass2->Fill((*JetsAK8_softDropMass)[1],wt);
-      }
-    }
     
-    if(((*JetsAK8_wDiscriminatorDeepDecorrel)[0]) > 0.5 && ((*JetsAK8_wDiscriminatorDeepDecorrel)[1]) > 0.5){
-      if(JetsAK8->size() > 0){  
-	h_AK8J1Mass3->Fill((*JetsAK8_softDropMass)[0],wt);
-      }
-      if(JetsAK8->size() >=2){  
-	h_AK8J2Mass3->Fill((*JetsAK8_softDropMass)[1],wt);
-      }
-    }
+    // if(((*JetsAK8_wDiscriminatorDeep)[0]) < 0.9 && ((*JetsAK8_wDiscriminatorDeep)[1]) < 0.9){
+    //   if(JetsAK8->size() > 0){  
+    // 	h_AK8J1Mass2->Fill((*JetsAK8_softDropMass)[0],wt);
+    //   }
+    //   if(JetsAK8->size() >=2){  
+    // 	h_AK8J2Mass2->Fill((*JetsAK8_softDropMass)[1],wt);
+    //   }
+    // }
     
-    if(((*JetsAK8_wDiscriminatorDeepDecorrel)[0]) < 0.5 && ((*JetsAK8_wDiscriminatorDeepDecorrel)[1]) < 0.5){
-      if(JetsAK8->size() > 0){  
-	h_AK8J1Mass4->Fill((*JetsAK8_softDropMass)[0],wt);
-      }
-      if(JetsAK8->size() >=2){  
-	h_AK8J2Mass4->Fill((*JetsAK8_softDropMass)[1],wt);
-      }
-    }
-
+    // if(((*JetsAK8_wDiscriminatorDeepDecorrel)[0]) > 0.5 && ((*JetsAK8_wDiscriminatorDeepDecorrel)[1]) > 0.5){
+    //   if(JetsAK8->size() > 0){  
+    // 	h_AK8J1Mass3->Fill((*JetsAK8_softDropMass)[0],wt);
+    //   }
+    //   if(JetsAK8->size() >=2){  
+    // 	h_AK8J2Mass3->Fill((*JetsAK8_softDropMass)[1],wt);
+    //   }
+    // }
+    
+    // if(((*JetsAK8_wDiscriminatorDeepDecorrel)[0]) < 0.5 && ((*JetsAK8_wDiscriminatorDeepDecorrel)[1]) < 0.5){
+    //   if(JetsAK8->size() > 0){  
+    // 	h_AK8J1Mass4->Fill((*JetsAK8_softDropMass)[0],wt);
+    //   }
+    //   if(JetsAK8->size() >=2){  
+    // 	h_AK8J2Mass4->Fill((*JetsAK8_softDropMass)[1],wt);
+    //   }
+    // }
 
     //}  // for ak8 jets gen matched
+    
     nEvtSurv++;
     h_cutflow->Fill("NEvtsNoWtLeft",1);
+    
+    //------to arrange ak8 jets by decreasing mass-----
+    cout<<"sd mass size" << JetsAK8_softDropMass->size()<<endl;
+    vector<pair<double, int> > masspair(JetsAK8_softDropMass->size());
+    for (int i=0; i< JetsAK8_softDropMass->size(); i++){
+      masspair.push_back(make_pair((*JetsAK8_softDropMass)[i], i));
+    }
+    
+    sort(masspair.begin(),masspair.end(), greater<>());
+    
+    for (int j = 0; j < masspair.size(); j++) { 
+      cout << masspair[j].first << "\t"	<< masspair[j].second <<"\n"<< endl; 
+      
+    } 
+    
+    vector<double> sorted_Pt(masspair.size());
+    vector<double> sorted_Eta(masspair.size());
+    vector<double> sorted_wDis(masspair.size());
+    //    ((*JetsAK8_wDiscriminatorDeep)[0])
+    for(int k=0; k< masspair.size(); k++){
+      //int temp_ind = masspair[k].second;
+      sorted_Pt[k]=(*JetsAK8)[(masspair[k].second)].Pt();
+      sorted_Eta[k]=(*JetsAK8)[(masspair[k].second)].Eta();
+    }
+  
   } // loop over entries
   cout<<"No. of entries survived: "<<nEvtSurv<<endl;
+}
+
+void SignalReg::sortbymass(vector<double> mass, int idx){
+  //--sorting events by decreasing mass 
+  vector<pair<double, int> > masspair;
+  for (int i=0; i< JetsAK8->size(); i++){
+    masspair.push_back(make_pair((*JetsAK8_softDropMass)[i], i));
+  }
+  sort(masspair.begin(),masspair.end(), greater<>());
+  for (int i = 0; i < masspair.size(); i++) { 
+    cout << masspair[i].first << "\t"
+	 << masspair[i].second << endl; 
+  } 
+    //sort(arr, arr+5, greater<>());
+  // [[m1,pt1,eta1],[m2,pt2,eta2],[]]
+  // sortbyMass.push_back(*JetsAK8_softDropMass); // []
+  // sortbyMass.push_back(*JetsAK8->Pt()); // vector.at(0) , vector[0]
+  //sortbyMass.push_back(*JetsAK8->Eta());
+  vector<double> sorted_Pt(masspair.size());
+  vector<double> sorted_Eta(masspair.size());  
+
+  // }
 }
 
 

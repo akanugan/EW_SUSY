@@ -49,19 +49,25 @@ void plotKinStack_KH(){
   TH1::SetDefaultSumw2(1);
   gStyle->SetOptStat(0);
   gStyle->SetTitle(0);
-  TString varName = "AK8Mass";
-  TString xLabel = "Softdrop mass AK8jet1 (GeV) ";
-  int rebin=1;
+  TString varName = "AK8J1doubleBDisnoBtag";
+  //  TString varName2 = "HWMET";
+  TString xLabel = "AK8 Jet1 double B Disc. ";
+  int rebin=5;
 
-  f[0] = new TFile("BKGhistos_allcuts/ST__MC2018.root");
-  f[1] = new TFile("BKGhistos_allcuts/Rare_MC2018.root");
-  f[3] = new TFile("BKGhistos_allcuts/QCD_HT_MC2018.root");
-  f[2] = new TFile("BKGhistos_allcuts/TTJets_MC2018.root");
-  f[4] = new TFile("BKGhistos_allcuts/WJetsToLNu_HT_MC2018.root");
-  f[5] = new TFile("BKGhistos_allcuts/ZJetsToNuNu_HT_MC2018.root");
-  f[6] = new TFile("SIG_WZ_histos_baseline/TChiWZ_600_100_MC2018.root");  
-  f[7] = new TFile("SIG_WZ_histos_baseline/TChiWZ_800_100_MC2018.root");
-  f[8] = new TFile("SIG_WZ_histos_baseline/TChiWZ_1000_100_MC2018.root");
+  f[0] = new TFile("BKG_conditions2/ST__MC2018.root");
+  f[1] = new TFile("BKG_conditions2/Rare_MC2018.root");
+  f[3] = new TFile("BKG_conditions2/QCD_HT_MC2018.root");
+  f[2] = new TFile("BKG_conditions2/TTJets_MC2018.root");
+  f[4] = new TFile("BKG_conditions2/WJetsToLNu_HT_MC2018.root");
+  f[5] = new TFile("BKG_conditions2/ZJetsToNuNu_HT_MC2018.root");
+  f[6] = new TFile("TChiWH_600_100_conditions2.root");
+  f[7] = new TFile("TChiWH_800_100_conditions2.root");
+  f[8] = new TFile("TChiWH_1000_100_conditions2.root");
+
+
+  //f[6] = new TFile("SIG_TChiWH_baseline/TChiWH_600_100_MC2018.root");
+  //f[7] = new TFile("SIG_TChiWH_baseline/TChiWH_800_100_MC2018.root");
+  //f[8] = new TFile("SIG_TChiWH_baseline/TChiWH_1000_100_MC2018.root");
 
   // f[6] = new TFile("SIG_WW_tightmass_vetoB/TChipmWW_600_100_MC2018.root");  
   // f[7] = new TFile("SIG_WW_tightmass_vetoB/TChipmWW_800_100_MC2018.root");
@@ -70,7 +76,11 @@ void plotKinStack_KH(){
   TH1D *h_Sig=(TH1D*)f[6]->FindObjectAny(varName);
   TH1D *h_Sig1=(TH1D*)f[7]->FindObjectAny(varName);
   TH1D *h_Sig2=(TH1D*)f[8]->FindObjectAny(varName);
-
+  
+  // TH1D *h_sig=(TH1D*)f[6]->FindObjectAny(varName2);
+  // TH1D *h_sig1=(TH1D*)f[7]->FindObjectAny(varName2);
+  // TH1D *h_sig2=(TH1D*)f[8]->FindObjectAny(varName2);
+  
   //
   // Top panel
   //
@@ -97,8 +107,10 @@ void plotKinStack_KH(){
   for(int i=0;i<nfiles;i++){
         
     TH1D *h_MET=(TH1D*)f[i]->FindObjectAny(varName);
-    
+    //   TH1D *h_MET2=(TH1D*)f[i]->FindObjectAny(varName2);
     h_MET->Rebin(rebin);
+    // h_MET2->Rebin(rebin);
+    // h_MET->Add(h_MET2);
     //    h_MET->GetYaxis()->SetRangeUser(100.5,20000);
     //    h_MET->SetMinimum(100);
     decorate(h_MET,i,f[i]->GetName());
@@ -140,24 +152,35 @@ void plotKinStack_KH(){
   TH1 *sigbkg_sum = (TH1D*)h_Sig ->Clone(); // just to have same bin content
   TH1 *sigbkg_sum1  = (TH1D*)h_Sig1 ->Clone(); // just to have same bin content
   TH1 *sigbkg_sum2  = (TH1D*)h_Sig2 ->Clone(); // just to have same bin content
+  bool sBkg =false;
   if (stack_sum->Integral() !=0){
   for (int bin=0;bin<=stack_sum->GetNcells();++bin) {
-    sstack_sum->SetBinContent(bin,sqrt(stack_sum->GetBinContent(bin)));
-    sigbkg_sum->SetBinContent(bin,sqrt(stack_sum->GetBinContent(bin)+h_Sig->GetBinContent(bin)));
-    sigbkg_sum1->SetBinContent(bin,sqrt(stack_sum->GetBinContent(bin)+h_Sig1->GetBinContent(bin)));
-    sigbkg_sum2->SetBinContent(bin,sqrt(stack_sum->GetBinContent(bin)+h_Sig2->GetBinContent(bin)));
+    double bgsum = (stack_sum->GetBinContent(bin)>0.) ? stack_sum->GetBinContent(bin) : 1e-6;
+    cout<< "test" <<bgsum<< endl;
+    sstack_sum->SetBinContent(bin,sqrt(bgsum));
+    double sigbg = ((stack_sum->GetBinContent(bin)+h_Sig->GetBinContent(bin))>0.) ? (stack_sum->GetBinContent(bin)+h_Sig->GetBinContent(bin)) : 1e-6;
+    sigbkg_sum->SetBinContent(bin,sqrt(sigbg));
+    double sig1bg = ((stack_sum->GetBinContent(bin)+h_Sig1->GetBinContent(bin))>0.) ? (stack_sum->GetBinContent(bin)+h_Sig1->GetBinContent(bin)) : 1e-6;
+    sigbkg_sum1->SetBinContent(bin,sqrt(sig1bg));
+    double sig2bg = ((stack_sum->GetBinContent(bin)+h_Sig2->GetBinContent(bin))>0.) ? (stack_sum->GetBinContent(bin)+h_Sig2->GetBinContent(bin)) : 1e-6;
+    sigbkg_sum2->SetBinContent(bin,sqrt(sig2bg));
+
+    // sigbkg_sum1->SetBinContent(bin,sqrt(stack_sum->GetBinContent(bin)+h_Sig1->GetBinContent(bin)));
+    // sigbkg_sum2->SetBinContent(bin,sqrt(stack_sum->GetBinContent(bin)+h_Sig2->GetBinContent(bin)));
+    //  if(sstack_sum->GetBinContent(bin)>0 && sigbkg_sum->GetBinContent(bin)>0 && sigbkg_sum1->GetBinContent(bin)>0 && sigbkg_sum2->GetBinContent(bin)>0) { sBkg = true;}
   }
   }
   //TRatioPlot *hRatio = new TRatioPlot(hratio,stack_sum,"Ratio");
   //printf("%f\n",static_cast<float>(hRatio->Integral()));
-
+  // if(sBkg) {
   sigbkg_sum->Add(sstack_sum,-1);
   sigbkg_sum->Scale(2);
   sigbkg_sum1->Add(sstack_sum,-1);
   sigbkg_sum1->Scale(2);
   sigbkg_sum2->Add(sstack_sum,-1);
   sigbkg_sum2->Scale(2);
-
+  // }   
+  
   //Option1:  Q = 2(sqrt(S+B)-sqrt(B))
   TH1D *hRatio = (TH1D*)sigbkg_sum ->Clone();
   TH1D *hRatio1 = (TH1D*)sigbkg_sum1 ->Clone();
@@ -170,10 +193,10 @@ void plotKinStack_KH(){
   // TH1D *hRatio2 = (TH1D*)h_Sig2 ->Clone();
   // hRatio->Divide(sstack_sum);
   // hRatio1->Divide(sstack_sum);
-  // hRatio2->Divide(sstack_sum);
+  //hRatio2->Divide(sstack_sum);
   // 
  
-  printf("%f\n",static_cast<float>(hRatio->Integral()));
+  printf("%f\n",static_cast<float>(sstack_sum->Integral()));
   //hRatio->Divide(static_cast<TH1*>(hs_var->GetStack()->Last()));
   //printf("%f\n",static_cast<float>(static_cast<TH1*>(hs_var->GetStack()->Last())->Integral()));
 
@@ -269,6 +292,7 @@ void plotKinStack_KH(){
 
   name3 = varName+".pdf";
   c_cA->SaveAs(name3);
+
   cout<<"*****************************************************"<<endl;
   cout<<"Int Lumi(inv.fb) for file1:"<<setprecision(4)<<intLumi<<endl;}
 
@@ -326,6 +350,10 @@ void drawlegend(TH1D *hist,int i,const char* fname){
   else if(lName.Contains("TChiWZ_600_100")){lName="TChiWZ_600_100";}
   else if(lName.Contains("TChiWZ_800_100")){lName="TChiWZ_800_100";}
   else if(lName.Contains("TChiWZ_1000_100")){lName="TChiWZ_1000_100";}
+
+  else if(lName.Contains("TChiWH_600_100")){lName="TChiWH(600,100)";}
+  else if(lName.Contains("TChiWH_800_100")){lName="TChiWH(800,100)";}
+  else if(lName.Contains("TChiWH_1000_100")){lName="TChiWH(1000,100)";}
 
   else if(lName.Contains("TChiWZ_300_1")){lName="TChiWZ_300_1";}
   else if(lName.Contains("TChiWZ_400_1")){lName="TChiWZ_400_1";}

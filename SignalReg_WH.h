@@ -39,6 +39,7 @@ class SignalReg : public NtupleVariables{
   //TH1D *h_MT2J;
   TH1D *h_dPhiMETAK8;
   TH1D *h_dPhiAK8J1J2;
+
   /* TH1D *h_AK8J1Pt, *h_AK8J1Mass, *h_AK8J1Eta, *h_AK8J1Tau21, *h_AK8J1wDisDC, *h_AK8J1zhDisDC; */
   /* TH1D *h_AK8J2Pt, *h_AK8J2Mass, *h_AK8J2Eta, *h_AK8J2Tau21, *h_AK8J2wDisDC, *h_AK8J2zhDisDC; */
   /* TH1D *h_AK8J1Mass1, *h_AK8J2Mass1; */
@@ -46,21 +47,26 @@ class SignalReg : public NtupleVariables{
   /* TH1D *h_AK8J1Mass3, *h_AK8J2Mass3; */
   /* TH1D *h_AK8J1Mass4, *h_AK8J2Mass4; */
 
-  TH1D *h_WHAK8J1Pt, *h_WHAK8J1Eta, *h_WHAK8J1Tau21, *h_WHAK8J1wDisDC, *h_WHAK8J1zhDisDC; 
-  TH1D *h_WHAK8J2Pt, *h_WHAK8J2Eta, *h_WHAK8J2Tau21, *h_WHAK8J2wDisDC, *h_WHAK8J2zhDisDC; 
+  TH1D *h_WHAK8J1Pt, *h_WHAK8J1Mass, *h_WHAK8J1Eta, *h_WHAK8J1Tau21, *h_WHAK8J1wDisDC, *h_WHAK8J1zhDisDC; 
+  TH1D *h_WHAK8J2Pt, *h_WHAK8J2Mass, *h_WHAK8J2Eta, *h_WHAK8J2Tau21, *h_WHAK8J2wDisDC, *h_WHAK8J2zhDisDC; 
   TH1D *h_WHMT;
   TH1D *h_WHMT2J;
+  TH1D *h_WHMETa;
+  TH1D *h_WHMETb;
+  TH1D *h_WHMETc;
 
-
-  TH1D *h_HWAK8J1Pt, *h_HWAK8J1Eta, *h_HWAK8J1Tau21, *h_HWAK8J1wDisDC, *h_HWAK8J1zhDisDC; 
-  TH1D *h_HWAK8J2Pt, *h_HWAK8J2Eta, *h_HWAK8J2Tau21, *h_HWAK8J2wDisDC, *h_HWAK8J2zhDisDC; 
+  TH1D *h_HWAK8J1Pt, *h_HWAK8J1Mass, *h_HWAK8J1Eta, *h_HWAK8J1Tau21, *h_HWAK8J1wDisDC, *h_HWAK8J1zhDisDC; 
+  TH1D *h_HWAK8J2Pt, *h_HWAK8J2Mass, *h_HWAK8J2Eta, *h_HWAK8J2Tau21, *h_HWAK8J2wDisDC, *h_HWAK8J2zhDisDC; 
   TH1D *h_HWMT;
   TH1D *h_HWMT2J;
- 
+  TH1D *h_HWMETa;
+  TH1D *h_HWMETb;
+  TH1D *h_HWMETc;
 
   TH1D *h_AK8J1wDis, *h_AK8J1zDis;
   TH1D *h_AK8J2wDis, *h_AK8J2zDis;  
   TH2D *h2_dRAK8J1J2;
+;
   TH2D *h2_AK8J1J2Tau21;
   TH2D *h2_DisdRAK8J1;
   TH2D *h2_DisdRAK8J2;
@@ -68,8 +74,7 @@ class SignalReg : public NtupleVariables{
   TH2D *h2_Tau21dRAK8J2;
   TH2D *h2_AK8J1Mass_J1Tau21;
   TH2D *h2_AK8J2Mass_J2Tau21;
-  //new for WX
-
+  
   TH1D *h_dPhi1;
   TH1D *h_dPhi2;
   TH1D *h_dPhi3;
@@ -77,29 +82,7 @@ class SignalReg : public NtupleVariables{
 
   TH1F *h_cutflow;
   TFile *oFile;
-
-  TH1D *h_WHMET_RegA, *h_WHMET_RegB, *h_WHMET_RegC, *h_WHMET_RegD;  
-  TH1D *h_HWMET_RegA, *h_HWMET_RegB, *h_HWMET_RegC, *h_HWMET_RegD;  
-  /* TH1D *h_WHAK8J1Mass, *h_WHAK8J2Mass, *h_HWMET; */
-  /* TH1D *h_HWAK8J1Mass, *h_HWAK8J2Mass, *h_HWMET; */
-  /* TH1D *h_WHAK8J1MassNo2bTag, *h_WHAK8J2MassNo2bTag; */
-  /* TH1D *h_HWAK8J1MassNo2bTag, *h_HWAK8J2MassNo2bTag; */
-  vector <TH1D*> h_WHAK8J1Mass;
-  vector <TH1D*> h_WHAK8J2Mass;
-  vector <TH1D*> h_WHMET;
   
-  vector <TH1D*> h_HWAK8J1Mass;
-  vector <TH1D*> h_HWAK8J2Mass;
-  vector <TH1D*> h_HWMET;
-   
-  vector <TH1D*> h_WHAK8J1MassNo2bTag; 
-  vector <TH1D*> h_WHAK8J2MassNo2bTag; 
-  vector <TH1D*> h_HWAK8J1MassNo2bTag; 
-  vector <TH1D*> h_HWAK8J2MassNo2bTag; 
-   
-    
-  //    for (auto* j : METbins)
-
 };
 #endif
 
@@ -107,7 +90,6 @@ class SignalReg : public NtupleVariables{
 
 void SignalReg::BookHistogram(const char *outFileName) {
 
-  
   //  char hname[200], htit[200];
   //  double xlow = 0.0,  xhigh = 2000.0;
   //  int nbins = 2000;
@@ -115,13 +97,7 @@ void SignalReg::BookHistogram(const char *outFileName) {
  
   oFile = new TFile(outFileName, "recreate");
   TH1::SetDefaultSumw2(1);
-  //vector <maps> h_maps;
-  //vector <TH1D*> histos;
-  //vector<tuple<string,string,int,float,float>> h_info; h_info.push_back({"MET","MET", 200, 0 , 2000}) ;
-  //for auto* x : h_info{
-  //histos.push_back(h_info.at(0) =new TH1D(h_info));
-  //h_maps.pushback({h_info.at(0),histos}); 
-  //h.push_back(TH1D(x))
+
   h_cutflow = new TH1F("CutFlow","cut flow",25,0,25);
   h_filters = new TH1D("Filters","Filters: Bin1 : all nEvnts, other bins: filter pass/fail",10,0,10);
   
@@ -171,17 +147,20 @@ void SignalReg::BookHistogram(const char *outFileName) {
   // ---for wh----
   h_WHAK8J1Pt = new TH1D("WHAK8J1Pt","2nd leading AK8 jets Pt",200,0,2000);
   h_WHAK8J1Eta = new TH1D("WHAK8J1Eta","AK8J2 Eta",120,-6,6);
- 
+  h_WHAK8J1Mass = new TH1D("WHAK8J1Mass","AK8J2 Mass",60,0,300);
   h_WHAK8J1Tau21 = new TH1D("WHAK8J1Tau21","AK8J2 Tau21",100,0,1);
   h_WHAK8J1wDisDC = new TH1D("WHh_AK8J1wDisDC","AK8 J2 w Discr.DeepDecorelated",100,0,1);
   h_WHAK8J1zhDisDC = new TH1D("WHh_AK8J1zhDisDC","AK8 J2 zh Discr.DeepDecorelated",100,0,1);
+  h_WHMETa = new TH1D("WHMETa","MET",200,0,2000);
+  h_WHMETb = new TH1D("WHMETb","MET",200,0,2000);
+  h_WHMETc = new TH1D("WHMETc","MET",200,0,2000);
   
   h_WHMT = new TH1D("WHmT","mT(MET,AK8J)",200,0,2000);
   h_WHMT2J = new TH1D("WHmT2J","mT(MET,AK8J2)",200,0,2000);  
 
   h_WHAK8J2Pt = new TH1D("WHAK8J2Pt","2nd leading AK8 jets Pt",200,0,2000);
   h_WHAK8J2Eta = new TH1D("WHAK8J2Eta","AK8J2 Eta",120,-6,6);
- 
+  h_WHAK8J2Mass = new TH1D("WHAK8J2Mass","AK8J2 Mass",60,0,300);
   h_WHAK8J2Tau21 = new TH1D("WHAK8J2Tau21","AK8J2 Tau21",100,0,1);
   h_WHAK8J2wDisDC = new TH1D("WHh_AK8J2wDisDC","AK8 J2 w Discr.DeepDecorelated",100,0,1);
   h_WHAK8J2zhDisDC = new TH1D("WHh_AK8J2zhDisDC","AK8 J2 zh Discr.DeepDecorelated",100,0,1);
@@ -189,23 +168,25 @@ void SignalReg::BookHistogram(const char *outFileName) {
   // --- for hw
   h_HWAK8J1Pt = new TH1D("HWAK8J1Pt","2nd leading AK8 jets Pt",200,0,2000);
   h_HWAK8J1Eta = new TH1D("HWAK8J1Eta","AK8J2 Eta",120,-6,6);
- 
+  h_HWAK8J1Mass = new TH1D("HWAK8J1Mass","AK8J2 Mass",60,0,300);
   h_HWAK8J1Tau21 = new TH1D("HWAK8J1Tau21","AK8J2 Tau21",100,0,1);
   h_HWAK8J1wDisDC = new TH1D("HWh_AK8J1wDisDC","AK8 J2 w Discr.DeepDecorelated",100,0,1);
   h_HWAK8J1zhDisDC = new TH1D("HWh_AK8J1zhDisDC","AK8 J2 zh Discr.DeepDecorelated",100,0,1);
+  h_HWMETa = new TH1D("HWMETa","MET",200,0,2000);
+  h_HWMETb = new TH1D("HWMETb","MET",200,0,2000);
+  h_HWMETc = new TH1D("HWMETc","MET",200,0,2000);
  
   h_HWMT = new TH1D("HWmT","mT(MET,AK8J)",200,0,2000);
   h_HWMT2J = new TH1D("HWmT2J","mT(MET,AK8J2)",200,0,2000);  
 
   h_HWAK8J2Pt = new TH1D("HWAK8J2Pt","2nd leading AK8 jets Pt",200,0,2000);
   h_HWAK8J2Eta = new TH1D("HWAK8J2Eta","AK8J2 Eta",120,-6,6);
-
+  h_HWAK8J2Mass = new TH1D("HWAK8J2Mass","AK8J2 Mass",60,0,300);
   h_HWAK8J2Tau21 = new TH1D("HWAK8J2Tau21","AK8J2 Tau21",100,0,1);
   h_HWAK8J2wDisDC = new TH1D("HWh_AK8J2wDisDC","AK8 J2 w Discr.DeepDecorelated",100,0,1);
   h_HWAK8J2zhDisDC = new TH1D("HWh_AK8J2zhDisDC","AK8 J2 zh Discr.DeepDecorelated",100,0,1);
 
-  //-------new WX
-  //
+
   // ----------
   h2_dRAK8J1J2 = new TH2D("dRAK8J1J2","x:deltaR(GenW,AK8J2) vs y:deltaR(GenW,AK8J2)",50,0,5,50,0,5);
   h2_AK8J1J2Tau21 = new TH2D("AK8J1J2Tau21","x:AK8J1 #tau21 vs y:AK8J2 #tau21",100,0,2,100,0,2);
@@ -222,74 +203,7 @@ void SignalReg::BookHistogram(const char *outFileName) {
   h_dPhi3 = new TH1D("DeltaPhi3","DeltaPhi3",40,0,4);
   h_dPhi4 = new TH1D("DeltaPhi4","DeltaPhi4",40,0,4);
 
-  h_WHMET_RegA = new TH1D("h_WHMET_RegA","WHMET Region A",40,0,2000);
-  h_WHMET_RegB = new TH1D("h_WHMET_RegB","WHMET Region B",40,0,2000);
-  h_WHMET_RegC = new TH1D("h_WHMET_RegC","WHMET Region C",40,0,2000);
-  h_WHMET_RegD = new TH1D("h_WHMET_RegD","WHMET Region D",40,0,2000);
- 
-  h_HWMET_RegA = new TH1D("h_HWMET_RegA","HWMET Region A",40,0,2000);
-  h_HWMET_RegB = new TH1D("h_HWMET_RegB","HWMET Region B",40,0,2000);
-  h_HWMET_RegC = new TH1D("h_HWMET_RegC","HWMET Region C",40,0,2000);
-  h_HWMET_RegD = new TH1D("h_HWMET_RegD","HWMET Region D",40,0,2000);
-  
-  /* h_WHAK8J1Mass = new TH1D("WHAK8J1Mass","AK8J2 Mass",60,0,300);      */
-  /* h_WHAK8J2Mass = new TH1D("WHAK8J2Mass","AK8J2 Mass",60,0,300); */
-  /* h_WHMET = new TH1D("WHMET","MET",200,0,2000); */
-    
-  /* h_HWAK8J1Mass = new TH1D("HWAK8J1Mass","AK8J2 Mass",60,0,300); */
-  /* h_HWMET = new TH1D("HWMET","MET",200,0,2000); */
-  /* h_HWAK8J2Mass = new TH1D("HWAK8J2Mass","AK8J2 Mass",60,0,300); */
-  
-  /* h_WHAK8J1MassNo2bTag = new TH1D("WHAK8J1Massnobtag","WHAK8J1 MassN",60,0,300); */
-  /* h_WHAK8J2MassNo2bTag = new TH1D("WHAK8J2Massnobtag","WHAK8J2 MassN",60,0,300); */
-  /* h_HWAK8J1MassNo2bTag = new TH1D("HWAK8J1Massnobtag","HWAK8J1 MassN",60,0,300); */
-  /* h_HWAK8J2MassNo2bTag = new TH1D("HWAK8J2Massnobtag","HWAK8J2 MassN",60,0,300); */
-
-  
-  // met binned histos
-  //char J1Mass[30], //*h_WHAK8J2Mass[30], *h_WHMET[30], *h_WHAK8J1MassNo2bTag[30], *h_WHAK8J2MassNo2bTag[30]; *\/ */
-  /*   *h_HWAK8J1Mass[30], *h_HWAK8J2Mass[30], *h_HWMET[30], *h_HWAK8J1MassNo2bTag[30], *h_HWAK8J2MassNo2bTag[30]; *\/ */
-  //use form
-  
-  // for(int j=0; j< 3; j++){ 
-    //TH1D* Form("h_WHAK8J1Mass_%d", j);
-    //sprintf(J1Mass,"%s%d","h_WHAK8J1Mass",j);
-    //TH1F *h = (TH1F*)gDirectory->Get(J1Mass);
-  /*   sprintf(*h_WHAK8J2Mass,"*h_WHAK8J2Mass%d",j); */
-  /*   sprintf(*h_WHMET,"*h_WHMET%d",j); */
-  /*   sprintf(*h_WHAK8J1MassNo2bTag,"*h_WHAK8J1MassNo2bTag%d",j); */
-  /*   sprintf(*h_WHAK8J2MassNo2bTag,"*h_WHAK8J2MassNo2bTag%d",j); */
-    
-  /*   sprintf(*h_HWAK8J1Mass,"*h_HWAK8J1Mass%d",j); */
-  /*   sprintf(*h_HWAK8J2Mass,"*h_HWAK8J2Mass%d",j); */
-  /*   sprintf(*h_HWMET,"*h_HWMET%d",j); */
-  /*   sprintf(*h_HWAK8J1MassNo2bTag,"*h_HWAK8J1MassNo2bTag%d",j); */
-  /*   sprintf(*h_HWAK8J2MassNo2bTag,"*h_HWAK8J2MassNo2bTag%d",j); */
-    
-    //std::form("h_WHAK8J1Mass_%f",j) = new TH1D(std::form("WHAK8J1Mass%f",j),std::form("AK8J1 Mass%f",j),60,0,300);
-    //h_WHAK8J1Mass = new TH1D("WHAK8J1Mass","AK8J1 Mass",60,0,300);
-  //}    
-  std::vector<double> METbins = {200,300,500,700,2000};
-
-  for(int j=0; j < METbins.size()-1; j++){
-    //TH1D *h_WHAK8J1Mass = new TH1D(Form("WHAK8J1Mass%d",j),"WHAK8J1Mass MET 1st bin",60,0,300);
-    h_WHAK8J1Mass.push_back(new TH1D(Form("WHAK8J1Mass%d",j),Form("WHAK8J1Mass MET %d bin",j),60,0,300));  
-    h_WHAK8J2Mass.push_back(new TH1D(Form("WHAK8J2Mass%d",j),Form("WHAK8J2Mass MET %d bin",j),60,0,300));  
-    h_WHMET.push_back(new TH1D(Form("WHMET%d",j),Form("WHMET MET %d bin",j),40,0,2000));  
-	
-    h_HWAK8J1Mass.push_back(new TH1D(Form("HWAK8J1Mass%d",j),Form("HWAK8J1Mass MET %d bin",j),60,0,300));  
-    h_HWAK8J2Mass.push_back(new TH1D(Form("HWAK8J2Mass%d",j),Form("HWAK8J2Mass MET %d bin",j),60,0,300));  
-    h_HWMET.push_back(new TH1D(Form("HWMET%d",j),Form("HWMET MET %d bin",j),40,0,2000));  
-    // h_HWMET.push_back(new TH1D(Form("HWMET%d",j),Form("HWMET MET %d bin",j),METbins.size()-1,&METbins[0]));  
-	
-    h_WHAK8J1MassNo2bTag.push_back(new TH1D(Form("WHAK8J1MassNo2bTag%d",j),Form("WHAK8J1MassNo2bTag MET %d bin",j),60,0,300));  
-    h_WHAK8J2MassNo2bTag.push_back(new TH1D(Form("WHAK8J2MassNo2bTag%d",j),Form("WHAK8J2MassNo2bTag MET %d bin",j),60,0,300));  
-    h_HWAK8J1MassNo2bTag.push_back(new TH1D(Form("HWAK8J1MassNo2bTag%d",j),Form("HWAK8J1MassNo2bTag MET %d bin",j),60,0,300));  
-    h_HWAK8J2MassNo2bTag.push_back(new TH1D(Form("HWAK8J2MassNo2bTag%d",j),Form("HWAK8J2MassNo2bTag MET %d bin",j),60,0,300));  
-  }   
-
-} // book histo loop
-
+}
 
 SignalReg::SignalReg(const TString &inputFileList, const char *outFileName, const char* dataset) {
   string nameData=dataset;

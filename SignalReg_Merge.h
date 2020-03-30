@@ -12,6 +12,7 @@
 #include "TFile.h"
 #include "TLorentzVector.h"
 #include "TDirectory.h"
+#include <vector>
 
 class SignalReg : public NtupleVariables{
 
@@ -22,11 +23,14 @@ class SignalReg : public NtupleVariables{
   Long64_t LoadTree(Long64_t entry);
   void     EventLoop(const char *,const char *);
   void     BookHistogram(const char *);
+  Double_t bjets_mtb();
   void print(Long64_t);
 
   //Variables defined
   bool isMC=true;
   double wt=0,lumiInfb=35.815165;
+  double deepCSVvalue = 0;
+  vector<TLorentzVector> bjets;
 
   TH1D *h_filters;
   //  TH1D *h_MET;
@@ -76,6 +80,7 @@ class SignalReg : public NtupleVariables{
   TH1D *h_AK8J1Tau21, *h_AK8J2Tau21;
   TH1D *h_AK8J1zDis, * h_AK8J2zDis;
 
+  TH1D *h_mtbmin, *h_mct;
   /* TH2D *h2_AK8J1J2Tau21; */
   /* TH2D *h2_DisdRAK8J1; */
   /* TH2D *h2_DisdRAK8J2; */
@@ -221,6 +226,9 @@ void SignalReg::BookHistogram(const char *outFileName) {
   h_AK8J1zDis = new TH1D("AK8J1zDis","AK8 J1 zDisc.",100,0,1);
   h_AK8J2zDis = new TH1D("AK8J2zDis","AK8 J2 zDisc.",100,0,1);
   //
+
+  h_mtbmin = new TH1D("mtbmin","mtbmin ",100,0,1000);
+  h_mct =  new TH1D("mcT","mcT ",100,0,1000);
 
   // ----------
   /* h2_dRAK8J1J2 = new TH2D("dRAK8J1J2","x:deltaR(GenW,AK8J2) vs y:deltaR(GenW,AK8J2)",50,0,5,50,0,5); */

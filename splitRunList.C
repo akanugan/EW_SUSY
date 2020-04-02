@@ -6,9 +6,10 @@
 #include<stdlib.h>
 
 using namespace std;
-void splitRunList(string infile,int nfPerJob){
+void splitRunList(string infile,int nfPerJob,int batch=1){
   //------------ needed for condor files --------------
   string exeCondor  = "worker2.sh";
+  string exePbs     = "worker.sh";
   string exeAna     = "signalReg";
   string datasetAna = "";
   string filesToTransfer = "";
@@ -30,9 +31,18 @@ void splitRunList(string infile,int nfPerJob){
   if(fileName.Contains("TChipmWW_600_100")) datasetAna = "TChipmWW_600_100_"+datasetAna;
   if(fileName.Contains("fastsim")) datasetAna = "fastsim_"+datasetAna;
   //---------------------------------------------------
-  cout<<"executable at worker node : "<<exeCondor<<endl
-      <<"Analysis executable : "<<exeAna<<endl
-      <<"dataset name for analysis : "<<datasetAna<<endl;
+  if (batch==1)
+    cout<<"executable at worker node : "<<exeCondor<<endl
+	<<"Analysis executable : "<<exeAna<<endl
+	<<"dataset name for analysis : "<<datasetAna<<endl;
+  else if (batch==2)
+    cout<<"executable at worker node : "<<exePbs<<endl
+	<<"Analysis executable : "<<exeAna<<endl
+	<<"dataset name for analysis : "<<datasetAna<<endl;
+  else {
+    cout << "batch should be either 1 (condor) or 2 (pbs)" << endl;
+    return;
+  }
   //----------------- split the input files into smaller ones ------------------
   ifstream file(infile);
   if(!file){cout<<"Couldn't Open File "<<infile<<endl;}
@@ -46,7 +56,7 @@ void splitRunList(string infile,int nfPerJob){
   file.close();
 
   int jobid=0;
-  char name[200];
+  char name[1000];
   ofstream outf;
   for(int i=0,j=0;i<fname.size();){
     sprintf(name,"FileList_%s_job%i.txt",dataset.c_str(),jobid);
@@ -59,40 +69,50 @@ void splitRunList(string infile,int nfPerJob){
     outf.close();
   }
 
-  //--------------------- make files for codor ------------------------------------
-  char fileListName[200],logFile[200];
+  //--------------------- make files for condor (make dummy .jdl for pbs) ------------------------------------
+  char fileListName[200],logFile[200],jobName[100],command[100];
   for(int i=0;i<jobid;i++){
     sprintf(name,"%s_job%i.jdl",dataset.c_str(),i);
-    sprintf(fileListName,"FileList_%s_job%i.txt",dataset.c_str(),i);
-    sprintf(logFile,"%s_job%i",dataset.c_str(),i);
-    outf.open(name);
-    outf<<"universe = vanilla"<<endl
-	<<"Executable = "<<exeCondor<<endl
-	// <<"request_disk = 10000000"<<endl
-	// <<"request_memory = 10000"<<endl
-	<<"Should_Transfer_Files = YES"<<endl
-	<<"WhenToTransferOutput = ON_EXIT_OR_EVICT"<<endl
-	<<"Transfer_Input_Files = "<<filesToTransfer<<","<<exeAna<<","<<fileListName<<endl
-      //	<<"PeriodicRemove = ( JobStatus == 2 ) && ( ( CurrentTime - EnteredCurrentStatus ) > 600 )"<<endl
-	<<"Output = "<<logFile<<".stdout"<<endl
-	<<"Error = "<<logFile<<".stderr"<<endl
-	<<"Log = "<<logFile<<".condor"<<endl
-	// <<"notification = Error"<<endl
-	// <<"notify_user = vhegde@FNAL.GOV"<<endl
-      //	<<"x509userproxy = $ENV(X509_USER_PROXY)"<<endl
-	<<"Arguments = "<<exeAna<<" "<<fileListName<<" "<<logFile<<".root "<<datasetAna<<endl
-	<<"+LENGTH=\"SHORT\""<<endl
-	<<endl
-	<<"Queue 1";
-    outf.close();
+    if (batch==2){ // pbs
+      sprintf(command,"touch %s",name); // creating dummy .jdl file for findFailedJobs.C
+      system(command);
+    }
+    if (batch==1){ // condor    
+      sprintf(fileListName,"FileList_%s_job%i.txt",dataset.c_str(),i);
+      sprintf(logFile,"%s_job%i",dataset.c_str(),i);
+      outf.open(name);
+      outf<<"universe = vanilla"<<endl
+	  <<"Executable = "<<exeCondor<<endl
+	  <<"Should_Transfer_Files = YES"<<endl
+	  <<"WhenToTransferOutput = ON_EXIT_OR_EVICT"<<endl
+	  <<"Transfer_Input_Files = "<<filesToTransfer<<","<<exeAna<<","<<fileListName<<endl
+	  <<"Output = "<<logFile<<".stdout"<<endl
+	  <<"Error = "<<logFile<<".stderr"<<endl
+	  <<"Log = "<<logFile<<".condor"<<endl
+	  <<"Arguments = "<<exeAna<<" "<<fileListName<<" "<<logFile<<".root "<<datasetAna<<endl
+	  <<"+LENGTH=\"SHORT\""<<endl
+	  <<endl
+	  <<"Queue 1";
+      outf.close();
+    }    
   }
-  //------------------------ submit to condor --------------------------------------
+  //------------------------ submit to condor or pbs --------------------------------------
   int t1=100;
   cout<<"Do you want to submit "<<jobid<<" jobs? If yes enter 100"<<endl;
   //  cin>>t1;
   for(int i=0;i<jobid && t1==100;i++){
-    sprintf(name,"condor_submit %s_job%i.jdl",dataset.c_str(),i);
-    system(name); 
+    if (batch==1){
+      sprintf(name,"condor_submit %s_job%i.jdl",dataset.c_str(),i);
+      system(name);
+    } else {
+      sprintf(fileListName,"FileList_%s_job%i.txt",dataset.c_str(),i);
+      sprintf(jobName,"%s_job%i",dataset.c_str(),i);
+      sprintf(name,"qsub -N %s -o %s.stdout -e %s.stderr -v exeAna=%s,fileListName=%s,outputFile=%s.root,datasetAna=%s submit.pbs",
+	      jobName,jobName,jobName,
+	      exeAna.c_str(),fileListName,jobName,datasetAna.c_str());
+      cout << name << endl;
+      system(name);
+    }
   }
   
 }

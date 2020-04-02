@@ -38,6 +38,11 @@ To submit jobs to condor for making histograms for all samples and signal:
 voms-proxy-init --voms cms
 ./submitMany.sh
 ```
+or submit jobs to pbs (recommended)
+```
+voms-proxy-init --voms cms
+./submitManyPbs.sh
+```
 
 Once the jobs are finished,
 ```

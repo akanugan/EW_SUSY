@@ -1,7 +1,7 @@
 #!/bin/sh
 
 export X509_USER_PROXY=/tmp/x509up_u$(id -u)
-voms-proxy-init -valid 192:0 -voms cms
+#voms-proxy-init -valid 192:0 -voms cms
 cp $X509_USER_PROXY /cms/data/$USER/.x509_user_proxy
 
 # the last arguement=2 is for pbs. 

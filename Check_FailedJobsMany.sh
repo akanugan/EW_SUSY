@@ -9,7 +9,11 @@ root -l -q 'findFailedJobs.C("Rare_MC2018")'
 
 root -l -q 'findFailedJobs.C("TChiWZ_1000_100_MC2018")'
 root -l -q 'findFailedJobs.C("TChiWZ_800_100_MC2018")'
+root -l -q 'findFailedJobs.C("TChiWZ_600_100_MC2018")'
 
+root -l -q 'findFailedJobs.C("TChiWH_1000_100_MC2018")'
+root -l -q 'findFailedJobs.C("TChiWH_800_100_MC2018")'
+root -l -q 'findFailedJobs.C("TChiWH_600_100_MC2018")'
 
 #root -l -q 'findFailedJobs.C("WJetsToLNu_HT_MC2016")'
 #root -l -q 'findFailedJobs.C("WJetsToLNu_HT_MC2017")'

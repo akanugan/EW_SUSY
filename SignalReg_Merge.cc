@@ -43,7 +43,7 @@ void SignalReg::EventLoop(const char *data,const char *inputFileList) {
 
   bool isFastSim = false;
   // float xsec = 0.0, numEvents = 0.0;
-  if(s_data.Contains("fastsim")){
+  if(s_data.Contains("TChi")){
     isFastSim = true;
     //   if(s_data.Contains("TChiWZ_1000")){ xsec = 1.34352e-3; numEvents = 28771;}
     //   else if(s_data.Contains("TChiWZ_800")){ xsec = 4.75843e-3; numEvents = 34036;}
@@ -124,6 +124,9 @@ void SignalReg::EventLoop(const char *data,const char *inputFileList) {
     if(isFastSim) JetID = true;
     if (JetsAK8->size() < 2) continue;                                          
     
+    Double_t mtbmin = -99999. , mct = -99999. ; //mCT is the contransverse mass variable 
+    mtbmin = find_bjets_mtbmin();
+    /*
     bjets.resize(0);
     Double_t mtbmin = 0, mct = 0; //mCT is the contransverse mass variable 
     //vector<TLorentzVector> bjets;
@@ -147,6 +150,7 @@ void SignalReg::EventLoop(const char *data,const char *inputFileList) {
       //   h_mtbmin->Fill(mtbmin,wt);
       //h_mct->Fill(mct,wt);
     } 
+    */
     
     // Double_t bjets_mTbmin = bjets_mtb();
     if(NJets < 2 || HT < 300 || MHT < 200 || MET <250                           // HT, MET, MHT cuts
@@ -262,7 +266,7 @@ void SignalReg::EventLoop(const char *data,const char *inputFileList) {
     //cout<<"jets disc size "<<JetsAK8_zDiscriminatorDeep->size()<<endl;
     //cout<<"\n";
    
-    // SR =1 , Mass_SB =2 , Unknown =3
+    // SR =1 , Mass_SB =2 , MET_regions =3
     int Region = 2;
     switch (Region){
     case 3:
@@ -274,7 +278,7 @@ void SignalReg::EventLoop(const char *data,const char *inputFileList) {
 	   ((*JetsAK8_wDiscriminatorDeep)[0] > 0.9) )
 	  {
 	    if(         //middle band
-	       ((*JetsAK8_softDropMass)[1] >85) &&
+	       ((*JetsAK8_softDropMass)[1] > 85) &&
 	       ((*JetsAK8_softDropMass)[1] < 135))
 	      {
 		h_WHMET_RegC->Fill(MET,wt);
@@ -289,32 +293,32 @@ void SignalReg::EventLoop(const char *data,const char *inputFileList) {
 	      }
 	    if( //side bands
 	       (((*JetsAK8_softDropMass)[1] >50) && ((*JetsAK8_softDropMass)[1] < 85)) ||
-	       (((*JetsAK8_softDropMass)[1] >135) && ((*JetsAK8_softDropMass)[1] < 250)) )
+	       (((*JetsAK8_softDropMass)[1] > 135) && ((*JetsAK8_softDropMass)[1] < 250)) )
 	      {
 		h_WHMET_RegD->Fill(MET,wt);
 		h_WHAK8J2Mass_RegD->Fill((*JetsAK8_softDropMass)[1],wt);
-		cout<<"Fill D WH"<<endl;
+		// cout<<"Fill D WH"<<endl;
 		if( (*JetsAK8_doubleBDiscriminator)[1] >0.3)
 		  {
 		    h_WHMET_RegB->Fill(MET,wt);
 		    h_WHAK8J2Mass_RegB->Fill((*JetsAK8_softDropMass)[1],wt);
-		    cout<<"Fill B WH"<<endl;
+		    //cout<<"Fill B WH"<<endl;
 		  }
 	      }
 	  }
 	//     H W
 	if( 
-	   ((*JetsAK8_softDropMass)[1] >65) &&
+	   ((*JetsAK8_softDropMass)[1] > 65) &&
 	   ((*JetsAK8_softDropMass)[1] < 90) &&
 	   ((*JetsAK8_wDiscriminatorDeep)[1] > 0.9) )
 	  {
 	    if(         //middle band or signal band
-	       ((*JetsAK8_softDropMass)[0] >85) &&
+	       ((*JetsAK8_softDropMass)[0] > 85) &&
 	       ((*JetsAK8_softDropMass)[0] < 135))
 	      {
 		h_HWMET_RegC->Fill(MET,wt);
 		h_HWAK8J1Mass_RegC->Fill((*JetsAK8_softDropMass)[0],wt);
-	    	cout<<"Fill C HW"<<endl;
+	    	//cout<<"Fill C HW"<<endl;
 		if( (*JetsAK8_doubleBDiscriminator)[0] >0.3)
 		  {
 		    h_HWMET_RegA->Fill(MET,wt);
@@ -500,19 +504,21 @@ void SignalReg::EventLoop(const char *data,const char *inputFileList) {
   cout<<"No. of entries survived: "<<nEvtSurv<<endl;
 }
 
-Double_t SignalReg::bjets_mtb(){
+Double_t SignalReg::find_bjets_mtbmin(){
   Double_t mtbmin = 0, mct = 0; //mCT is the contransverse mass variable 
   //vector<TLorentzVector> bjets;
-  for(int i=0;i<Jets_bJetTagDeepCSVprobb->size();i++){
+  bjets.resize(0);
+  for(int i=0; i < Jets_bJetTagDeepCSVprobb -> size(); i++){
     if((*Jets)[i].Pt() < 30 || abs((*Jets)[i].Eta()) > 2.4) continue;
     if((*Jets_bJetTagDeepCSVprobb)[i]+(*Jets_bJetTagDeepCSVprobbb)[i] > deepCSVvalue)
       bjets.push_back((*Jets)[i]);
   }
-  sortTLorVec(&bjets);
+  sortTLorVec(&bjets); // Sort b jets by decreasing mass
   // cout<<"Bjets Pt: "<< (*Jets)[0].Pt() <<"\t"<< (*Jets)[1].Pt() <<"\t"<< (*Jets)[2].Pt() <<endl;
     
   if(bjets.size()==1){
     mtbmin = sqrt(2*(*Jets)[0].Pt()*MET*(1-cos(DeltaPhi(METPhi,(*Jets)[0].Phi()))));
+    return mtbmin;
     //h_mtbmin->Fill(mtbmin,wt);
   }
   else if(bjets.size() >= 2){ 

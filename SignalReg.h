@@ -23,7 +23,7 @@ class SignalReg : public NtupleVariables{
   Long64_t LoadTree(Long64_t entry);
   void     EventLoop(const char *,const char *);
   void     BookHistogram(const char *);
-  Double_t bjets_mtb();
+  Double_t find_bjets_mtbmin();
   void print(Long64_t);
 
   //Variables defined
@@ -52,31 +52,28 @@ class SignalReg : public NtupleVariables{
   /* TH1D *h_AK8J1Mass4, *h_AK8J2Mass4; */
 
   //SR
-  TH1D *h_WHAK8J1Pt, *h_WHAK8J1Mass, *h_WHAK8J1Eta, *h_WHAK8J1Tau21, *h_WHAK8J1wDis;
-  TH1D *h_WHAK8J2Pt, *h_WHAK8J2Mass, *h_WHAK8J2Eta, *h_WHAK8J2Tau21, *h_WHAK8J2wDis;
+  TH1D *h_WHAK8J1Pt, *h_WHAK8J1Mass, *h_WHAK8J1MassNo2bTag, *h_WHAK8J1Eta, *h_WHAK8J1Tau21, *h_WHAK8J1wDis;
+  TH1D *h_WHAK8J2Pt, *h_WHAK8J2Mass, *h_WHAK8J2MassNo2bTag, *h_WHAK8J2Eta, *h_WHAK8J2Tau21, *h_WHAK8J2wDis;
   TH1D *h_WHMET;
   TH1D *h_WHMT;
   TH1D *h_WHMT2J;
   TH1D *h_WHMETa;
   TH1D *h_WHMETc;
-  TH1D *h_WHmtbmin, *h_WHmct;
-  TH2D * h2_WHmtbminMct, *h2_WHmtbminHmass;
-  
-  TH1D *h_HWAK8J1Pt, *h_HWAK8J1Mass, *h_HWAK8J1Eta, *h_HWAK8J1Tau21, *h_HWAK8J1wDis;
-  TH1D *h_HWAK8J2Pt, *h_HWAK8J2Mass, *h_HWAK8J2Eta, *h_HWAK8J2Tau21, *h_HWAK8J2wDis;
+
+  TH1D *h_HWAK8J1Pt, *h_HWAK8J1Mass, *h_HWAK8J1MassNo2bTag, *h_HWAK8J1Eta, *h_HWAK8J1Tau21, *h_HWAK8J1wDis;
+  TH1D *h_HWAK8J2Pt, *h_HWAK8J2Mass, *h_HWAK8J2MassNo2bTag, *h_HWAK8J2Eta, *h_HWAK8J2Tau21, *h_HWAK8J2wDis;
   TH1D *h_HWMET;
   TH1D *h_HWMT;
   TH1D *h_HWMT2J;
   TH1D *h_HWMETa;
   TH1D *h_HWMETc;
-  TH1D *h_HWmtbmin, *h_HWmct;
-  TH2D * h2_HWmtbminMct, *h2_HWmtbminHmass;
   
-  //SB with deepdoubleB
-  TH1D *h_WHAK8J1MassNo2bTag, *h_WHAK8J2MassNo2bTag;
-  TH1D *h_HWAK8J1MassNo2bTag, *h_HWAK8J2MassNo2bTag;
+  TH1D *h_WHmtbmin, *h_WHmct;
+  TH1D *h_HWmtbmin, *h_HWmct;
+  TH2D *h2_WHmtbminMct, *h2_WHmtbminHmass;
+  TH2D *h2_HWmtbminMct, *h2_HWmtbminHmass;
 
-  //SB with doubleB
+  //SB
   TH1D *h_WHMET_RegA, *h_WHMET_RegB, *h_WHMET_RegC, *h_WHMET_RegD;
   TH1D *h_WHAK8J2Mass_RegA, *h_WHAK8J2Mass_RegB, *h_WHAK8J2Mass_RegC, *h_WHAK8J2Mass_RegD;
   TH1D *h_HWMET_RegA, *h_HWMET_RegB, *h_HWMET_RegC, *h_HWMET_RegD;
@@ -89,7 +86,7 @@ class SignalReg : public NtupleVariables{
   TH1D *h_AK8J1zDis, * h_AK8J2zDis;
 
 
-  
+  TH1D *h_mtbmin, *h_mct;
   /* TH2D *h2_AK8J1J2Tau21; */
   /* TH2D *h2_DisdRAK8J1; */
   /* TH2D *h2_DisdRAK8J2; */
@@ -171,7 +168,7 @@ void SignalReg::BookHistogram(const char *outFileName) {
   h_WHAK8J1Pt = new TH1D("WHAK8J1Pt","leading AK8 jets Pt",200,0,2000);
   h_WHAK8J1Eta = new TH1D("WHAK8J1Eta","AK8J1 Eta",120,-6,6);
   h_WHAK8J1Mass = new TH1D("WHAK8J1Mass","AK8J1 Mass",60,0,300);
-  h_WHAK8J1MassNo2bTag = new TH1D("WHAK8J1MassNo2bTag","AK8J1 Mass no2btag",60,0,300);
+  h_WHAK8J1MassNo2bTag = new TH1D("WHAK8J1MassNo2bTag","AK8J1 Mass",60,0,300);
   h_WHAK8J1Tau21 = new TH1D("WHAK8J1Tau21","AK8J1 Tau21",100,0,1);
   h_WHAK8J1wDis = new TH1D("WH_AK8J1wDis","AK8 J1 w Discr. corelated",100,0,1);
   h_WHMET = new TH1D("WHMET","MET",200,0,2000);
@@ -183,19 +180,15 @@ void SignalReg::BookHistogram(const char *outFileName) {
   h_WHAK8J2Pt = new TH1D("WHAK8J2Pt","2nd leading AK8 jets Pt",200,0,2000);
   h_WHAK8J2Eta = new TH1D("WHAK8J2Eta","AK8J2 Eta",120,-6,6);
   h_WHAK8J2Mass = new TH1D("WHAK8J2Mass","AK8J2 Mass",60,0,300);
-  h_WHAK8J2MassNo2bTag = new TH1D("WHAK8J2MassNo2bTag","AK8J2 Mass no2btag",60,0,300);
+  h_WHAK8J2MassNo2bTag = new TH1D("WHAK8J2MassNo2bTag","AK8J2 Mass",60,0,300);
   h_WHAK8J2Tau21 = new TH1D("WHAK8J2Tau21","AK8J2 Tau21",100,0,1);
   h_WHAK8J2wDis = new TH1D("WH_AK8J2wDis","AK8 J2 w Discr. corelated",100,0,1);
-  h_WHmtbmin = new TH1D("WHmtbmin","mtbmin ",100,0,1000);
-  h_WHmct =  new TH1D("WHmcT","mcT ",100,0,1000);
-  h2_WHmtbminMct = new TH2D("h2_WHmtbminMct","x:mtb vs y:mct ",100,0,1000,100,0,1000);
-  h2_WHmtbminHmass = new TH2D("h2_WHmtbminHmass","x:mtb vs y:SoftdropmassH",100,0,1000,60,0,300);
     
   // --- for hw
   h_HWAK8J1Pt = new TH1D("HWAK8J1Pt"," leading AK8 jets Pt",200,0,2000);
   h_HWAK8J1Eta = new TH1D("HWAK8J1Eta","AK8J1 Eta",120,-6,6);
   h_HWAK8J1Mass = new TH1D("HWAK8J1Mass","AK8J1 Mass",60,0,300);
-  h_HWAK8J1MassNo2bTag = new TH1D("HWAK8J1MassNo2bTag","AK8J1 Mass no2btag",60,0,300);
+  h_HWAK8J1MassNo2bTag = new TH1D("HWAK8J1MassNo2bTag","AK8J1 Mass",60,0,300);
   h_HWAK8J1Tau21 = new TH1D("HWAK8J1Tau21","AK8J1 Tau21",100,0,1);
   h_HWAK8J1wDis = new TH1D("HWAK8J1wDis","AK8 J2 w Discr.corelated",100,0,1);
   
@@ -208,16 +201,10 @@ void SignalReg::BookHistogram(const char *outFileName) {
   h_HWAK8J2Pt = new TH1D("HWAK8J2Pt","2nd leading AK8 jets Pt",200,0,2000);
   h_HWAK8J2Eta = new TH1D("HWAK8J2Eta","AK8J2 Eta",120,-6,6);
   h_HWAK8J2Mass = new TH1D("HWAK8J2Mass","AK8J2 Mass",60,0,300);
-  h_HWAK8J2MassNo2bTag = new TH1D("HWAK8J2MassNo2bTag","AK8J2 Mass no2btag",60,0,300);
+  h_HWAK8J2MassNo2bTag = new TH1D("HWAK8J2MassNo2bTag","AK8J1 Mass",60,0,300);
   h_HWAK8J2Tau21 = new TH1D("HWAK8J2Tau21","AK8J2 Tau21",100,0,1);
   h_HWAK8J2wDis = new TH1D("HWAK8J2wDis","AK8 J2 w Discr. corelated",100,0,1);
-  h_HWmtbmin = new TH1D("HWmtbmin","mtbmin ",100,0,1000);
-  h_HWmct =  new TH1D("HWmcT","mcT ",100,0,1000);
-  h2_HWmtbminMct = new TH2D("h2_HWmtbminMct","x:mtbmin vs y:mct ",100,0,1000,100,0,1000);
-  h2_HWmtbminHmass = new TH2D("h2_HWmtbminHmass","x:mtbmin vs y:SoftdropmassH",100,0,1000,60,0,300);
-
-  
-// SB
+  // SB
   h_WHMET_RegA = new TH1D("WHMET_RegA","WHMETA",200,0,2000);
   h_WHMET_RegB = new TH1D("WHMET_RegB","WHMETB",200,0,2000);
   h_WHMET_RegC = new TH1D("WHMET_RegC","WHMETC",200,0,2000);
@@ -249,6 +236,22 @@ void SignalReg::BookHistogram(const char *outFileName) {
   h_AK8J1zDis = new TH1D("AK8J1zDis","AK8 J1 zDisc.",100,0,1);
   h_AK8J2zDis = new TH1D("AK8J2zDis","AK8 J2 zDisc.",100,0,1);
   //
+
+  //  h_mtbmin = new TH1D("mtbmin","mtbmin ",100,0,1000);
+  // h_mct =  new TH1D("mcT","mcT ",100,0,1000);
+  h_WHmtbmin = new TH1D("WHmtbmin","mtbmin ",100,0,1000);
+  h_WHmct =  new TH1D("WHmcT","mcT ",100,0,1000);
+  h_WHmtbmin = new TH1D("WHmtbmin","mtbmin ",100,0,1000);
+  h_WHmct =  new TH1D("WHmcT","mcT ",100,0,1000);
+  h2_WHmtbminMct = new TH2D("WHmtbminMct","x:mtbmin vs y:mct",100,0,1000,100,0,1000);
+  h2_WHmtbminHmass = new TH2D("WHmtbminHmass","x:mtbmin vs y:mass",100,0,1000,60,0,300);
+
+  h_HWmtbmin = new TH1D("HWmtbmin","mtbmin ",100,0,1000);
+  h_HWmct =  new TH1D("HWmcT","mcT ",100,0,1000);
+  h_HWmtbmin = new TH1D("HWmtbmin","mtbmin ",100,0,1000);
+  h_HWmct =  new TH1D("HWmcT","mcT ",100,0,1000);
+  h2_HWmtbminMct = new TH2D("HWmtbminMct","x:mtbmin vs y:mct",100,0,1000,100,0,1000);
+  h2_HWmtbminHmass = new TH2D("HWmtbminHmass","x:mtbmin vs y:mass",100,0,1000,60,0,300);
 
 
   // ----------

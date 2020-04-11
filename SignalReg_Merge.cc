@@ -120,31 +120,43 @@ void SignalReg::EventLoop(const char *data,const char *inputFileList) {
     h_cutflow->Fill("Weighted",wt);
     //--------------
     //    if(jentry>100) break;
+
     //#################### EWK Planned baseline cuts
     if(isFastSim) JetID = true;
-    if (JetsAK8->size() <= 2) continue;                                          
+
 
     //   Calc. mtbmin, mt and mt2j
     Double_t mtbmin = -99999. , mct = -99999. ; //mCT is the contransverse mass variable 
     double mt = 0, mt2j = 0;
-    mtbmin = find_bjets_mtbmin();
+    //    mtbmin = find_bjets_mtbmin();           // loops over b-jets and finds mtmin
+
     if(JetsAK8->size() > 0) mt = sqrt(2*(*JetsAK8)[0].Pt()*MET*(1-cos(DeltaPhi(METPhi,(*JetsAK8)[0].Phi()))));
     if(JetsAK8->size()>=2) mt2j = sqrt(2*(*JetsAK8)[1].Pt()*MET*(1-cos(DeltaPhi(METPhi,(*JetsAK8)[1].Phi()))));
 
-    // RA2b cuts + some boosted SR cuts
-    if(NJets <= 2 || NJets >= 6                                       //AK4 jets from 2 to 6
-       || mt < 500                                                    // mt > 500
-       || HT < 300 || MHT < 200 || MET <250                           // HT, MET, MHT cuts
-       || (*JetsAK8)[0].Pt() < 200 || (*JetsAK8)[1].Pt() < 200                  // pT >200
-       || abs((*JetsAK8)[0].Eta()) >2 || abs((*JetsAK8)[1].Eta()) >2            //  |Eta|<2
-       || NMuons!=0 || NElectrons!=0                                            // Veto e,muons
-       || (MHT/HT > 1.0) || !JetID                                              // MHT<HT and Veto JET ID
+    // Modified RA2b cuts
+    if(NJets < 2                                                                //AK4 jets >=2
+       || HT < 300 || MHT < 200 || MET < 250                                     // HT, MET, MHT cuts
+       || NMuons!=0 || NElectrons!=0                                             // Veto e,muons
+       || (MHT/HT > 1.0) || !JetID                                               // MHT<HT and Veto JET ID
        || !(DeltaPhi1 > 1.5 && DeltaPhi2 > 0.5 && DeltaPhi3 > 0.3 && DeltaPhi4 > 0.3)  //Angle cuts
-       //||BTagsDeepCSV!=0                                                               //Veto B jets   old cut BTags!=0 
-       ||mtbmin < 200                                                     // mTbmin > 200 to reduce ttbar bkg
        || isoMuonTracks!=0 || isoElectronTracks!=0 || isoPionTracks!=0) continue; //Veto isolated tracks
-
     
+    //Boosted AK8 jet cuts
+    if (JetsAK8->size() < 2                                                     // require >=2 AK8 jets
+	|| (*JetsAK8)[0].Pt() < 200 || (*JetsAK8)[1].Pt() < 200                  // AK8 jets pT >200
+	|| abs((*JetsAK8)[0].Eta()) >2 || abs((*JetsAK8)[1].Eta()) >2) continue; // jets |Eta| < 2	
+
+    // ******* Choose  b veto / comment for non-b veto
+    //if(BTagsDeepCSV!=0)continue;                                              //Veto B jets   old cut BTags!=0 
+    
+    /*
+    // + some additional cuts
+    if(NJets >= 6                                                       //AK4 jets <= 6
+       || mt < 500                                                      // mt > 500
+       ||mtbmin < 200) continue;                                        // mTbmin > 200 to reduce ttbar bkg    
+    
+    */
+
     //    if(MET < 200) continue;
     //h_cutflow->Fill("MET>200",wt);
     float dphi1=4, dphi2=4, dphi3=4, dphi4=4;
@@ -237,25 +249,25 @@ void SignalReg::EventLoop(const char *data,const char *inputFileList) {
     //cout<<"jets disc size "<<JetsAK8_zDiscriminatorDeep->size()<<endl;
     //cout<<"\n";
    
-    // SR =1 , Mass_SB =2 , MET_regions =3
-    int Region = 2;
+    //WH SR =1 , Mass_SB =2 , Bkgest in MET_bins =3 ,  temp = 9
+    int Region = 1;
     switch (Region){
     case 3:
       {
 	// W H 
 	if( 
-	   ((*JetsAK8_softDropMass)[0] >65) &&
-	   ((*JetsAK8_softDropMass)[0] < 90) &&
-	   ((*JetsAK8_wDiscriminatorDeep)[0] > 0.9) )
+	   ((*JetsAK8_softDropMass)[0] > massLowW) &&
+	   ((*JetsAK8_softDropMass)[0] < massHighW) &&
+	   ((*JetsAK8_wDiscriminatorDeep)[0] > deepAK8Wscore) )
 	  {
 	    if(         //middle band
-	       ((*JetsAK8_softDropMass)[1] > 85) &&
-	       ((*JetsAK8_softDropMass)[1] < 135))
+	       ((*JetsAK8_softDropMass)[1] > massLowH) &&
+	       ((*JetsAK8_softDropMass)[1] < massHighH))
 	      {
 		h_WHMET_RegC->Fill(MET,wt);
 		h_WHAK8J2Mass_RegC->Fill((*JetsAK8_softDropMass)[1],wt);
 		//cout<<"Fill C WH"<<endl;
-		if( (*JetsAK8_doubleBDiscriminator)[1] >0.3)  // Signal region **
+		if( (*JetsAK8_doubleBDiscriminator)[1] >bbscore)  // Signal region **
 		  {
 		    h_WHMET_RegA->Fill(MET,wt);
 		    h_WHAK8J2Mass_RegA->Fill((*JetsAK8_softDropMass)[1],wt);
@@ -263,13 +275,13 @@ void SignalReg::EventLoop(const char *data,const char *inputFileList) {
 		  }
 	      }
 	    if( //side bands
-	       (((*JetsAK8_softDropMass)[1] >50) && ((*JetsAK8_softDropMass)[1] < 85)) ||
-	       (((*JetsAK8_softDropMass)[1] > 135) && ((*JetsAK8_softDropMass)[1] < 250)) )
+	       (((*JetsAK8_softDropMass)[1] >50) && ((*JetsAK8_softDropMass)[1] < massLowH)) ||
+	       (((*JetsAK8_softDropMass)[1] > massHighH) && ((*JetsAK8_softDropMass)[1] < 250)) )
 	      {
 		h_WHMET_RegD->Fill(MET,wt);
 		h_WHAK8J2Mass_RegD->Fill((*JetsAK8_softDropMass)[1],wt);
 		// cout<<"Fill D WH"<<endl;
-		if( (*JetsAK8_doubleBDiscriminator)[1] >0.3)
+		if( (*JetsAK8_doubleBDiscriminator)[1] >bbscore)
 		  {
 		    h_WHMET_RegB->Fill(MET,wt);
 		    h_WHAK8J2Mass_RegB->Fill((*JetsAK8_softDropMass)[1],wt);
@@ -279,30 +291,30 @@ void SignalReg::EventLoop(const char *data,const char *inputFileList) {
 	  }
 	//     H W
 	if( 
-	   ((*JetsAK8_softDropMass)[1] > 65) &&
-	   ((*JetsAK8_softDropMass)[1] < 90) &&
-	   ((*JetsAK8_wDiscriminatorDeep)[1] > 0.9) )
+	   ((*JetsAK8_softDropMass)[1] > massLowW) &&
+	   ((*JetsAK8_softDropMass)[1] < massHighW) &&
+	   ((*JetsAK8_wDiscriminatorDeep)[1] > deepAK8Wscore) )
 	  {
 	    if(         //middle band or signal band
-	       ((*JetsAK8_softDropMass)[0] > 85) &&
-	       ((*JetsAK8_softDropMass)[0] < 135))
+	       ((*JetsAK8_softDropMass)[0] > massLowH) &&
+	       ((*JetsAK8_softDropMass)[0] < massHighH))
 	      {
 		h_HWMET_RegC->Fill(MET,wt);
 		h_HWAK8J1Mass_RegC->Fill((*JetsAK8_softDropMass)[0],wt);
 	    	//cout<<"Fill C HW"<<endl;
-		if( (*JetsAK8_doubleBDiscriminator)[0] >0.3)
+		if( (*JetsAK8_doubleBDiscriminator)[0] >bbscore)
 		  {
 		    h_HWMET_RegA->Fill(MET,wt);
 		    h_HWAK8J1Mass_RegA->Fill((*JetsAK8_softDropMass)[0],wt);
 		  }
 	      }
 	    if( //side bands
-	       (((*JetsAK8_softDropMass)[0] >50) && ((*JetsAK8_softDropMass)[0] < 85)) ||
-	       (((*JetsAK8_softDropMass)[0] >135) && ((*JetsAK8_softDropMass)[0] < 250)) )
+	       (((*JetsAK8_softDropMass)[0] >50) && ((*JetsAK8_softDropMass)[0] < massLowH)) ||
+	       (((*JetsAK8_softDropMass)[0] >massHighH) && ((*JetsAK8_softDropMass)[0] < 250)) )
 	      {
 		h_HWMET_RegD->Fill(MET,wt);
 		h_HWAK8J1Mass_RegD->Fill((*JetsAK8_softDropMass)[0],wt);
-		if( (*JetsAK8_doubleBDiscriminator)[0] >0.3)
+		if( (*JetsAK8_doubleBDiscriminator)[0] >bbscore)
 		  {
 		    h_HWMET_RegB->Fill(MET,wt);
 		    h_HWAK8J1Mass_RegB->Fill((*JetsAK8_softDropMass)[0],wt);
@@ -315,39 +327,39 @@ void SignalReg::EventLoop(const char *data,const char *inputFileList) {
     case 2:
       {
 	if( // W H
-	   ((*JetsAK8_softDropMass)[0] > 65) &&
-	   ((*JetsAK8_softDropMass)[0] < 90) &&
-	   ((*JetsAK8_wDiscriminatorDeep)[0] > 0.9) &&
+	   ((*JetsAK8_softDropMass)[0] > massLowW) &&
+	   ((*JetsAK8_softDropMass)[0] < massHighW) &&
+	   ((*JetsAK8_wDiscriminatorDeep)[0] > deepAK8Wscore) &&
 	   ((*JetsAK8_softDropMass)[1] > 50) &&
 	   ((*JetsAK8_softDropMass)[1] < 250) ){
 	  
-	  if( ((*JetsAK8_doubleBDiscriminator)[1] > 0.3) ) {
-	    //if (((*JetsAK8_deepDoubleBDiscriminatorH)[1] > 0.7) ){ // Sig reg mass range
+	  if( ((*JetsAK8_doubleBDiscriminator)[1] > bbscore) ) {
+	    //if (((*JetsAK8_deepDoubleBDiscriminatorH)[1] > deepbbscore) ){ // Sig reg mass range
 	    h_WHAK8J1Mass->Fill((*JetsAK8_softDropMass)[0],wt); 
 	    h_WHAK8J2Mass->Fill((*JetsAK8_softDropMass)[1],wt); 
 	  }
 	  
-	  if( ((*JetsAK8_doubleBDiscriminator)[1] < 0.3) ) {
-	  //if( ((*JetsAK8_deepDoubleBDiscriminatorH)[1] < 0.7) ){ // 2b side band 
+	  if( ((*JetsAK8_doubleBDiscriminator)[1] < bbscore) ) {
+	  //if( ((*JetsAK8_deepDoubleBDiscriminatorH)[1] < deepbbscore) ){ // 2b side band 
 	    h_WHAK8J1MassNo2bTag->Fill((*JetsAK8_softDropMass)[0],wt); 
 	    h_WHAK8J2MassNo2bTag->Fill((*JetsAK8_softDropMass)[1],wt); 
 	  }
 	}
 		
 	if( // H W
-	   ((*JetsAK8_softDropMass)[1] > 65) &&
-	   ((*JetsAK8_softDropMass)[1] < 90) &&
-	   ((*JetsAK8_wDiscriminatorDeep)[1] > 0.9) &&
+	   ((*JetsAK8_softDropMass)[1] > massLowW) &&
+	   ((*JetsAK8_softDropMass)[1] < massHighW) &&
+	   ((*JetsAK8_wDiscriminatorDeep)[1] > deepAK8Wscore) &&
 	   ((*JetsAK8_softDropMass)[0] > 50) &&
 	   ((*JetsAK8_softDropMass)[0] < 250) ){
 	  
-	  if( ((*JetsAK8_doubleBDiscriminator)[0] > 0.3) ) {
-	    //if ( ((*JetsAK8_deepDoubleBDiscriminatorH)[0] > 0.7) ){
+	  if( ((*JetsAK8_doubleBDiscriminator)[0] > bbscore) ) {
+	    //if ( ((*JetsAK8_deepDoubleBDiscriminatorH)[0] > deepbbscore) ){
 	    h_HWAK8J1Mass->Fill((*JetsAK8_softDropMass)[0],wt); 
 	    h_HWAK8J2Mass->Fill((*JetsAK8_softDropMass)[1],wt); 
 	  }
-	  if( ((*JetsAK8_doubleBDiscriminator)[0] < 0.3) ) {
-	  //if ( ((*JetsAK8_deepDoubleBDiscriminatorH)[0] < 0.7) ){
+	  if( ((*JetsAK8_doubleBDiscriminator)[0] < bbscore) ) {
+	  //if ( ((*JetsAK8_deepDoubleBDiscriminatorH)[0] < deepbbscore) ){
 	    h_HWAK8J1MassNo2bTag->Fill((*JetsAK8_softDropMass)[0],wt); 
 	    h_HWAK8J2MassNo2bTag->Fill((*JetsAK8_softDropMass)[1],wt); 
 	  }
@@ -359,13 +371,13 @@ void SignalReg::EventLoop(const char *data,const char *inputFileList) {
       {
     	//-----------    W H Signal region
 	if(
-	   ((*JetsAK8_softDropMass)[0] > 65) &&
-	   ((*JetsAK8_softDropMass)[0] < 90) &&
-	   ((*JetsAK8_wDiscriminatorDeep)[0] > 0.9) &&
-	   ((*JetsAK8_softDropMass)[1] > 85) &&
-	   ((*JetsAK8_softDropMass)[1] < 135) &&
-	   //	   ((*JetsAK8_doubleBDiscriminator)[1] >0.3) ) {
-	   ((*JetsAK8_deepDoubleBDiscriminatorH)[1] >0.7) ) {      
+	   ((*JetsAK8_softDropMass)[0] > massLowW) &&
+	   ((*JetsAK8_softDropMass)[0] < massHighW) &&
+	   ((*JetsAK8_wDiscriminatorDeep)[0] > deepAK8Wscore) &&
+	   ((*JetsAK8_softDropMass)[1] > massLowH) &&
+	   ((*JetsAK8_softDropMass)[1] < massHighH) &&
+	   //	   ((*JetsAK8_doubleBDiscriminator)[1] >bbscore) ) {
+	   ((*JetsAK8_deepDoubleBDiscriminatorH)[1] >deepbbscore) ) {      
 	  
 	  h_WHMET->Fill(MET,wt);
 	  h_WHMT->Fill(mt,wt);
@@ -389,13 +401,13 @@ void SignalReg::EventLoop(const char *data,const char *inputFileList) {
 	}
     	//------------    H W  Signal region    
 	if( 
-	   ((*JetsAK8_softDropMass)[1] > 65) &&
-	   ((*JetsAK8_softDropMass)[1] < 90) &&
-	   ((*JetsAK8_wDiscriminatorDeep)[1] > 0.9) &&
-	   ((*JetsAK8_softDropMass)[0] > 85) &&
-	   ((*JetsAK8_softDropMass)[0] < 135) &&
-	   //	   ((*JetsAK8_doubleBDiscriminator)[0] > 0.3) ) {
-	   ((*JetsAK8_deepDoubleBDiscriminatorH)[0] > 0.7) ){
+	   ((*JetsAK8_softDropMass)[1] > massLowW) &&
+	   ((*JetsAK8_softDropMass)[1] < massHighW) &&
+	   ((*JetsAK8_wDiscriminatorDeep)[1] > deepAK8Wscore) &&
+	   ((*JetsAK8_softDropMass)[0] > massLowH) &&
+	   ((*JetsAK8_softDropMass)[0] < massHighH) &&
+	   //	   ((*JetsAK8_doubleBDiscriminator)[0] > bbscore) ) {
+	   ((*JetsAK8_deepDoubleBDiscriminatorH)[0] > deepbbscore) ){
 	  
 	  h_HWMET->Fill(MET,wt);
 	  h_HWMT->Fill(mt,wt);
@@ -420,15 +432,37 @@ void SignalReg::EventLoop(const char *data,const char *inputFileList) {
 	} //end H W
 	break;
       } // end Signal region case  
+
+    case 9:             // for WW
+      {
+    	//-----------    W W Signal region
+	if(
+	   ((*JetsAK8_softDropMass)[0] > massLowW) &&
+	   ((*JetsAK8_softDropMass)[0] < massHighW) &&
+	   ((*JetsAK8_wDiscriminatorDeep)[0] > deepAK8Wscore) &&
+	   ((*JetsAK8_softDropMass)[1] > massLowW) &&
+	   ((*JetsAK8_softDropMass)[1] < massHighW) &&
+	   ((*JetsAK8_wDiscriminatorDeep)[1] > deepAK8Wscore) ) { 
+	 
+	  
+	  h_WWMET->Fill(MET,wt);
+	  h_WWMT->Fill(mt,wt);
+	  h_WWMT2J->Fill(mt2j,wt);
+      
+	  h_WWAK8J1Pt->Fill(((*JetsAK8)[0].Pt()),wt);
+	  h_WWAK8J1Eta->Fill(((*JetsAK8)[0].Eta()),wt);
+	  h_WWAK8J1Mass->Fill((*JetsAK8_softDropMass)[0],wt);
+	}
+      } //end case 9
       
     } // end switch
     
     // -----------------------     tweaking wdisc score
     bool wDisTweak = false;
     if(wDisTweak){
-      if( (65< (*JetsAK8_softDropMass)[0] && (*JetsAK8_softDropMass)[0] < 90) &&
-	  (90< (*JetsAK8_softDropMass)[1] && (*JetsAK8_softDropMass)[1] < 135) &&
-	  (*JetsAK8_doubleBDiscriminator)[1] >0.3  ){
+      if( (massLowW< (*JetsAK8_softDropMass)[0] && (*JetsAK8_softDropMass)[0] < massHighW) &&
+	  (massHighW< (*JetsAK8_softDropMass)[1] && (*JetsAK8_softDropMass)[1] < massHighH) &&
+	  (*JetsAK8_doubleBDiscriminator)[1] >bbscore  ){
 	if( (*JetsAK8_wDiscriminatorDeep)[0] > 0.779) {
 	  h_WHMETa->Fill(MET,wt);
 	}
@@ -436,9 +470,9 @@ void SignalReg::EventLoop(const char *data,const char *inputFileList) {
 	  h_WHMETc->Fill(MET,wt);
 	}
       }
-      if( (65< (*JetsAK8_softDropMass)[1] && (*JetsAK8_softDropMass)[1] < 90) &&
-	  (90< (*JetsAK8_softDropMass)[0] && (*JetsAK8_softDropMass)[0] < 135) &&
-	  (*JetsAK8_doubleBDiscriminator)[0] > 0.3)  {
+      if( (massLowW< (*JetsAK8_softDropMass)[1] && (*JetsAK8_softDropMass)[1] < massHighW) &&
+	  (massHighW< (*JetsAK8_softDropMass)[0] && (*JetsAK8_softDropMass)[0] < massHighH) &&
+	  (*JetsAK8_doubleBDiscriminator)[0] > bbscore)  {
 	if( (*JetsAK8_wDiscriminatorDeep)[1] > 0.779) {
 	  h_HWMETa->Fill(MET,wt);
 	}
@@ -452,8 +486,8 @@ void SignalReg::EventLoop(const char *data,const char *inputFileList) {
     bool ZorHtobb_genrecomatch = false;
     if (ZorHtobb_genrecomatch){
       if(
-	 ((*JetsAK8_softDropMass)[1] > 65 && (*JetsAK8_softDropMass)[1] < 90) && 
-	 ((*JetsAK8_softDropMass)[0] > 90 && (*JetsAK8_softDropMass)[0] < 135) ){ 
+	 ((*JetsAK8_softDropMass)[1] > massLowW && (*JetsAK8_softDropMass)[1] < massHighW) && 
+	 ((*JetsAK8_softDropMass)[0] > massLowH && (*JetsAK8_softDropMass)[0] < massHighH) ){ 
 	
  	for (int gen=0; gen < GenParticles_PdgId->size(); gen++){
 	  
@@ -482,7 +516,7 @@ void SignalReg::EventLoop(const char *data,const char *inputFileList) {
       } // end tune mass window
     }// end if
      //print(jentry);
-
+  
    
     nEvtSurv++;
     h_cutflow->Fill("NEvtsNoWtLeft",1);

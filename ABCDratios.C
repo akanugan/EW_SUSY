@@ -20,11 +20,11 @@ void ABCDratios(){
   TFile * file_inputdistributions2;
   TFile * file_inputdistributions3;
   TFile * file_output;
-  TString filename = "TTJetsBkg";     //file name to be saved
+  TString filename = "TTJets";     //file name to be saved
   TString name;
   
 
-  file_inputdistributions = new TFile("corrected_histos_ABCD_deep2b/TTJets_MC2018.root", "READ");
+  file_inputdistributions = new TFile("Histos_WH_info5/TTJets_MC2018.root", "READ");
   //file_inputdistributions = new TFile("TTJets_MC2018.root", "READ");
   //BKG_WX_conditions1a/ Histos_deep2b_mtbcut_massSB/
   //ST__MC2018.root //     TTJets_MC2018.root
@@ -35,9 +35,9 @@ void ABCDratios(){
   // file_inputdistributions2 = new TFile("BKG_baseline+0.35T21to0.5_Nomasscut/ZJetsToNuNu_HT_MC2018.root", "READ");
   // file_inputdistributions3 = new TFile("BKG_baseline+T21greaterthan0.5_Nomasscut/ZJetsToNuNu_HT_MC2018.root", "READ");
 
-  TH1F * h_Bkg1 = (TH1F*) file_inputdistributions->Get("WHAK8J2Mass");
+  TH1F * h_Bkg1 = (TH1F*) file_inputdistributions->Get("WHAK8J2MassSB");
   TH1F * h_Bkg2 = (TH1F*) file_inputdistributions->Get("WHAK8J2MassNo2bTag");  //WHAK8J1MassNo2bTag      //WHAK8J1Massnobtag
-  TH1F * h_Bkg3 = (TH1F*) file_inputdistributions->Get("HWAK8J1Mass");
+  TH1F * h_Bkg3 = (TH1F*) file_inputdistributions->Get("HWAK8J1MassSB");
   TH1F * h_Bkg4 = (TH1F*) file_inputdistributions->Get("HWAK8J1MassNo2bTag");
 
   h_Bkg1->Add(h_Bkg3); // higgs mass tagged
@@ -45,12 +45,12 @@ void ABCDratios(){
 
   const Int_t NBINS = 4;
   //Double_t edges[NBINS + 1] = {50.0, 85.0, 135.0, 160.0, 190.0, 250.0};
-  Double_t edges[NBINS + 1] = {50.0, 85.0, 135.0, 180., 250.0};
+  Double_t edges[NBINS + 1] = {50.0, 85.0, 135.0, 200., 250.0};
   TH1F *h_varbin = (TH1F*)h_Bkg1->Rebin(NBINS,"hvarbin",edges);
   TH1F *h_varbin2 = (TH1F*)h_Bkg2->Rebin(NBINS,"hvarbin2",edges);
   h_varbin->Divide(h_varbin2);
   h_varbin->GetXaxis()->SetRange(0,300);
-  h_varbin->GetYaxis()->SetRangeUser(0.,1.4);
+  h_varbin->GetYaxis()->SetRangeUser(0.,0.7);
   h_varbin->SetTitle("");
   h_varbin->GetXaxis()->SetTitle("Soft drop mass (GeV)");
   h_varbin->GetYaxis()->SetTitle("Ratio {pass/fail}");
@@ -68,7 +68,7 @@ void ABCDratios(){
   
   h_Bkg1->Divide(h_Bkg2); // bin by bin
   h_Bkg1->GetXaxis()->SetRange(0,300);
-  h_Bkg1->GetYaxis()->SetRangeUser(0.,1.);
+  h_Bkg1->GetYaxis()->SetRangeUser(0.,0.7);
   h_Bkg1->SetTitle(""); // gStyle->SetOptTitle(0);
   h_Bkg1->GetXaxis()->SetTitle("Soft drop mass (GeV)");
   h_Bkg1->GetYaxis()->SetTitle("R_{pass/fail}");
@@ -88,9 +88,9 @@ void ABCDratios(){
   c1->GetFrame()->SetBorderSize(12);
   
   h_Bkg1->Draw("E");
-  c1->Print("TTJetsi_deep2b.png");
+  c1->Print(filename+"i_deepbb.png");
   h_varbin->Draw("E");
-  c1->Print("TTJets_deep2b.png");
+  c1->Print(filename+"_deepbb.png");
   c1->Update();
   //c1->SaveAs(filename+".pdf");
 }

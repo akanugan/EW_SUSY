@@ -28,7 +28,7 @@ TString name3;
 TLatex textOnTop,intLumiE;
 const int nfiles=9,nBG=6;    //Specify no. of files
 TFile *f[nfiles];
-int col[11]={kPink+1,kTeal+9,kGreen,kYellow,kOrange,kBlue,kCyan,kRed,kBlue+2,kMagenta,kPink+1};  //Specify Colors b's
+int col[11]={kPink+1,kTeal+9,kMagenta,kYellow,kOrange,kBlue,kCyan,kRed,kBlue+2,kMagenta+3,kPink+1};  //Specify Colors b's
 
 TCanvas *c_cA=new TCanvas("kinVar","plot of a kin var",1200,1200);
 
@@ -49,20 +49,20 @@ void plotKinStack_KH(){
   TH1::SetDefaultSumw2(1);
   gStyle->SetOptStat(0);
   gStyle->SetTitle(0);
-  TString varName = "AK8J1doubleBDisnoBtag";
-  //  TString varName2 = "HWMET";
-  TString xLabel = "AK8 Jet1 double B Disc. ";
+  TString varName = "WHMET";
+  TString varName2 = "HWMET";
+  TString xLabel = "MET (GeV)";
   int rebin=5;
 
-  f[0] = new TFile("BKG_conditions2/ST__MC2018.root");
-  f[1] = new TFile("BKG_conditions2/Rare_MC2018.root");
-  f[3] = new TFile("BKG_conditions2/QCD_HT_MC2018.root");
-  f[2] = new TFile("BKG_conditions2/TTJets_MC2018.root");
-  f[4] = new TFile("BKG_conditions2/WJetsToLNu_HT_MC2018.root");
-  f[5] = new TFile("BKG_conditions2/ZJetsToNuNu_HT_MC2018.root");
-  f[6] = new TFile("TChiWH_600_100_conditions2.root");
-  f[7] = new TFile("TChiWH_800_100_conditions2.root");
-  f[8] = new TFile("TChiWH_1000_100_conditions2.root");
+  f[0] = new TFile("Histos_WH_info5/ST__MC2018.root");
+  f[1] = new TFile("Histos_WH_info5/Rare_MC2018.root");
+  f[3] = new TFile("Histos_WH_info5/QCD_HT_MC2018.root");
+  f[2] = new TFile("Histos_WH_info5/TTJets_MC2018.root");
+  f[4] = new TFile("Histos_WH_info5/WJetsToLNu_HT_MC2018.root");
+  f[5] = new TFile("Histos_WH_info5/ZJetsToNuNu_HT_MC2018.root");
+  f[6] = new TFile("Histos_WH_info5/TChiWH_600_100_MC2018.root");
+  f[7] = new TFile("Histos_WH_info5/TChiWH_800_100_MC2018.root");
+  f[8] = new TFile("Histos_WH_info5/TChiWH_1000_100_MC2018.root");
 
 
   //f[6] = new TFile("SIG_TChiWH_baseline/TChiWH_600_100_MC2018.root");
@@ -77,9 +77,9 @@ void plotKinStack_KH(){
   TH1D *h_Sig1=(TH1D*)f[7]->FindObjectAny(varName);
   TH1D *h_Sig2=(TH1D*)f[8]->FindObjectAny(varName);
   
-  // TH1D *h_sig=(TH1D*)f[6]->FindObjectAny(varName2);
-  // TH1D *h_sig1=(TH1D*)f[7]->FindObjectAny(varName2);
-  // TH1D *h_sig2=(TH1D*)f[8]->FindObjectAny(varName2);
+  TH1D *h_sig=(TH1D*)f[6]->FindObjectAny(varName2);
+  TH1D *h_sig1=(TH1D*)f[7]->FindObjectAny(varName2);
+  TH1D *h_sig2=(TH1D*)f[8]->FindObjectAny(varName2);
   
   //
   // Top panel
@@ -95,6 +95,7 @@ void plotKinStack_KH(){
 
   gStyle->SetTextSize(2);
   THStack *hs_var=new THStack("var_Stack","");
+  TH1D *h_total;
   //TH1D *h_R;
   TH1D *h_MET_R[nfiles];
   for(int i=0;i<nfiles;i++){
@@ -107,24 +108,34 @@ void plotKinStack_KH(){
   for(int i=0;i<nfiles;i++){
         
     TH1D *h_MET=(TH1D*)f[i]->FindObjectAny(varName);
-    //   TH1D *h_MET2=(TH1D*)f[i]->FindObjectAny(varName2);
-    h_MET->Rebin(rebin);
-    // h_MET2->Rebin(rebin);
-    // h_MET->Add(h_MET2);
+    h_MET->Rebin(rebin);  
+    
+    TH1D *h_MET2=(TH1D*)f[i]->FindObjectAny(varName2);
+    h_MET2->Rebin(rebin);
+    h_MET->Add(h_MET2);
+    
     //    h_MET->GetYaxis()->SetRangeUser(100.5,20000);
     //    h_MET->SetMinimum(100);
     decorate(h_MET,i,f[i]->GetName());
     
-    if(i<=(nBG-1)) hs_var->Add(h_MET);
-
+    if(i<=(nBG-1)){
+      hs_var->Add(h_MET);
+      if(i==0) h_total = (TH1D*)h_MET->Clone("totalHist");
+      else h_total->Add(h_MET);
+    }
+    
     if(i==nBG-1) {
       //c_cA->cd();
       hs_var->Draw("BAR HIST");
       hs_var->Draw("HIST");
       hs_var->SetMinimum(0.8);
       hs_var->SetMaximum(hs_var->GetMaximum()*10);
-      decorate(hs_var,i,f[i]->GetName()); 
+      decorate(hs_var,i,f[i]->GetName());
       //hs_var->GetYaxis()->SetRangeUser(100.5,20000);
+      h_total->SetFillStyle(3014);
+      h_total->SetFillColor(kGray+1);
+      h_total->Draw("e2 same");
+
     }
     if(i>=nBG){ 
       //c_cA->cd(); 
@@ -202,9 +213,14 @@ void plotKinStack_KH(){
 
   hs_var->Draw("BAR HIST");
   hs_var->Draw("HIST");
-  h_Sig->Draw("hist same");
-  h_Sig1->Draw("hist same");
-  h_Sig2->Draw("hist same");
+  //  hs_var->Draw("e2 same");
+  h_total->SetFillStyle(3017);
+  h_total->SetFillColor(kBlack);
+  h_total->Draw("e2 same");
+
+  h_Sig->Draw("hist same e");
+  h_Sig1->Draw("hist same e");
+  h_Sig2->Draw("hist same e");
   //hs_var->SetTitle("");
   hs_var->GetXaxis()->CenterTitle(true);
   hs_var->GetYaxis()->CenterTitle(true);
@@ -359,9 +375,9 @@ void drawlegend(TH1D *hist,int i,const char* fname){
   else if(lName.Contains("TChiWZ_400_1")){lName="TChiWZ_400_1";}
   else if(lName.Contains("TChiWZ_500_1")){lName="TChiWZ_500_1";}
 
-  else if(lName.Contains("TChipmWW_600_100")){lName="TChiWW_600_100";}
-  else if(lName.Contains("TChipmWW_800_100")){lName="TChiWw_800_100";}
-  else if(lName.Contains("TChipmWW_1000_100")){lName="TChiWW_1000_100";}
+  else if(lName.Contains("TChiWW_600_100")){lName="TChiWW(600,100)";}
+  else if(lName.Contains("TChiWW_800_100")){lName="TChiWW(800,100)";}
+  else if(lName.Contains("TChiWW_1000_100")){lName="TChiWW(1000,100)";}
 
   //  else if(lName.Contains("T5bbbbZg_1600_150")){lName="T5bbbbZG(1.6,0.15)";}
   //  else if(lName.Contains("T5bbbbZg_1600_150")){lName="#tilde{g}_{1600}#rightarrow b#bar{b}#tilde{#chi}_{1,150}^{0}";}

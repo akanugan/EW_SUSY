@@ -41,7 +41,9 @@ class SignalReg : public NtupleVariables{
   TH1D *h_filters;
   //  TH1D *h_MET;
   //  TH1D *h_MHT;
-  /* TH1D *h_HT; */
+  TH1D *h_HT;
+  TH1D *h_madHT;
+
   /* TH1D *h_NJets; */
   /* TH1D *h_BTags; */
 
@@ -58,16 +60,16 @@ class SignalReg : public NtupleVariables{
   /* TH1D *h_AK8J1Mass4, *h_AK8J2Mass4; */
 
   //WH SR
-  TH1D *h_WHAK8J1Pt, *h_WHAK8J1Mass, *h_WHAK8J1MassNo2bTag, *h_WHAK8J1Eta, *h_WHAK8J1Tau21, *h_WHAK8J1wDis;
-  TH1D *h_WHAK8J2Pt, *h_WHAK8J2Mass, *h_WHAK8J2MassNo2bTag, *h_WHAK8J2Eta, *h_WHAK8J2Tau21, *h_WHAK8J2wDis;
+  TH1D *h_WHAK8J1Pt, *h_WHAK8J1Mass, *h_WHAK8J1Eta, *h_WHAK8J1Tau21, *h_WHAK8J1wDis;
+  TH1D *h_WHAK8J2Pt, *h_WHAK8J2Mass, *h_WHAK8J2Eta, *h_WHAK8J2Tau21, *h_WHAK8J2wDis;
   TH1D *h_WHMET;
   TH1D *h_WHMT;
   TH1D *h_WHMT2J;
   TH1D *h_WHMETa;
   TH1D *h_WHMETc;
 
-  TH1D *h_HWAK8J1Pt, *h_HWAK8J1Mass, *h_HWAK8J1MassNo2bTag, *h_HWAK8J1Eta, *h_HWAK8J1Tau21, *h_HWAK8J1wDis;
-  TH1D *h_HWAK8J2Pt, *h_HWAK8J2Mass, *h_HWAK8J2MassNo2bTag, *h_HWAK8J2Eta, *h_HWAK8J2Tau21, *h_HWAK8J2wDis;
+  TH1D *h_HWAK8J1Pt, *h_HWAK8J1Mass, *h_HWAK8J1Eta, *h_HWAK8J1Tau21, *h_HWAK8J1wDis;
+  TH1D *h_HWAK8J2Pt, *h_HWAK8J2Mass, *h_HWAK8J2Eta, *h_HWAK8J2Tau21, *h_HWAK8J2wDis;
   TH1D *h_HWMET;
   TH1D *h_HWMT;
   TH1D *h_HWMT2J;
@@ -87,11 +89,17 @@ class SignalReg : public NtupleVariables{
   TH1D *h_WWAK8J1Eta;
   TH1D *h_WWAK8J1Mass;
 
-  //SB
+  //Bkest_MET
   TH1D *h_WHMET_RegA, *h_WHMET_RegB, *h_WHMET_RegC, *h_WHMET_RegD;
   TH1D *h_WHAK8J2Mass_RegA, *h_WHAK8J2Mass_RegB, *h_WHAK8J2Mass_RegC, *h_WHAK8J2Mass_RegD;
   TH1D *h_HWMET_RegA, *h_HWMET_RegB, *h_HWMET_RegC, *h_HWMET_RegD;
   TH1D *h_HWAK8J1Mass_RegA, *h_HWAK8J1Mass_RegB, *h_HWAK8J1Mass_RegC, *h_HWAK8J1Mass_RegD;  
+
+  // Mass SB
+  TH1D *h_WHAK8J1MassSB, *h_WHAK8J1MassNo2bTag;
+  TH1D *h_WHAK8J2MassSB, *h_WHAK8J2MassNo2bTag;
+  TH1D *h_HWAK8J1MassSB, *h_HWAK8J1MassNo2bTag;
+  TH1D *h_HWAK8J2MassSB, *h_HWAK8J2MassNo2bTag;
 
   // GenReco match
   TH1D *h_AK8J1doubleBDis, *h_AK8J2doubleBDis;
@@ -103,7 +111,7 @@ class SignalReg : public NtupleVariables{
 
   TH1D *h_mtbmin, *h_mct;
   /* TH2D *h2_AK8J1J2Tau21; */
-  /* TH2D *h2_DisdRAK8J1; */
+  /* TH2D *h2_DisxodRAK8J1; */
   /* TH2D *h2_DisdRAK8J2; */
   /* TH2D *h2_Tau21dRAK8J1; */
   /* TH2D *h2_Tau21dRAK8J2; */
@@ -138,7 +146,9 @@ void SignalReg::BookHistogram(const char *outFileName) {
   
   /* h_MET = new TH1D("MET","MET",200,0,2000); */
   /* h_MHT = new TH1D("MHT","MHT",200,0,2000); */
-  /* h_HT = new TH1D("HT","HT",100,0,5000); */
+   h_HT = new TH1D("HT","HT",100,0,5000); 
+   h_madHT = new TH1D("madHT","madHT",100,0,5000); 
+
   /* h_NJets = new TH1D("NJets","NJets with pT > 30, |eta| < 20.4",20,0,20);   */
   /* h_BTags = new TH1D("BTags","BTags with DeepCSV MedWP",10,0,10);   */
   
@@ -183,7 +193,7 @@ void SignalReg::BookHistogram(const char *outFileName) {
   h_WHAK8J1Pt = new TH1D("WHAK8J1Pt","leading AK8 jets Pt",200,0,2000);
   h_WHAK8J1Eta = new TH1D("WHAK8J1Eta","AK8J1 Eta",120,-6,6);
   h_WHAK8J1Mass = new TH1D("WHAK8J1Mass","AK8J1 Mass",60,0,300);
-  h_WHAK8J1MassNo2bTag = new TH1D("WHAK8J1MassNo2bTag","AK8J1 Mass",60,0,300);
+
   h_WHAK8J1Tau21 = new TH1D("WHAK8J1Tau21","AK8J1 Tau21",100,0,1);
   h_WHAK8J1wDis = new TH1D("WH_AK8J1wDis","AK8 J1 w Discr. corelated",100,0,1);
   h_WHMET = new TH1D("WHMET","MET",200,0,2000);
@@ -195,7 +205,7 @@ void SignalReg::BookHistogram(const char *outFileName) {
   h_WHAK8J2Pt = new TH1D("WHAK8J2Pt","2nd leading AK8 jets Pt",200,0,2000);
   h_WHAK8J2Eta = new TH1D("WHAK8J2Eta","AK8J2 Eta",120,-6,6);
   h_WHAK8J2Mass = new TH1D("WHAK8J2Mass","AK8J2 Mass",60,0,300);
-  h_WHAK8J2MassNo2bTag = new TH1D("WHAK8J2MassNo2bTag","AK8J2 Mass",60,0,300);
+
   h_WHAK8J2Tau21 = new TH1D("WHAK8J2Tau21","AK8J2 Tau21",100,0,1);
   h_WHAK8J2wDis = new TH1D("WH_AK8J2wDis","AK8 J2 w Discr. corelated",100,0,1);
     
@@ -203,7 +213,7 @@ void SignalReg::BookHistogram(const char *outFileName) {
   h_HWAK8J1Pt = new TH1D("HWAK8J1Pt"," leading AK8 jets Pt",200,0,2000);
   h_HWAK8J1Eta = new TH1D("HWAK8J1Eta","AK8J1 Eta",120,-6,6);
   h_HWAK8J1Mass = new TH1D("HWAK8J1Mass","AK8J1 Mass",60,0,300);
-  h_HWAK8J1MassNo2bTag = new TH1D("HWAK8J1MassNo2bTag","AK8J1 Mass",60,0,300);
+
   h_HWAK8J1Tau21 = new TH1D("HWAK8J1Tau21","AK8J1 Tau21",100,0,1);
   h_HWAK8J1wDis = new TH1D("HWAK8J1wDis","AK8 J2 w Discr.corelated",100,0,1);
   
@@ -216,7 +226,7 @@ void SignalReg::BookHistogram(const char *outFileName) {
   h_HWAK8J2Pt = new TH1D("HWAK8J2Pt","2nd leading AK8 jets Pt",200,0,2000);
   h_HWAK8J2Eta = new TH1D("HWAK8J2Eta","AK8J2 Eta",120,-6,6);
   h_HWAK8J2Mass = new TH1D("HWAK8J2Mass","AK8J2 Mass",60,0,300);
-  h_HWAK8J2MassNo2bTag = new TH1D("HWAK8J2MassNo2bTag","AK8J1 Mass",60,0,300);
+ 
   h_HWAK8J2Tau21 = new TH1D("HWAK8J2Tau21","AK8J2 Tau21",100,0,1);
   h_HWAK8J2wDis = new TH1D("HWAK8J2wDis","AK8 J2 w Discr. corelated",100,0,1);
  
@@ -229,7 +239,7 @@ void SignalReg::BookHistogram(const char *outFileName) {
   h_WWAK8J1Mass = new TH1D("WWAK8J1Mass","AK8J1 Mass",60,0,300);
 
 
- // SB
+ // Bkgest MET
   h_WHMET_RegA = new TH1D("WHMET_RegA","WHMETA",200,0,2000);
   h_WHMET_RegB = new TH1D("WHMET_RegB","WHMETB",200,0,2000);
   h_WHMET_RegC = new TH1D("WHMET_RegC","WHMETC",200,0,2000);
@@ -250,6 +260,16 @@ void SignalReg::BookHistogram(const char *outFileName) {
   h_HWAK8J1Mass_RegC = new TH1D("HWAK8J1Mass_RegC","HWAK8J1MassC",60,0,300);
   h_HWAK8J1Mass_RegD = new TH1D("HWAK8J1Mass_RegD","HWAK8J1MassD",60,0,300);
   //
+
+  // Mass SB
+  h_WHAK8J1MassSB = new TH1D("WHAK8J1MassSB","AK8J1 Mass",60,0,300);
+  h_WHAK8J1MassNo2bTag = new TH1D("WHAK8J1MassNo2bTag","AK8J1 Mass",60,0,300);
+  h_WHAK8J2MassSB = new TH1D("WHAK8J2MassSB","AK8J2 Mass",60,0,300);
+  h_WHAK8J2MassNo2bTag = new TH1D("WHAK8J2MassNo2bTag","AK8J2 Mass",60,0,300);  
+  h_HWAK8J1MassSB = new TH1D("HWAK8J1MassSB","AK8J1 Mass",60,0,300);
+  h_HWAK8J1MassNo2bTag = new TH1D("HWAK8J1MassNo2bTag","AK8J1 Mass",60,0,300);
+  h_HWAK8J2MassSB = new TH1D("HWAK8J2MassSB","AK8J2 Mass",60,0,300);
+  h_HWAK8J2MassNo2bTag = new TH1D("HWAK8J2MassNo2bTag","AK8J1 Mass",60,0,300);
 
   // gen Reco match
   h_AK8J1doubleBDis = new TH1D("AK8J1doubleBDis","AK8 J1 doubleB disc.",100,0,1);

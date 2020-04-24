@@ -37,7 +37,7 @@ void decorate(THStack*,int,const char*);
 void drawlegend(TH1D*,int,const char*);
 void printInt(TH1D*,int,const char*);
 
-TLegend *legend1=new TLegend(0.4501, 0.7,  0.93, 0.88);
+TLegend *legend1=new TLegend(0.6, 0.7,  0.93, 0.88);
 //TLegend *legend1=new TLegend(0.1,0.7,0.48,0.9);
 //TLegend *legend1=new TLegend(0.1,0.7,0.48,0.9);
 
@@ -49,26 +49,39 @@ void plotKinStack_KH(){
   TH1::SetDefaultSumw2(1);
   gStyle->SetOptStat(0);
   gStyle->SetTitle(0);
-  TString varName = "WHMET";
-  TString varName2 = "HWMET";
-  TString xLabel = "MET (GeV)";
+  TString varName = "WHmT2J";
+  TString varName2 = "HWmT2J";
+  TString xLabel = "mT(subleadAK8,MET) (GeV)";
   int rebin=5;
 
-  f[0] = new TFile("Histos_WH_info5/ST__MC2018.root");
-  f[1] = new TFile("Histos_WH_info5/Rare_MC2018.root");
-  f[3] = new TFile("Histos_WH_info5/QCD_HT_MC2018.root");
-  f[2] = new TFile("Histos_WH_info5/TTJets_MC2018.root");
-  f[4] = new TFile("Histos_WH_info5/WJetsToLNu_HT_MC2018.root");
-  f[5] = new TFile("Histos_WH_info5/ZJetsToNuNu_HT_MC2018.root");
-  f[6] = new TFile("Histos_WH_info5/TChiWH_600_100_MC2018.root");
-  f[7] = new TFile("Histos_WH_info5/TChiWH_800_100_MC2018.root");
-  f[8] = new TFile("Histos_WH_info5/TChiWH_1000_100_MC2018.root");
+  //MC 2018 only
+  f[0] = new TFile("ST__MC2018.root");
+  f[1] = new TFile("QCD_HT_MC2018.root");
+  f[2] = new TFile("TTJets_MC2018.root");
+  f[3] = new TFile("WJetsToLNu_HT_MC2018.root");
+  f[4] = new TFile("ZJetsToNuNu_HT_MC2018.root");
+  f[5] = new TFile("Rare_MC2018.root");
+
+  // Ful run 2
+  // f[0] = new TFile("ST__MCRun2.root");
+  // f[1] = new TFile("QCD_HT_MCRun2.root");
+  // f[2] = new TFile("TTJets_MCRun2.root");
+  // f[3] = new TFile("WJetsToLNu_HT_MCRun2.root");
+  // f[4] = new TFile("ZJetsToNuNu_HT_MCRun2.root");
+  //  f[5] = new TFile("Rare_MCRun2.root");  
+
+  // f[6] = new TFile("Histos_WH_info7/TChiWH_600_100_MC2018.root");
+  // f[7] = new TFile("Histos_WH_info7/TChiWH_800_100_MC2018.root");
+  // f[8] = new TFile("Histos_WH_info7/TChiWH_1000_100_MC2018.root");
+  f[6] = new TFile("TChiWH_600_100_MC2018.root");
+  f[7] = new TFile("TChiWH_800_100_MC2018.root");
+  f[8] = new TFile("TChiWH_1000_100_MC2018.root");
 
 
-  //f[6] = new TFile("SIG_TChiWH_baseline/TChiWH_600_100_MC2018.root");
-  //f[7] = new TFile("SIG_TChiWH_baseline/TChiWH_800_100_MC2018.root");
-  //f[8] = new TFile("SIG_TChiWH_baseline/TChiWH_1000_100_MC2018.root");
-
+  // f[6] = new TFile("SIG_TChiWH_baseline/TChiWH_600_100_MC2018.root");
+  // f[7] = new TFile("SIG_TChiWH_baseline/TChiWH_800_100_MC2018.root");
+  // f[8] = new TFile("SIG_TChiWH_baseline/TChiWH_1000_100_MC2018.root");
+  
   // f[6] = new TFile("SIG_WW_tightmass_vetoB/TChipmWW_600_100_MC2018.root");  
   // f[7] = new TFile("SIG_WW_tightmass_vetoB/TChipmWW_800_100_MC2018.root");
   // f[8] = new TFile("SIG_WW_tightmass_vetoB/TChipmWW_1000_100_MC2018.root");
@@ -76,11 +89,16 @@ void plotKinStack_KH(){
   TH1D *h_Sig=(TH1D*)f[6]->FindObjectAny(varName);
   TH1D *h_Sig1=(TH1D*)f[7]->FindObjectAny(varName);
   TH1D *h_Sig2=(TH1D*)f[8]->FindObjectAny(varName);
-  
+   
   TH1D *h_sig=(TH1D*)f[6]->FindObjectAny(varName2);
   TH1D *h_sig1=(TH1D*)f[7]->FindObjectAny(varName2);
   TH1D *h_sig2=(TH1D*)f[8]->FindObjectAny(varName2);
   
+  h_Sig->Add(h_sig);
+  h_Sig1->Add(h_sig1);
+  h_Sig2->Add(h_sig2);
+
+
   //
   // Top panel
   //
@@ -114,8 +132,8 @@ void plotKinStack_KH(){
     h_MET2->Rebin(rebin);
     h_MET->Add(h_MET2);
     
-    //    h_MET->GetYaxis()->SetRangeUser(100.5,20000);
-    //    h_MET->SetMinimum(100);
+    h_MET->GetYaxis()->SetRangeUser(100.5,20000);
+    h_MET->SetMinimum(100);
     decorate(h_MET,i,f[i]->GetName());
     
     if(i<=(nBG-1)){
@@ -149,7 +167,7 @@ void plotKinStack_KH(){
     }
     drawlegend(h_MET,i,f[i]->GetName());
     if(i==nfiles-1){
-      hs_var->GetXaxis()->SetRangeUser(0,2100); 
+      hs_var->GetXaxis()->SetRangeUser(0,2000); 
       hs_var->GetXaxis()->SetTitleOffset(.90);
       //hs_var->GetXaxis()->SetTitle(xLabel); hs_var->GetYaxis()->SetTitle("Events");hs_var->SetTitle(0);
     }
@@ -167,7 +185,7 @@ void plotKinStack_KH(){
   if (stack_sum->Integral() !=0){
   for (int bin=0;bin<=stack_sum->GetNcells();++bin) {
     double bgsum = (stack_sum->GetBinContent(bin)>0.) ? stack_sum->GetBinContent(bin) : 1e-6;
-    cout<< "test" <<bgsum<< endl;
+    cout<< "Stack sum: " <<bgsum<< endl;
     sstack_sum->SetBinContent(bin,sqrt(bgsum));
     double sigbg = ((stack_sum->GetBinContent(bin)+h_Sig->GetBinContent(bin))>0.) ? (stack_sum->GetBinContent(bin)+h_Sig->GetBinContent(bin)) : 1e-6;
     sigbkg_sum->SetBinContent(bin,sqrt(sigbg));
@@ -225,7 +243,7 @@ void plotKinStack_KH(){
   hs_var->GetXaxis()->CenterTitle(true);
   hs_var->GetYaxis()->CenterTitle(true);
   hs_var->GetYaxis()->SetTitle("# of events");
-  //hs_var->GetXaxis()->SetTitle(xLabel);
+  //hs_var->GetXaxis()->SetTitle("mT (GeV)");
   hs_var->GetYaxis()->SetTitleOffset(1.0);
   hs_var->GetYaxis()->SetTitleFont(42);
   hs_var->GetYaxis()->SetTitleSize(0.045);
@@ -260,7 +278,7 @@ void plotKinStack_KH(){
   // Bottom panel
   //
   //// Ratio Plot in lower panel
-
+  
   TPad *pad2 = new TPad("pad2", "pad2", 0, 0.02, 1.0, 0.30);
   pad2->SetTopMargin(0.0);
   pad2->SetBottomMargin(0.4);
@@ -279,7 +297,7 @@ void plotKinStack_KH(){
   hRatio->GetYaxis()->SetTitleSize(0.1);
   hRatio->GetYaxis()->SetTitleFont(42);
   hRatio->GetYaxis()->SetLabelFont(42);
-  hRatio->GetXaxis()->SetRangeUser(0,2100); //set to same as pad 1
+  hRatio->GetXaxis()->SetRangeUser(0,2000); //set to same as pad 1
 
   hRatio->SetMarkerSize(1.);
   hRatio->SetMarkerColor(kBlack);
@@ -301,11 +319,10 @@ void plotKinStack_KH(){
   Double_t Gmax=hRatio->GetXaxis()->GetBinUpEdge(hRatio->GetNbinsX()-5);
   Double_t Gmin=hRatio->GetXaxis()->GetXmin();
   printf("%f\n",Gmax);
-  TLine *line = new TLine(Gmin,2,2100,2);
+  TLine *line = new TLine(Gmin,2,2000,2);
   line->SetLineColor(kBlue);
   line->Draw();
-  //
-
+  
   name3 = varName+".pdf";
   c_cA->SaveAs(name3);
 
@@ -395,7 +412,8 @@ void setLastBinAsOverFlow(TH1D* h_hist){
   double lastBinErr=h_hist->GetBinError(h_hist->GetNbinsX()),  overflErr=h_hist->GetBinError(h_hist->GetNbinsX()+1);
   
   if(lastBinCt!=0 && overflCt!=0)
-    lastBinErr = (lastBinCt+overflCt)* (sqrt( ((lastBinErr/lastBinCt)*(lastBinErr/lastBinCt)) + ((overflErr/overflCt)*(overflErr/overflCt)) ) );
+    //lastBinErr = (lastBinCt+overflCt)* (sqrt( ((lastBinErr/lastBinCt)*(lastBinErr/lastBinCt)) + ((overflErr/overflCt)*(overflErr/overflCt)) ) );
+    lastBinErr = sqrt( (lastBinErr*lastBinErr) + (overflErr*overflErr) );
   
   else if(lastBinCt==0 && overflCt!=0)
     lastBinErr = overflErr;

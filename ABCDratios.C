@@ -24,7 +24,7 @@ void ABCDratios(){
   TString name;
   
 
-  file_inputdistributions = new TFile("Histos_WH_info5/TTJets_MC2018.root", "READ");
+  file_inputdistributions = new TFile("Histos_WH_info7/TTJets_MC2018.root", "READ");
   //file_inputdistributions = new TFile("TTJets_MC2018.root", "READ");
   //BKG_WX_conditions1a/ Histos_deep2b_mtbcut_massSB/
   //ST__MC2018.root //     TTJets_MC2018.root
@@ -50,7 +50,7 @@ void ABCDratios(){
   TH1F *h_varbin2 = (TH1F*)h_Bkg2->Rebin(NBINS,"hvarbin2",edges);
   h_varbin->Divide(h_varbin2);
   h_varbin->GetXaxis()->SetRange(0,300);
-  h_varbin->GetYaxis()->SetRangeUser(0.,0.7);
+  h_varbin->GetYaxis()->SetRangeUser(0.,1.4);
   h_varbin->SetTitle("");
   h_varbin->GetXaxis()->SetTitle("Soft drop mass (GeV)");
   h_varbin->GetYaxis()->SetTitle("Ratio {pass/fail}");
@@ -68,7 +68,7 @@ void ABCDratios(){
   
   h_Bkg1->Divide(h_Bkg2); // bin by bin
   h_Bkg1->GetXaxis()->SetRange(0,300);
-  h_Bkg1->GetYaxis()->SetRangeUser(0.,0.7);
+  h_Bkg1->GetYaxis()->SetRangeUser(0.,1.4);
   h_Bkg1->SetTitle(""); // gStyle->SetOptTitle(0);
   h_Bkg1->GetXaxis()->SetTitle("Soft drop mass (GeV)");
   h_Bkg1->GetYaxis()->SetTitle("R_{pass/fail}");

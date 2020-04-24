@@ -43,7 +43,7 @@ TLegend *legend1=new TLegend(0.4501, 0.65,  0.88, 0.88);
 //TLegend *legend2=new TLegend(0.7, 0.9,  0.90, 0.65);
 //TLegend *legend2=new TLegend(0.6, 0.90,  0.98, 0.45);
 void setLastBinAsOverFlow(TH1D*);
-void BkgestinMET(){
+void BkgestinMET_tmp2(){
   double sr_Integral=0,cr_Integral=0;
   TH1::SetDefaultSumw2(1);
   gStyle->SetOptStat(0);
@@ -60,18 +60,18 @@ void BkgestinMET(){
   TString xLabel = " MET (GeV)";
   int rebin=1;
 
-  f[0] = new TFile("Histos_WH_info5/ST__MC2018.root");
-  f[1] = new TFile("Histos_WH_info5/Rare_MC2018.root");
-  f[2] = new TFile("Histos_WH_info5/TTJets_MC2018.root");
-  f[3] = new TFile("Histos_WH_info5/QCD_HT_MC2018.root");
-  f[4] = new TFile("Histos_WH_info5/WJetsToLNu_HT_MC2018.root");
-  f[5] = new TFile("Histos_WH_info5/ZJetsToNuNu_HT_MC2018.root");
+  f[0] = new TFile("Histos_WH_info7/ST__MC2018.root");
+  f[1] = new TFile("Histos_WH_info7/Rare_MC2018.root");
+  f[2] = new TFile("Histos_WH_info7/TTJets_MC2018.root");
+  f[3] = new TFile("Histos_WH_info7/QCD_HT_MC2018.root");
+  f[4] = new TFile("Histos_WH_info7/WJetsToLNu_HT_MC2018.root");
+  f[5] = new TFile("Histos_WH_info7/ZJetsToNuNu_HT_MC2018.root");
   		    		  
-  f[6] = new TFile("Histos_WH_info5/Total_MC2018.root");
+  f[6] = new TFile("Histos_WH_info7/Total_MC2018.root");
  
 
   gStyle->SetTextSize(2);
-  THStack *hs_var=new THStack("var_Stack","MET Stacked");
+  THStack *hs_var=new THStack("var_Stack","");
   //TH1D *h_R;
   TH1D *h_MET_R[nfiles];
   for(int i=0;i<nfiles;i++){
@@ -107,13 +107,8 @@ void BkgestinMET(){
   TH1D* h_D = (TH1D*)h_METTotal7->Rebin(numMETbins,"h_D",METbins);  
 
   TH1D* overlay = new TH1D("overlay","Predicted BC/D",numMETbins,METbins);
-  vector<Double_t> Pred_A_arr;
-  vector<Double_t> Pred_A_err_arr;
-
-  cout<< "B 0bin "<<  h_B->GetBinContent(0) <<endl;;
-  cout<< "C 0bin "<<  h_C->GetBinContent(0) <<endl;;
  
-  for (int bin=1; bin < numMETbins+1; bin++){
+  for (int bin=1; bin < numMETbins+1; bin++){  //total
     //for (int bin=0; bin < numMETbins; bin++){
     Double_t A,B,C,D,Pred_A =0;
     Double_t B_err,C_err,D_err,Pred_A_err =0;
@@ -132,12 +127,11 @@ void BkgestinMET(){
     cout<<"D err is: "<<D_err<<endl;
     Pred_A = abs((B*C)/D);
     cout<<"pred A is "<<Pred_A<<endl;
-    
     Pred_A_err = Pred_A * TMath::Sqrt( TMath::Power(B_err/B,2) + TMath::Power(C_err/C,2) + TMath::Power(D_err/D,2));
     cout<<"pred A error  is "<<Pred_A_err<<endl;
 
     A = h_A->GetBinContent(bin); // A  
-    cout<<"Observed A is "<<A<<endl;
+    cout<<"Observed A is "<< A <<endl;
     cout <<"Difference : " << abs(Pred_A - A) <<endl; 
       
     overlay->SetBinContent(bin,Pred_A);
@@ -154,28 +148,45 @@ void BkgestinMET(){
   
   TH1D *h_total;
   //individual
-  for(int i=0; i < nBG; i++){
+  for(int i=0; i < nBG; i++){ //0 to 5
     
-    printf("%d\n",i);
+    //    printf("%d\n",i);
     
-    TH1D *h_MET=(TH1D*)f[i]->FindObjectAny(varName);
-    TH1D *h_MET2=(TH1D*)f[i]->FindObjectAny(varName2);
+    TH1D *h_MET=(TH1D*)f[i]->FindObjectAny(varName); //reg a
+    TH1D *h_MET2=(TH1D*)f[i]->FindObjectAny(varName2); //reg a
     
+    TH1D *h_MET3=(TH1D*)f[i]->FindObjectAny(varName3);
+    TH1D *h_MET4=(TH1D*)f[i]->FindObjectAny(varName4);
+    TH1D *h_MET5=(TH1D*)f[i]->FindObjectAny(varName5);
+    TH1D *h_MET6=(TH1D*)f[i]->FindObjectAny(varName6);
+    TH1D *h_MET7=(TH1D*)f[i]->FindObjectAny(varName7);
+    TH1D *h_MET8=(TH1D*)f[i]->FindObjectAny(varName8);
+
     h_MET->Add(h_MET2); // region a
     
-    //    TH1D *hmET = (TH1D*)h_MET->Clone();
-    //TH1D *h_mET->SetName("h_mET");
-    // TH1D *h_mET;
-    //    static const int numMETbins = 4;
-    //Double_t METbins[numMETbins+1] = {200.,300.,500.,700.,2000.};
+    h_MET3->Add(h_MET4); //region b
+    h_MET5->Add(h_MET6); // region c
+    h_MET7->Add(h_MET8); //region d
+        
     TH1D* h_MET_binned = (TH1D*)h_MET->Rebin(numMETbins,"h_MET_binned",METbins);
-  
-    //h_test->Draw();
-    // TH1F *hMET_binned = (TH1F*)hMET_binned->Rebin(kk,"hnew2",xbins2);
-    //    h_MET->GetYaxis()->SetRangeUser(100.5,20000);
-    //    h_MET->SetMinimum(100);
-    
-    // cout<<"Content in last bin:"<< h_MET_binned->GetBinContent(4)<<endl;
+ 
+    TH1D* h_MET3_binned = (TH1D*)h_MET3->Rebin(numMETbins,"h_MET3_binned",METbins);
+    TH1D* h_MET5_binned = (TH1D*)h_MET5->Rebin(numMETbins,"h_MET5_binned",METbins);
+    TH1D* h_MET7_binned = (TH1D*)h_MET7->Rebin(numMETbins,"h_MET7_binned",METbins);
+ 
+    cout<<"Bkg:  "<< f[i]->GetName() <<endl;
+    cout <<"A in 1st bin is: " <<h_MET_binned->GetBinContent(1)<<" +/- "<<h_MET_binned->GetBinError(1)<<endl; 
+    cout <<"B in 1st bin is: " <<h_MET3_binned->GetBinContent(1)<<" +/- "<<h_MET3_binned->GetBinError(1)<<endl; 
+    cout <<"C in 1st bin is: " <<h_MET5_binned->GetBinContent(1)<<" +/- "<<h_MET5_binned->GetBinError(1)<<endl; 
+    cout <<"D in 1st bin is: " <<h_MET7_binned->GetBinContent(1)<<" +/- "<<h_MET7_binned->GetBinError(1)<<endl; 
+    cout<<" \n  "<<endl;
+    cout <<"A in 2nd bin is: " <<h_MET_binned->GetBinContent(2)<<" +/- "<<h_MET_binned->GetBinError(2)<<endl; 
+    cout <<"B in 2nd bin is: " <<h_MET3_binned->GetBinContent(2)<<" +/- "<<h_MET3_binned->GetBinError(2)<<endl; 
+    cout <<"C in 2nd bin is: " <<h_MET5_binned->GetBinContent(2)<<" +/- "<<h_MET5_binned->GetBinError(2)<<endl; 
+    cout <<"D in 2nd bin is: " <<h_MET7_binned->GetBinContent(2)<<" +/- "<<h_MET7_binned->GetBinError(2)<<endl; 
+    cout<<" ***  \n  "<<endl;
+
+ 
     if(i<=(nBG-1)){
       hs_var->Add(h_MET_binned);
       if(i==0) h_total = (TH1D*)h_MET->Clone("totalHist");
@@ -212,10 +223,12 @@ void BkgestinMET(){
       
     }
     drawlegend(h_MET_binned,i,f[i]->GetName());
-    if(i==nfiles-1){
+    if(i==nBG-1){
       //hs_var->GetXaxis()->SetRangeUser(0,1500); 
       //hs_var->GetXaxis()->SetTitleOffset(.90);
-      hs_var->GetXaxis()->SetTitle(xLabel); hs_var->GetYaxis()->SetTitle("Events");hs_var->SetTitle(0);
+      hs_var->GetXaxis()->SetTitle("MET");
+      hs_var->GetYaxis()->SetTitle("Events");
+      hs_var->SetTitle(0);
     }
   }
   
@@ -339,8 +352,9 @@ void setLastBinAsOverFlow(TH1D* h_hist){
   double lastBinErr=h_hist->GetBinError(h_hist->GetNbinsX()),  overflErr=h_hist->GetBinError(h_hist->GetNbinsX()+1);
   
   if(lastBinCt!=0 && overflCt!=0)
-    lastBinErr = (lastBinCt+overflCt)* (sqrt( ((lastBinErr/lastBinCt)*(lastBinErr/lastBinCt)) + ((overflErr/overflCt)*(overflErr/overflCt)) ) );
-  
+    //    lastBinErr = (lastBinCt+overflCt)* (sqrt( ((lastBinErr/lastBinCt)*(lastBinErr/lastBinCt)) + ((overflErr/overflCt)*(overflErr/overflCt)) ) );
+    lastBinErr = sqrt( (lastBinErr*lastBinErr) + (overflErr*overflErr) );  
+
   else if(lastBinCt==0 && overflCt!=0)
     lastBinErr = overflErr;
   else if(lastBinCt!=0 && overflCt==0)

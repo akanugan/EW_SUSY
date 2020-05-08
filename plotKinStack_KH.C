@@ -26,7 +26,7 @@ char name[100];
 char name2[100];
 TString name3;
 TLatex textOnTop,intLumiE;
-const int nfiles=9,nBG=6;    //Specify no. of files
+const int nfiles=9, nBG= 6;    //Specify no. of files
 TFile *f[nfiles];
 int col[11]={kPink+1,kTeal+9,kMagenta,kYellow,kOrange,kBlue,kCyan,kRed,kBlue+2,kMagenta+3,kPink+1};  //Specify Colors b's
 
@@ -49,30 +49,30 @@ void plotKinStack_KH(){
   TH1::SetDefaultSumw2(1);
   gStyle->SetOptStat(0);
   gStyle->SetTitle(0);
-  TString varName = "WHmT2J";
-  TString varName2 = "HWmT2J";
-  TString xLabel = "mT(subleadAK8,MET) (GeV)";
+  TString varName = "WHMET";
+  TString varName2 = "HWMET";
+  TString xLabel = "MET (GeV)";
   int rebin=5;
 
   //MC 2018 only
-  f[0] = new TFile("ST__MC2018.root");
-  f[1] = new TFile("QCD_HT_MC2018.root");
-  f[2] = new TFile("TTJets_MC2018.root");
-  f[3] = new TFile("WJetsToLNu_HT_MC2018.root");
-  f[4] = new TFile("ZJetsToNuNu_HT_MC2018.root");
-  f[5] = new TFile("Rare_MC2018.root");
+  // f[0] = new TFile("Histos_WZ/b-veto/ST__MC2018.root");
+  // f[1] = new TFile("Histos_WZ/b-veto/QCD_HT_MC2018.root");
+  // f[2] = new TFile("Histos_WZ/b-veto/TTJets_MC2018.root");
+  // f[3] = new TFile("Histos_WZ/b-veto/WJetsToLNu_HT_MC2018.root");
+  // f[4] = new TFile("Histos_WZ/b-veto/ZJetsToNuNu_HT_MC2018.root");
+  // f[5] = new TFile("Histos_WZ/b-veto/Rare_MC2018.root");
+  // f[6] = new TFile("Histos_WZ/b-veto/TChiWZ_600_100_MC2018.root");
+  // f[7] = new TFile("Histos_WZ/b-veto/TChiWZ_800_100_MC2018.root");
+  // f[8] = new TFile("Histos_WZ/b-veto/TChiWZ_1000_100_MC2018.root");
 
   // Ful run 2
-  // f[0] = new TFile("ST__MCRun2.root");
-  // f[1] = new TFile("QCD_HT_MCRun2.root");
-  // f[2] = new TFile("TTJets_MCRun2.root");
-  // f[3] = new TFile("WJetsToLNu_HT_MCRun2.root");
-  // f[4] = new TFile("ZJetsToNuNu_HT_MCRun2.root");
-  //  f[5] = new TFile("Rare_MCRun2.root");  
+  f[0] = new TFile("ST__MCRun2.root");
+  f[1] = new TFile("QCD_HT_MCRun2.root");
+  f[2] = new TFile("TTJets_MCRun2.root");
+  f[3] = new TFile("WJetsToLNu_HT_MCRun2.root");
+  f[4] = new TFile("ZJetsToNuNu_HT_MCRun2.root");
+  f[5] = new TFile("Rare_MCRun2.root");  
 
-  // f[6] = new TFile("Histos_WH_info7/TChiWH_600_100_MC2018.root");
-  // f[7] = new TFile("Histos_WH_info7/TChiWH_800_100_MC2018.root");
-  // f[8] = new TFile("Histos_WH_info7/TChiWH_1000_100_MC2018.root");
   f[6] = new TFile("TChiWH_600_100_MC2018.root");
   f[7] = new TFile("TChiWH_800_100_MC2018.root");
   f[8] = new TFile("TChiWH_1000_100_MC2018.root");
@@ -90,9 +90,9 @@ void plotKinStack_KH(){
   TH1D *h_Sig1=(TH1D*)f[7]->FindObjectAny(varName);
   TH1D *h_Sig2=(TH1D*)f[8]->FindObjectAny(varName);
    
-  TH1D *h_sig=(TH1D*)f[6]->FindObjectAny(varName2);
-  TH1D *h_sig1=(TH1D*)f[7]->FindObjectAny(varName2);
-  TH1D *h_sig2=(TH1D*)f[8]->FindObjectAny(varName2);
+  TH1D *h_sig=(TH1D*)f[5]->FindObjectAny(varName2);
+  TH1D *h_sig1=(TH1D*)f[6]->FindObjectAny(varName2);
+  TH1D *h_sig2=(TH1D*)f[7]->FindObjectAny(varName2);
   
   h_Sig->Add(h_sig);
   h_Sig1->Add(h_sig1);

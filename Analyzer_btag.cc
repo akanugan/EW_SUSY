@@ -104,6 +104,11 @@ void SignalReg::EventLoop(const char *data,const char *inputFileList) {
   else if(dataRun<0) cout<<"Processing it as "<<abs(dataRun)<<" MC"<<endl;
   else cout<<"No specific data/MC year"<<endl;
 
+  double WH_cnt, HW_cnt =0;
+  double Zcand_SR_cnt, Hcand_SR_cnt = 0; 
+  double wz_cnt, wh_cnt =0;
+  double doublebfarfrombjet, doublebclosetobjet =0;
+
   for (Long64_t jentry=0; jentry<nentries;jentry++) {
     
     // ==============print number of events done == == == == == == == =
@@ -386,9 +391,27 @@ void SignalReg::EventLoop(const char *data,const char *inputFileList) {
     if(new_WZWH_SR){
       vector<bool> jetsAK8hasb;
       for(int i=0;i<JetsAK8->size();i++){
+	if((*JetsAK8)[i].Pt() > 200 && abs((*JetsAK8)[i].Eta()) < 2.0 &&
+	   ((*JetsAK8_softDropMass)[i] > massLowH) &&
+	   ((*JetsAK8_softDropMass)[i] < massHighH) &&
+	   ((*JetsAK8_deepDoubleBDiscriminatorH)[i] > deepbbscore) ) {
+	  
+	  for(int b=0;b<bjets.size();b++){
+	    h_dRbjet2bAk8->Fill(abs(bjets[b].DeltaR((*JetsAK8)[i])),wt);
+	    if(bjets[b].DeltaR((*JetsAK8)[i]) > 0.8){
+	      doublebfarfrombjet +=1;
+	    }
+	    else{
+	      doublebclosetobjet +=1;}
+	  }
+	}
+      }
+
+      for(int i=0;i<JetsAK8->size();i++){
 	bool foundbInAK8 = 0;
 	for(int b=0;b<bjets.size();b++){
-	  if(bjets[b].DeltaR((*JetsAK8)[i]) < 0.8){
+	  if( (*JetsAK8)[i].Pt() > 200 && abs((*JetsAK8)[i].Eta()) < 2.0 &&
+	      bjets[b].DeltaR((*JetsAK8)[i]) < 1.2 ){
 	    foundbInAK8 = 1;
 	    break;
 	  }
@@ -396,21 +419,33 @@ void SignalReg::EventLoop(const char *data,const char *inputFileList) {
 	jetsAK8hasb.push_back(foundbInAK8);    
       }// AK8 loop for b content
 
-      bool ZorHcand = false;
+      bool Zcand = false;
+      bool Hcand = false;
       bool Wcand = false;
       for(int i=0;i<JetsAK8->size();i++){
 	if((*JetsAK8)[i].Pt() > 200 && abs((*JetsAK8)[i].Eta()) < 2.0){
-	  if(jetsAK8hasb[i]){ //FOR Z OR H CAND.
-	
+	  
+	  if(jetsAK8hasb[i]){ //FOR Z CAND.
+	    if(
+	       ((*JetsAK8_softDropMass)[i] > massLowZ) &&
+	       ((*JetsAK8_softDropMass)[i] < massHighZ) &&
+	       ((*JetsAK8_deepDoubleBDiscriminatorH)[i] > deepbbscore) ) { 
+	      Zcand = true;
+	      Zcand_SR_cnt +=1;
+	    }
+	  }
+
+	  if(jetsAK8hasb[i]){ //FOR H CAND.
 	    if(
 	       ((*JetsAK8_softDropMass)[i] > massLowH) &&
 	       ((*JetsAK8_softDropMass)[i] < massHighH) &&
 	       ((*JetsAK8_deepDoubleBDiscriminatorH)[i] > deepbbscore) ) { 
-	      ZorHcand = true;
+	      Hcand = true;
+	      Hcand_SR_cnt +=1;
 	    }
 	  }
+	
 	  else{ //W cand
-	    
 	    if(
 	       ((*JetsAK8_softDropMass)[i] > massLowW) &&                                   	   
 	       ((*JetsAK8_softDropMass)[i] < massHighW) &&                                                
@@ -420,16 +455,27 @@ void SignalReg::EventLoop(const char *data,const char *inputFileList) {
 	  }
 	}
       }
-      if (ZorHcand && Wcand){
+      
+      if (Zcand && Wcand){
+	wz_cnt += 1;
+	h_wzMET->Fill(MET,wt);
+	h_wzMETvBin->Fill(MET,wt);
+	h_wzMT->Fill(mt,wt);
+	h_wzMT2J->Fill(mt2j,wt);
+      }
+
+      if (Hcand && Wcand){
+	wh_cnt += 1;
 	h_whMET->Fill(MET,wt);
-	h_METvBin->Fill(MET,wt);
+	h_whMETvBin->Fill(MET,wt);
 	h_whMT->Fill(mt,wt);
 	h_whMT2J->Fill(mt2j,wt);
       }
+
     }
     
           
-    bool WH_SR = true;
+    bool WH_SR = false;
     if(WH_SR){
       //-----------    W H Signal region
       if(
@@ -443,6 +489,7 @@ void SignalReg::EventLoop(const char *data,const char *inputFileList) {
 	 //	   ((*JetsAK8_doubleBDiscriminator)[1] >bbscore) ) {
 	 ((*JetsAK8_deepDoubleBDiscriminatorH)[1] > deepbbscore) ) {      
 	  
+	WH_cnt += 1;
 	h_WHMET->Fill(MET,wt);
 	h_WHMT->Fill(mt,wt);
 	h_WHMT2J->Fill(mt2j,wt);
@@ -475,6 +522,7 @@ void SignalReg::EventLoop(const char *data,const char *inputFileList) {
 	 //	   ((*JetsAK8_doubleBDiscriminator)[0] > bbscore) ) {
 	 ((*JetsAK8_deepDoubleBDiscriminatorH)[0] > deepbbscore) ){
 	  
+	HW_cnt += 1;
 	h_HWMET->Fill(MET,wt);
 	h_HWMT->Fill(mt,wt);
 	h_HWMT2J->Fill(mt2j,wt);
@@ -703,12 +751,17 @@ void SignalReg::EventLoop(const char *data,const char *inputFileList) {
     h_cutflow->Fill("NEvtsNoWtLeft",1);
     //    cout<<" ____ End evt loop ----------   "<<endl;
   } // loop over entries
+  cout << "WH count + HW count:" << WH_cnt <<"+" <<HW_cnt <<"=" << WH_cnt+HW_cnt <<endl;
+  cout <<"Z cand in low mass SR(75-105): "<< Zcand_SR_cnt <<endl<< "H cand in high mass SR(105-135): "<< Hcand_SR_cnt <<endl;
+  cout<< "wz count " << wz_cnt <<endl<<"wh count " << wh_cnt <<endl;
+  cout <<"no. of 2b tag AK8 close to bjets: "<< doublebclosetobjet <<endl<< "no. of 2b tag AK8 far from bjets: " << doublebfarfrombjet <<endl; 
   cout<<"No. of entries survived: "<<nEvtSurv<<endl;
 }
 
 Double_t SignalReg::find_bjets_mtbmin(){
   Double_t mtbmin = 0, mct = 0; //mCT is the contransverse mass variable 
   //vector<TLorentzVector> bjets;
+  TLorentzVector b1,b2;
   bjets.resize(0);
   for(int i=0; i < Jets_bJetTagDeepCSVprobb -> size(); i++){
     if((*Jets)[i].Pt() < 30 || abs((*Jets)[i].Eta()) > 2.4) continue;
@@ -718,38 +771,49 @@ Double_t SignalReg::find_bjets_mtbmin(){
   sortTLorVec(&bjets); // Sort b jets by decreasing mass
   // cout<<"Bjets Pt: "<< (*Jets)[0].Pt() <<"\t"<< (*Jets)[1].Pt() <<"\t"<< (*Jets)[2].Pt() <<endl;
     
-  if(bjets.size()==1){
-    mtbmin = sqrt(2*(*Jets)[0].Pt()*MET*(1-cos(DeltaPhi(METPhi,(*Jets)[0].Phi()))));
+  if(bjets.size() == 1){
+    b1 = bjets[0];
+    mtbmin = sqrt(2*b1.Pt()*MET*(1-cos(DeltaPhi(METPhi,b1.Phi()))));
+    //mtbmin = sqrt(2*(*Jets)[0].Pt()*MET*(1-cos(DeltaPhi(METPhi,(*Jets)[0].Phi()))));
     return mtbmin;
-    //h_mtbmin->Fill(mtbmin,wt);
   }
   else if(bjets.size() >= 2){ 
-    mtbmin = min( sqrt(2*(*Jets)[0].Pt()*MET*(1-cos(DeltaPhi(METPhi,(*Jets)[0].Phi())))),
-		  sqrt(2*(*Jets)[1].Pt()*MET*(1-cos(DeltaPhi(METPhi,(*Jets)[1].Phi())))) );
-    mct =  sqrt(2*(*Jets)[0].Pt()*(*Jets)[1].Pt()*(1+cos(DeltaPhi((*Jets)[0].Phi(),(*Jets)[1].Phi()))));
+    b1 = bjets[0];
+    b2 = bjets[1];
+    mtbmin = min( sqrt(2*b1.Pt()*MET*(1-cos(DeltaPhi(METPhi,b1.Phi())))),
+		  sqrt(2*b2.Pt()*MET*(1-cos(DeltaPhi(METPhi,b2.Phi())))));
+    mct = sqrt(2*b1.Pt()*b2.Pt()*(1 + cos(b1.DeltaPhi(b2))));
+    //    mtbmin = min( sqrt(2*(*Jets)[0].Pt()*MET*(1-cos(DeltaPhi(METPhi,(*Jets)[0].Phi())))),
+    //		  sqrt(2*(*Jets)[1].Pt()*MET*(1-cos(DeltaPhi(METPhi,(*Jets)[1].Phi())))) );
+    //mct =  sqrt(2*(*Jets)[0].Pt()*(*Jets)[1].Pt()*(1+cos(DeltaPhi((*Jets)[0].Phi(),(*Jets)[1].Phi()))));
     return mtbmin;
-    //   h_mtbmin->Fill(mtbmin,wt);
-    //h_mct->Fill(mct,wt);
   }
 }
-
-
 void SignalReg::print(Long64_t jentry){
   //cout<<endl;
   TLorentzVector v1,photo;
   cout<<"------------------------------------------------------------"<<endl;
   cout<<"MomMass:"<<SusyMotherMass<<" Kid Mass:"<<SusyLSPMass<<endl;
   for(int i=0;i<GenParticles->size();i++){  
-    cout<<EvtNum<<" "<<jentry<<" "<<GenParticles->size()<<" "<<i<<" PdgId:"<<(*GenParticles_PdgId)[i]<<" parentId:"<<(*GenParticles_ParentId)[i]<<" parentIndx:"<<(*GenParticles_ParentIdx)[i]<<" Status:"<<(*GenParticles_Status)[i]<<"\tPx :"<<(*GenParticles)[i].Px()<<" Py :"<<(*GenParticles)[i].Py()<<" Pz :"<<(*GenParticles)[i].Pz()<<" E: "<<(*GenParticles)[i].Energy()<<" M:"<<(*GenParticles)[i].M()<<endl;
-    cout<<EvtNum<<" "<<jentry<<" "<<GenParticles->size()<<" "<<i<<" PdgId:"<<(*GenParticles_PdgId)[i]<<" parentId:"<<(*GenParticles_ParentId)[i]<<" parentIndx:"<<(*GenParticles_ParentIdx)[i]<<" Status:"<<(*GenParticles_Status)[i]<</*"\tPx:"<<(*GenParticles)[i].Px()<<" Py:"<<(*GenParticles)[i].Py()<<" Pz:"<<(*GenParticles)[i].Pz()<<*/"\tPt:"<<(*GenParticles)[i].Pt()<<" Eta:"<<(*GenParticles)[i].Eta()<<" Phi:"<<(*GenParticles)[i].Phi()<<" E:"<<(*GenParticles)[i].Energy()<<endl;
-    
+    //    cout<<EvtNum<<" "<<jentry<<" "<<GenParticles->size()<<" "<<i<<" PdgId:"<<(*GenParticles_PdgId)[i]<<" parentId:"<<(*GenParticles_ParentId)[i]<<" parentIndx:"<<(*GenParticles_ParentIdx)[i]<<" Status:"<<(*GenParticles_Status)[i]<<"\tPx :"<<(*GenParticles)[i].Px()<<" Py :"<<(*GenParticles)[i].Py()<<" Pz :"<<(*GenParticles)[i].Pz()<<" E: "<<(*GenParticles)[i].Energy()<<" M:"<<(*GenParticles)[i].M()<<endl;
+    cout<<EvtNum<<" "<<jentry<<" "<<GenParticles->size()<<" "<<i<<" PdgId:"<<(*GenParticles_PdgId)[i]<<" parentId:"<<(*GenParticles_ParentId)[i]<<" parentIndx:"<<(*GenParticles_ParentIdx)[i]<<" Status:"<<(*GenParticles_Status)[i]<</*"\tPx:"<<(*GenParticles)[i].Px()<<" Py:"<<(*GenParticles)[i].Py()<<" Pz:"<<(*GenParticles)[i].Pz()<<*/"\tPt:"<<(*GenParticles)[i].Pt()<<" Eta:"<<(*GenParticles)[i].Eta()<<" Phi:"<<(*GenParticles)[i].Phi()<<" M:"<<(*GenParticles)[i].M()<<endl;
   }
-  for(int i=0;i<Photons->size();i++){
-    double dR=0;//DeltaR( bestPhoton.Eta(),bestPhoton.Phi(),(*Photons)[i].Eta(),(*Photons)[i].Phi() );
-    //cout<<jentry<<" i:"<<i<<" phoSize:"<<Photons->size()<<" Pt:"<<bestPhoton.Pt()<<" eta:"<<bestPhoton.Eta()<<" phi:"<<bestPhoton.Phi()<<" otherP:"<<(*Photons)[i].Pt()<<" eta:"<<(*Photons)[i].Eta()<<" phi:"<<(*Photons)[i].Phi()<<" dR:"<<dR<<endl;
+  cout<<endl;
+  for(int i=0;i<GenJets->size();i++){
+    cout<< "Size of GenJets: "<< GenJets->size() << endl;
+    cout<<"GenJetPt:"<<(*GenJets)[i].Pt()<<" GenJetEta:"<<(*GenJets)[i].Eta()<<" GenJetPhi:"<<(*GenJets)[i].Phi()<<endl;
   }
+  cout<<endl;
   for(int i=0;i<Jets->size();i++){
+    cout<< "Size of Jets: "<< Jets->size() << endl;
     cout<<"JetPt:"<<(*Jets)[i].Pt()<<" JetEta:"<<(*Jets)[i].Eta()<<" JetPhi:"<<(*Jets)[i].Phi()<<endl;
   }
-  cout<<"MHTPhi:"<<MHTPhi<<" DPhi1:"<<DeltaPhi1<<" DeltaPhi2:"<<DeltaPhi2<<" DeltaPhi3:"<<DeltaPhi3<<" DeltaPhi4:"<<DeltaPhi4<<endl;
+  cout<<endl;
+  cout<<"MET:"<<MET<<" METPhi:"<<METPhi<<" MHTPhi:"<<MHTPhi<<" DPhi1:"<<DeltaPhi1<<" DeltaPhi2:"<<DeltaPhi2<<" DeltaPhi3:"<<DeltaPhi3<<" DeltaPhi4:"<<DeltaPhi4<<endl;
+  cout<<endl;
+  for(int i=0;i<JetsAK8->size();i++){
+    cout<< "Size of AK8 Jets: "<< JetsAK8->size() << endl;
+    cout<<"AK8 pT:"<<(*JetsAK8)[i].Pt()<<" eta:"<<(*JetsAK8)[i].Eta()<<" phi:"<<(*JetsAK8)[i].Phi()<<" softDropM:"<<(*JetsAK8_softDropMass)[i]<<" tau21:"<<(*JetsAK8_NsubjettinessTau2)[i]/(*JetsAK8_NsubjettinessTau1)[i]<<" DeepDoubleBDiscr:"<<(*JetsAK8_deepDoubleBDiscriminatorH)[i]<<" WDiscr:"<<(*JetsAK8_wDiscriminatorDeep)[i]<<" WdiscrDecorr:"<<(*JetsAK8_wDiscriminatorDeepDecorrel)[i]<<endl;
+  }
 }
+

@@ -97,8 +97,8 @@ void SignalReg::EventLoop(const char *data,const char *inputFileList) {
     TTJets_nonHTcut = true;
   }
 
-  // lumiInfb = 137.0;
-  // cout<<"!!!! changing intLumi to 137/fb, although you should have used 2018 intLumi...."<<endl;
+  lumiInfb = 137.0;
+  cout<<"!!!! changing intLumi to 137/fb, although you should have used 2018 intLumi...."<<endl;
 
   if(dataRun>0) cout<<"Processing it as "<<dataRun<<" data"<<endl;
   else if(dataRun<0) cout<<"Processing it as "<<abs(dataRun)<<" MC"<<endl;
@@ -146,8 +146,12 @@ void SignalReg::EventLoop(const char *data,const char *inputFileList) {
     double mt = 0, mt2j = 0;
     mtbmin = find_bjets_mtbmin();           // loops over b-jets and finds mtmin
 
-    if(JetsAK8->size() > 0) mt = sqrt(2*(*JetsAK8)[0].Pt()*MET*(1-cos(DeltaPhi(METPhi,(*JetsAK8)[0].Phi()))));
-    if(JetsAK8->size() >= 2) mt2j = sqrt(2*(*JetsAK8)[1].Pt()*MET*(1-cos(DeltaPhi(METPhi,(*JetsAK8)[1].Phi()))));
+    if(JetsAK8->size() > 0 && (*JetsAK8)[0].Pt() > 200 && abs((*JetsAK8)[0].Eta()) < 2 ) {
+      mt = sqrt(2*(*JetsAK8)[0].Pt()*MET*(1-cos(DeltaPhi(METPhi,(*JetsAK8)[0].Phi()))));
+    }
+    if(JetsAK8->size() >= 2 && (*JetsAK8)[1].Pt() > 200 && abs((*JetsAK8)[1].Eta()) < 2 ){ 
+      mt2j = sqrt(2*(*JetsAK8)[1].Pt()*MET*(1-cos(DeltaPhi(METPhi,(*JetsAK8)[1].Phi()))));
+    }
     
     if (TTJets_nonHTcut){
       if (madHT > 600) continue;  //madHT <= 600 for non HT
@@ -392,11 +396,11 @@ void SignalReg::EventLoop(const char *data,const char *inputFileList) {
       vector<bool> jetsAK8hasb;
       for(int i=0;i<JetsAK8->size();i++){
 	if((*JetsAK8)[i].Pt() > 200 && abs((*JetsAK8)[i].Eta()) < 2.0 &&
-	   ((*JetsAK8_softDropMass)[i] > massLowH) &&
-	   ((*JetsAK8_softDropMass)[i] < massHighH) &&
+	   ((*JetsAK8_softDropMass)[i] > massLowZ) &&
+	   ((*JetsAK8_softDropMass)[i] < massHighZ) &&
 	   ((*JetsAK8_deepDoubleBDiscriminatorH)[i] > deepbbscore) ) {
 	  
-	  for(int b=0;b<bjets.size();b++){
+	  for(int b=0; b<bjets.size(); b++){
 	    h_dRbjet2bAk8->Fill(abs(bjets[b].DeltaR((*JetsAK8)[i])),wt);
 	    if(bjets[b].DeltaR((*JetsAK8)[i]) > 0.8){
 	      doublebfarfrombjet +=1;
@@ -411,7 +415,7 @@ void SignalReg::EventLoop(const char *data,const char *inputFileList) {
 	bool foundbInAK8 = 0;
 	for(int b=0;b<bjets.size();b++){
 	  if( (*JetsAK8)[i].Pt() > 200 && abs((*JetsAK8)[i].Eta()) < 2.0 &&
-	      bjets[b].DeltaR((*JetsAK8)[i]) < 1.2 ){
+	      bjets[b].DeltaR((*JetsAK8)[i]) < 0.8 ){  // found that 0.8 is optimized here
 	    foundbInAK8 = 1;
 	    break;
 	  }

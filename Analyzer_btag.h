@@ -33,8 +33,8 @@ class SignalReg : public NtupleVariables{
   double deepCSVvalue = 0;
   double deepAK8Wscore = 0; // deepAK8W score
   double massLowW = 65., massHighW = 105.; //65-90, 55-100
-  double massLowZ = 75., massHighZ = 105.; //65-90, 55-100
-  double massLowH = 105., massHighH = 135.;
+  double massLowZ = 65., massHighZ = 105.; //65-90, 55-100
+  double massLowH = 85., massHighH = 135.;
   double bbscore = 0.3; //  double b score
   double deepbbscore = 0.7; // deep double b score
 

@@ -139,10 +139,10 @@ void SignalReg::EventLoop(const char *data,const char *inputFileList) {
     //   Calc. mtbmin, mt and mt2j
     Double_t mtbmin = -99999. , mct = -99999. ; //mCT is the contransverse mass variable 
     double mt = 0, mt2j = 0;
-    mtbmin = find_bjets_mtbmin();           // loops over b-jets and finds mtmin
+    //    mtbmin = find_bjets_mtbmin();           // loops over b-jets and finds mtmin
 
     // if(JetsAK8->size() > 0) mt = sqrt(2*(*JetsAK8)[0].Pt()*MET*(1-cos(DeltaPhi(METPhi,(*JetsAK8)[0].Phi()))));
-     if(JetsAK8->size() > 0 && (*JetsAK8)[0].Pt() > 200 && abs((*JetsAK8)[0].Eta()) < 2 ) mt = sqrt(2*(*JetsAK8)[0].Pt()*MET*(1-cos(DeltaPhi(METPhi,(*JetsAK8)[0].Phi()))));
+    if(JetsAK8->size() > 0 && (*JetsAK8)[0].Pt() > 200 && abs((*JetsAK8)[0].Eta()) < 2 ) mt = sqrt(2*(*JetsAK8)[0].Pt()*MET*(1-cos(DeltaPhi(METPhi,(*JetsAK8)[0].Phi()))));
     if(JetsAK8->size()>=2) mt2j = sqrt(2*(*JetsAK8)[1].Pt()*MET*(1-cos(DeltaPhi(METPhi,(*JetsAK8)[1].Phi()))));
     
     if (TTJets_nonHTcut){
@@ -196,10 +196,10 @@ void SignalReg::EventLoop(const char *data,const char *inputFileList) {
 
     if(Jets->size() > 2 && (*Jets)[2].Pt() > 30 && abs((*Jets)[2].Eta()) < 6.0)
       dphi3 = (abs(DeltaPhi(METPhi,(*Jets)[2].Phi())));
-
+    
     if(Jets->size() > 3 && (*Jets)[3].Pt() > 30 && abs((*Jets)[3].Eta()) < 6.0)
       dphi4 = (abs(DeltaPhi(METPhi,(*Jets)[3].Phi())));
-
+    
     //----Photon veto
     int nPhotons=0;
     for(int i=0;i<Photons->size();i++){

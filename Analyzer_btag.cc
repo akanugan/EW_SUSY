@@ -86,9 +86,6 @@ void SignalReg::EventLoop(const char *data,const char *inputFileList) {
     lumiInfb = 137.0;
     deepCSVvalue = 0.4184;
     deepAK8Wscore = 0.918;
-    //   if(s_data.Contains("TChiWZ_1000")){ xsec = 1.34352e-3; numEvents = 28771;}
-    //   else if(s_data.Contains("TChiWZ_800")){ xsec = 4.75843e-3; numEvents = 34036;}
-    //   cout<<"Assigning xsec as: "<<xsec<<endl;
   }
     
   bool TTJets_nonHTcut = false;
@@ -424,41 +421,115 @@ void SignalReg::EventLoop(const char *data,const char *inputFileList) {
       }// AK8 loop for b content
 
       bool Zcand = false;
+      bool Zcand_antitag = false;
+      bool Zcand_SB = false;
+      bool Zcand_SB_antitag = false;
       bool Hcand = false;
+      bool Hcand_antitag = false;
+      bool Hcand_SB = false;
+      bool Hcand_SB_antitag = false;
       bool Wcand = false;
+      double bound1 = 50.0;
+      double bound2 = 200.0;
+      double bound3 = 250.0;
+      
       for(int i=0;i<JetsAK8->size();i++){
 	if((*JetsAK8)[i].Pt() > 200 && abs((*JetsAK8)[i].Eta()) < 2.0){
 	  
 	  if(jetsAK8hasb[i]){ //FOR Z CAND.
 	    if(
 	       ((*JetsAK8_softDropMass)[i] > massLowZ) &&
-	       ((*JetsAK8_softDropMass)[i] < massHighZ) &&
-	       ((*JetsAK8_deepDoubleBDiscriminatorH)[i] > deepbbscore) ) { 
-	      Zcand = true;
-	      Zcand_SR_cnt +=1;
+	       ((*JetsAK8_softDropMass)[i] < massHighZ)) {
+	      if( ((*JetsAK8_deepDoubleBDiscriminatorH)[i] > deepbbscore) ) { 
+		Zcand = true;
+		Zcand_SR_cnt +=1;
+	      }
+	      else{
+		Zcand_antitag = true;
+	      }
 	    }
 	  }
+	  
+	  //****
+	 
+	  if(jetsAK8hasb[i]){ //FOR Z CAND. SB
+	    if(
+	       ((*JetsAK8_softDropMass)[i] > bound1) && ((*JetsAK8_softDropMass)[i] < massLowZ) ||
+	       (((*JetsAK8_softDropMass)[i] > bound2) && ((*JetsAK8_softDropMass)[i] < bound3)) ){
+	      if( ((*JetsAK8_deepDoubleBDiscriminatorH)[i] > deepbbscore) ) { 
+		Zcand_SB = true;
+	      }
+	      else{
+		Zcand_SB_antitag = true;
+	      }
+	    }
+	  }
+
+	  //*****
 
 	  if(jetsAK8hasb[i]){ //FOR H CAND.
 	    if(
 	       ((*JetsAK8_softDropMass)[i] > massLowH) &&
-	       ((*JetsAK8_softDropMass)[i] < massHighH) &&
-	       ((*JetsAK8_deepDoubleBDiscriminatorH)[i] > deepbbscore) ) { 
-	      Hcand = true;
-	      Hcand_SR_cnt +=1;
+	       ((*JetsAK8_softDropMass)[i] < massHighH) ) {
+	      if( ((*JetsAK8_deepDoubleBDiscriminatorH)[i] > deepbbscore) ) { 
+		Hcand = true;
+		Hcand_SR_cnt +=1;
+	      }
+	      else{
+		Hcand_antitag = true;
+	      }
 	    }
 	  }
-	
-	  else{ //W cand
+
+	  //*****
+
+	  if(jetsAK8hasb[i]){ //FOR H CAND. SB
+	    if(
+	       ((*JetsAK8_softDropMass)[i] > bound1) && ((*JetsAK8_softDropMass)[i] < massLowH) ||
+	       (((*JetsAK8_softDropMass)[i] > bound2) && ((*JetsAK8_softDropMass)[i] < bound3)) ){
+	      if( ((*JetsAK8_deepDoubleBDiscriminatorH)[i] > deepbbscore) ) { 
+		Hcand_SB = true;
+	      }
+	      else{
+		Hcand_SB_antitag = true;
+	      }
+	    }
+	  }
+	  
+	  //*****
+
+	  else{ // W cand.
 	    if(
 	       ((*JetsAK8_softDropMass)[i] > massLowW) &&                                   	   
 	       ((*JetsAK8_softDropMass)[i] < massHighW) &&                                                
-	       ((*JetsAK8_wDiscriminatorDeep)[i] > deepAK8Wscore) ){
+	       ((*JetsAK8_wDiscriminatorDeep)[i] > deepAK8Wscore) )
 	      Wcand = true;
+	  }
+	  
+	  if(jetsAK8hasb[i]){ //FOR 2b tagged AK8 mass
+	    if (Wcand){
+	      if(
+		 ((*JetsAK8_softDropMass)[i] > 20) &&
+		 ((*JetsAK8_softDropMass)[i] < 250) ){
+		if(
+		   ((*JetsAK8_deepDoubleBDiscriminatorH)[i] > deepbbscore) ){
+		  h_wzAK82bMass_RegA->Fill((*JetsAK8_softDropMass)[i],wt); 
+		}
+		else{
+		  h_wzAK82bMass_RegC->Fill((*JetsAK8_softDropMass)[i],wt);
+		}
+	      }
+	      // if(
+	      // 	 ((*JetsAK8_softDropMass)[i] > 30) &&
+	      // 	 ((*JetsAK8_softDropMass)[i] < 250) &&
+	      // 	 ((*JetsAK8_deepDoubleBDiscriminatorH)[i] > deepbbscore) ) {
+	      //  h_whAK82bMass_RegA->Fill((*JetsAK8_softDropMass)[i],wt); 	
+	      // }
 	    }
 	  }
-	}
-      }
+	} //jet pt and eta
+      } // loop ak8 jets
+      
       
       if (Zcand && Wcand){
 	wz_cnt += 1;
@@ -467,6 +538,18 @@ void SignalReg::EventLoop(const char *data,const char *inputFileList) {
 	h_wzMT->Fill(mt,wt);
 	h_wzMT2J->Fill(mt2j,wt);
       }
+      
+      if (Zcand_antitag && Wcand){
+	h_wzMET_RegC->Fill(MET,wt);
+      }
+
+      if (Zcand_SB && Wcand){
+	h_wzMET_RegB->Fill(MET,wt);
+      }
+      
+      if (Zcand_SB_antitag && Wcand){
+	h_wzMET_RegD->Fill(MET,wt);
+      }
 
       if (Hcand && Wcand){
 	wh_cnt += 1;
@@ -474,6 +557,18 @@ void SignalReg::EventLoop(const char *data,const char *inputFileList) {
 	h_whMETvBin->Fill(MET,wt);
 	h_whMT->Fill(mt,wt);
 	h_whMT2J->Fill(mt2j,wt);
+      }
+
+      if (Hcand_antitag && Wcand){
+	h_whMET_RegC->Fill(MET,wt);
+      }
+
+      if (Hcand_SB && Wcand){
+	h_whMET_RegB->Fill(MET,wt);
+      }
+      
+      if (Hcand_SB_antitag && Wcand){
+	h_whMET_RegD->Fill(MET,wt);
       }
 
     }

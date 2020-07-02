@@ -1,0 +1,8 @@
+*.root
+*.condor
+*.stderr
+*.stdout
+*~
+*.pdf
+*.txt
+*.png

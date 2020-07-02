@@ -1,4 +1,0 @@
-root://cmseos.fnal.gov//store/user/lpcsusyhad/SusyRA2Analysis2015/Skims/Run2ProductionV17/scan/tree_signal/tree_T2tt_200_50_MC2016_fast.root
-root://cmseos.fnal.gov//store/user/lpcsusyhad/SusyRA2Analysis2015/Skims/Run2ProductionV17/scan/tree_signal/tree_T2tt_300_150_MC2016_fast.root
-root://cmseos.fnal.gov//store/user/lpcsusyhad/SusyRA2Analysis2015/Skims/Run2ProductionV17/scan/tree_signal/tree_T2tt_500_325_MC2016_fast.root
-root://cmseos.fnal.gov//store/user/lpcsusyhad/SusyRA2Analysis2015/Skims/Run2ProductionV17/scan/tree_signal/tree_T2tt_650_350_MC2016_fast.root

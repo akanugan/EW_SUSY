@@ -86,9 +86,10 @@ void SignalReg::EventLoop(const char *data,const char *inputFileList) {
     lumiInfb = 137.0;
     deepCSVvalue = 0.4184;
     deepAK8Wscore = 0.918;
-    //   if(s_data.Contains("TChiWZ_1000")){ xsec = 1.34352e-3; numEvents = 28771;}
-    //   else if(s_data.Contains("TChiWZ_800")){ xsec = 4.75843e-3; numEvents = 34036;}
-    //   cout<<"Assigning xsec as: "<<xsec<<endl;
+  }
+
+  if(s_data.Contains("Rare")){    
+    lumiInfb = 137.0;
   }
     
   bool TTJets_nonHTcut = false;
@@ -97,8 +98,8 @@ void SignalReg::EventLoop(const char *data,const char *inputFileList) {
     TTJets_nonHTcut = true;
   }
 
-  lumiInfb = 137.0;
-  cout<<"!!!! changing intLumi to 137/fb, although you should have used 2018 intLumi...."<<endl;
+  //lumiInfb = 137.0;
+  //cout<<"!!!! changing intLumi to 137/fb, although you should have used 2018 intLumi...."<<endl;
 
   if(dataRun>0) cout<<"Processing it as "<<dataRun<<" data"<<endl;
   else if(dataRun<0) cout<<"Processing it as "<<abs(dataRun)<<" MC"<<endl;
@@ -108,9 +109,9 @@ void SignalReg::EventLoop(const char *data,const char *inputFileList) {
   double Zcand_SR_cnt, Hcand_SR_cnt = 0; 
   double wz_cnt, wh_cnt =0;
   double doublebfarfrombjet, doublebclosetobjet =0;
-
+ 
   for (Long64_t jentry=0; jentry<nentries;jentry++) {
-    
+ 
     // ==============print number of events done == == == == == == == =
     double progress = 10.0 * jentry / (1.0 * nentries);
     int k = int (progress);
@@ -132,7 +133,10 @@ void SignalReg::EventLoop(const char *data,const char *inputFileList) {
     //   Weight = xsec/numEvents;
     // }
     wt=Weight*1000.0*lumiInfb;
-
+    if(!isMC){
+      wt = 1;
+    }
+    
     h_cutflow->Fill("0",1);
     h_cutflow->Fill("Weighted",wt);
     //--------------
@@ -140,12 +144,12 @@ void SignalReg::EventLoop(const char *data,const char *inputFileList) {
 
     //#################### EWK Planned baseline cuts
     if(isFastSim) JetID = true;
-
     //   Calc. mtbmin, mt and mt2j
     Double_t mtbmin = -99999. , mct = -99999. ; //mCT is the contransverse mass variable 
     double mt = 0, mt2j = 0;
+    //cout << "************** Debug 1.5"<<endl;
     mtbmin = find_bjets_mtbmin();           // loops over b-jets and finds mtmin
-
+    //cout << "************** Debug 2"<<endl;
     if(JetsAK8->size() > 0 ) {
       mt = sqrt(2*(*Electrons)[0].Pt()*MET*(1-cos(DeltaPhi(METPhi,(*Electrons)[0].Phi()))));
     }
@@ -160,7 +164,8 @@ void SignalReg::EventLoop(const char *data,const char *inputFileList) {
     //for madHT stiching check in TTJets
     h_1l_MT->Fill(mt,wt); 
     h_HT->Fill(HT,wt);  
-    h_madHT->Fill(madHT,wt);      
+    h_MET->Fill(MET,wt);  
+    
 
     // Modified RA2b cuts
     if(NJets < 2                                                                //AK4 jets >=2
@@ -175,7 +180,7 @@ void SignalReg::EventLoop(const char *data,const char *inputFileList) {
        //|| isoPionTracks!=0)
        )
       continue; //Veto isolated tracks
-    
+
     //Boosted AK8 jet cuts
     if (JetsAK8->size() < 2                                                     // require >=2 AK8 jets
 	//	|| (*JetsAK8)[0].Pt() < 200 || (*JetsAK8)[1].Pt() < 200                  // AK8 jets pT >200
@@ -230,6 +235,7 @@ void SignalReg::EventLoop(const char *data,const char *inputFileList) {
     h_filters->Fill("JetID",JetID);
     h_filters->Fill("(MET/CaloMET<5.)",(MET/CaloMET < 5.));
 
+        
     if(!isFastSim){
       if(!(globalSuperTightHalo2016Filter==1 && HBHENoiseFilter==1 && HBHEIsoNoiseFilter==1 && eeBadScFilter==1 && EcalDeadCellTriggerPrimitiveFilter==1 && BadChargedCandidateFilter && BadPFMuonFilter && NVtx > 0 && JetID && (MET/CaloMET < 5.))) continue;
       h_cutflow->Fill("Filters",wt);
@@ -241,17 +247,23 @@ void SignalReg::EventLoop(const char *data,const char *inputFileList) {
       TString trgName;
       for(int i=0;i<TriggerPass->size();i++){
 	trgName = (*TriggerNames)[i];
+	//trgName = (*TriggerPass)[i];
 	if(!(trgName.Contains("MET"))) continue;
 	if((*TriggerPass)[i]==1 && (trgName.Contains("HLT_PFMET100_PFMHT100_IDTight_v") || trgName.Contains("HLT_PFMET110_PFMHT110_IDTight_v") ||
 				    trgName.Contains("HLT_PFMET120_PFMHT120_IDTight_v") || trgName.Contains("HLT_PFMET130_PFMHT130_IDTight_v") ||
-				    trgName.Contains("HLT_PFMET140_PFMHT140_IDTight_v") || trgName.Contains("HLT_PFMET90_PFMHT90_IDTight_v") || 
-				    trgName.Contains("HLT_PFMETNoMu100_PFMHTNoMu100_IDTight_v") || trgName.Contains("HLT_PFMETNoMu110_PFMHTNoMu110_IDTight_v") ||
-				    trgName.Contains("HLT_PFMETNoMu120_PFMHTNoMu120_IDTight_v") || trgName.Contains("HLT_PFMETNoMu130_PFMHTNoMu130_IDTight_v") || 
-				    trgName.Contains("HLT_PFMETNoMu140_PFMHTNoMu140_IDTight_v") ||  trgName.Contains("HLT_PFMETNoMu90_PFMHTNoMu90_IDTight_v"))) trgPass = true;
+				    trgName.Contains("HLT_PFMET140_PFMHT140_IDTight_v") || trgName.Contains("HLT_PFMET90_PFMHT90_IDTight_v"))){
+	  // trgName.Contains("HLT_PFMETNoMu100_PFMHTNoMu100_IDTight_v") || trgName.Contains("HLT_PFMETNoMu110_PFMHTNoMu110_IDTight_v") ||
+	  // trgName.Contains("HLT_PFMETNoMu120_PFMHTNoMu120_IDTight_v") || trgName.Contains("HLT_PFMETNoMu130_PFMHTNoMu130_IDTight_v") || 
+	  // trgName.Contains("HLT_PFMETNoMu140_PFMHTNoMu140_IDTight_v") ||  trgName.Contains("HLT_PFMETNoMu90_PFMHTNoMu90_IDTight_v")))
+	  
+	  trgPass = true;
+
+	}
+	if(trgPass) h_cutflow->Fill("PassedTrigger",wt);
+	else continue;
       }
-      if(trgPass) h_cutflow->Fill("PassedTrigger",wt);
-      else continue;
     }
+    
     bool HEMaffected = false;
     if(dataRun==2018 && RunNum >=319077){
       for(int i=0;i<Jets->size();i++){
@@ -262,7 +274,7 @@ void SignalReg::EventLoop(const char *data,const char *inputFileList) {
       }
     }
     //--------------------------end of triggers
-
+    
     if(HEMaffected){
       h_cutflow->Fill("HEMaffected",wt);
       continue;
@@ -449,8 +461,7 @@ void SignalReg::EventLoop(const char *data,const char *inputFileList) {
       
       for(int i=0;i<JetsAK8->size();i++){
 	if((*JetsAK8)[i].Pt() > 200 && abs((*JetsAK8)[i].Eta()) < 2.0){
-	  
-
+	 
 	  if(jetsAK8hasb[i]){
 	    h_2btaggedAK8Mass->Fill((*JetsAK8_softDropMass)[i],wt);
 	    h_2btaggedAK8ddBscore->Fill((*JetsAK8_deepDoubleBDiscriminatorH)[i],wt);
@@ -490,7 +501,7 @@ void SignalReg::EventLoop(const char *data,const char *inputFileList) {
 	  }
 
 	  //*****
-
+	  
 	  if(jetsAK8hasb[i]){ //FOR H CAND.
 	    if(
 	       ((*JetsAK8_softDropMass)[i] > massLowH) &&
@@ -557,13 +568,18 @@ void SignalReg::EventLoop(const char *data,const char *inputFileList) {
       
       if (Zcand && Wcand){
 	wz_cnt += 1;
+	cout <<"in reg A1" <<endl;
+	h_wzmtbmin->Fill(mtbmin,wt);
 	h_wzMET->Fill(MET,wt);
 	h_wzMETvBin->Fill(MET,wt);
 	h_wzMT->Fill(mt,wt);
 	h_wzMT2J->Fill(mt2j,wt);
+	h_madHT->Fill(madHT,wt);      
       }
       
       if (Zcand_antitag && Wcand){
+	cout <<"in reg C1" <<endl;
+	h_antiwzmtbmin->Fill(mtbmin,wt);
 	h_wzMET_RegC->Fill(MET,wt);
       }
 
@@ -577,6 +593,8 @@ void SignalReg::EventLoop(const char *data,const char *inputFileList) {
 
       if (Hcand && Wcand){
 	wh_cnt += 1;
+	cout <<"in reg A2" <<endl;
+	h_whmtbmin->Fill(mtbmin,wt);
 	h_whMET->Fill(MET,wt);
 	h_whMETvBin->Fill(MET,wt);
 	h_whMT->Fill(mt,wt);
@@ -584,6 +602,8 @@ void SignalReg::EventLoop(const char *data,const char *inputFileList) {
       }
 
       if (Hcand_antitag && Wcand){
+	cout <<"in reg C2" <<endl;
+	h_antiwhmtbmin->Fill(mtbmin,wt);
 	h_whMET_RegC->Fill(MET,wt);
       }
 

@@ -41,7 +41,7 @@ class SignalReg : public NtupleVariables{
   vector<TLorentzVector> bjets;
 
   TH1D *h_filters;
-  //  TH1D *h_MET;
+  TH1D *h_MET;
   //  TH1D *h_MHT;
   TH1D *h_HT;
   TH1D *h_madHT;
@@ -50,6 +50,11 @@ class SignalReg : public NtupleVariables{
   vector<double> whMETvbins={200,250,300,350,400,450,550,650,800,1200};
   TH1D *h_wzMETvBin;
   TH1D *h_whMETvBin;
+
+  TH1D *h_wzmtbmin;
+  TH1D *h_antiwzmtbmin;
+  TH1D *h_whmtbmin;
+  TH1D *h_antiwhmtbmin;
 
   /* TH1D *h_NJets; */
   /* TH1D *h_BTags; */
@@ -185,7 +190,7 @@ void SignalReg::BookHistogram(const char *outFileName) {
   h_cutflow = new TH1F("CutFlow","cut flow",25,0,25);
   h_filters = new TH1D("Filters","Filters: Bin1 : all nEvnts, other bins: filter pass/fail",10,0,10);
   
-  /* h_MET = new TH1D("MET","MET",200,0,2000); */
+  h_MET = new TH1D("MET","MET",200,0,2000); 
   /* h_MHT = new TH1D("MHT","MHT",200,0,2000); */
   h_HT = new TH1D("HT","HT",100,0,5000); 
   h_madHT = new TH1D("madHT","madHT",100,0,5000); 
@@ -343,7 +348,12 @@ void SignalReg::BookHistogram(const char *outFileName) {
   h_wzMET_RegC = new TH1D("wzMETvBin_RegC","MET variable bins",wzMETvbins.size()-1,&(wzMETvbins[0]));
   h_wzMET_RegD = new TH1D("wzMETvBin_RegD","MET variable bins",wzMETvbins.size()-1,&(wzMETvbins[0]));
 
-  // Mass SB
+  h_wzmtbmin = new TH1D("wzmtbmin","mtbmin ",100,0,1000);
+  h_antiwzmtbmin = new TH1D("antiwzmtbmin","mtbmin ",100,0,1000);
+  h_whmtbmin = new TH1D("whmtbmin","mtbmin ",100,0,1000);
+  h_antiwhmtbmin = new TH1D("antiwhmtbmin","mtbmin ",100,0,1000);
+  
+// Mass SB
   h_wzAK82bMass_RegA = new TH1D("wzAK82btaggedMassSB_RegA","2btagged AK8 Mass",60,0,300);
   h_wzAK82bMass_RegB = new TH1D("wzAK82btaggedMassSB_RegB","2btagged AK8 Mass",60,0,300);
   h_wzAK82bMass_RegC = new TH1D("wzAK82btaggedMassSB_RegC","2btagged AK8 Mass",60,0,300);

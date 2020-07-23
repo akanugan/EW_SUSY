@@ -34,7 +34,7 @@ class SignalReg : public NtupleVariables{
   double deepAK8Wscore = 0; // deepAK8W score
   double massLowW = 65., massHighW = 105.; //65-90, 55-100
   double massLowZ = 65., massHighZ = 105.; //65-90, 55-100
-  double massLowH = 85., massHighH = 135.;
+  double massLowH = 105., massHighH = 135.;
   double bbscore = 0.3; //  double b score
   double deepbbscore = 0.7; // deep double b score
 
@@ -120,6 +120,12 @@ class SignalReg : public NtupleVariables{
   TH1D *h_WHAK8J2Mass_RegA, *h_WHAK8J2Mass_RegB, *h_WHAK8J2Mass_RegC, *h_WHAK8J2Mass_RegD;
   TH1D *h_HWMET_RegA, *h_HWMET_RegB, *h_HWMET_RegC, *h_HWMET_RegD;
   TH1D *h_HWAK8J1Mass_RegA, *h_HWAK8J1Mass_RegB, *h_HWAK8J1Mass_RegC, *h_HWAK8J1Mass_RegD;  
+
+  //new
+  TH1D *h_whMET_RegB, *h_whMET_RegC, *h_whMET_RegD;
+  TH1D *h_whAK82bMass_RegA, *h_whAK82bMass_RegB, *h_whAK82bMass_RegC, *h_whAK82bMass_RegD;
+  TH1D *h_wzMET_RegB, *h_wzMET_RegC, *h_wzMET_RegD;
+  TH1D *h_wzAK82bMass_RegA, *h_wzAK82bMass_RegB, *h_wzAK82bMass_RegC, *h_wzAK82bMass_RegD;  
 
   // Mass SB
   TH1D *h_WHAK8J1MassSB, *h_WHAK8J1MassNo2bTag;
@@ -318,7 +324,24 @@ void SignalReg::BookHistogram(const char *outFileName) {
   h_HWAK8J1Mass_RegD = new TH1D("HWAK8J1Mass_RegD","HWAK8J1MassD",60,0,300);
   //
 
+  h_whMET_RegB = new TH1D("whMETvBin_RegB","MET variable bins",wzMETvbins.size()-1,&(wzMETvbins[0]));
+  h_whMET_RegC = new TH1D("whMETvBin_RegC","MET variable bins",wzMETvbins.size()-1,&(wzMETvbins[0]));
+  h_whMET_RegD = new TH1D("whMETvBin_RegD","MET variable bins",wzMETvbins.size()-1,&(wzMETvbins[0]));
+  h_wzMET_RegB = new TH1D("wzMETvBin_RegB","MET variable bins",wzMETvbins.size()-1,&(wzMETvbins[0]));
+  h_wzMET_RegC = new TH1D("wzMETvBin_RegC","MET variable bins",wzMETvbins.size()-1,&(wzMETvbins[0]));
+  h_wzMET_RegD = new TH1D("wzMETvBin_RegD","MET variable bins",wzMETvbins.size()-1,&(wzMETvbins[0]));
+
   // Mass SB
+  h_wzAK82bMass_RegA = new TH1D("wzAK82btaggedMassSB_RegA","2btagged AK8 Mass",60,0,300);
+  h_wzAK82bMass_RegB = new TH1D("wzAK82btaggedMassSB_RegB","2btagged AK8 Mass",60,0,300);
+  h_wzAK82bMass_RegC = new TH1D("wzAK82btaggedMassSB_RegC","2btagged AK8 Mass",60,0,300);
+  h_wzAK82bMass_RegD = new TH1D("wzAK82btaggedMassSB_RegD","2btagged AK8 Mass",60,0,300);
+
+  h_whAK82bMass_RegA = new TH1D("whAK82btaggedMassSB_RegA","2btagged AK8 Mass",60,0,300);
+  h_whAK82bMass_RegB = new TH1D("whAK82btaggedMassSB_RegB","2btagged AK8 Mass",60,0,300);
+  h_whAK82bMass_RegC = new TH1D("whAK82btaggedMassSB_RegC","2btagged AK8 Mass",60,0,300);
+  h_whAK82bMass_RegD = new TH1D("whAK82btaggedMassSB_RegD","2btagged AK8 Mass",60,0,300);
+
   h_WHAK8J1MassSB = new TH1D("WHAK8J1MassSB","AK8J1 Mass",60,0,300);
   h_WHAK8J1MassNo2bTag = new TH1D("WHAK8J1MassNo2bTag","AK8J1 Mass",60,0,300);
   h_WHAK8J2MassSB = new TH1D("WHAK8J2MassSB","AK8J2 Mass",60,0,300);

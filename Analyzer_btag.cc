@@ -87,7 +87,11 @@ void SignalReg::EventLoop(const char *data,const char *inputFileList) {
     deepCSVvalue = 0.4184;
     deepAK8Wscore = 0.918;
   }
-    
+
+  if(s_data.Contains("Rare")){    
+    lumiInfb = 137.0;
+  }
+  
   bool TTJets_nonHTcut = false;
   if (s_runlist.Contains("TTJets_DiLept") || s_runlist.Contains("TTJets_SingleLeptFromT") ){
     cout <<" *****  Applying madHT < 600 cut to add other HT samples > 600"<< endl;
@@ -156,7 +160,7 @@ void SignalReg::EventLoop(const char *data,const char *inputFileList) {
     
     //for madHT stiching check in TTJets
     h_HT->Fill(HT,wt);  
-    h_madHT->Fill(madHT,wt);      
+
 
     // Modified RA2b cuts
     if(NJets < 2                                                                //AK4 jets >=2
@@ -429,7 +433,7 @@ void SignalReg::EventLoop(const char *data,const char *inputFileList) {
       bool Hcand_SB = false;
       bool Hcand_SB_antitag = false;
       bool Wcand = false;
-      double bound1 = 50.0;
+      double bound1 = 30.0;
       double bound2 = 200.0;
       double bound3 = 250.0;
       
@@ -537,6 +541,7 @@ void SignalReg::EventLoop(const char *data,const char *inputFileList) {
 	h_wzMETvBin->Fill(MET,wt);
 	h_wzMT->Fill(mt,wt);
 	h_wzMT2J->Fill(mt2j,wt);
+	h_madHT->Fill(madHT,wt);      
       }
       
       if (Zcand_antitag && Wcand){

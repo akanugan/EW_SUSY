@@ -41,10 +41,14 @@ class SignalReg : public NtupleVariables{
   vector<TLorentzVector> bjets;
 
   TH1D *h_filters;
+  //afer baseline histos
   TH1D *h_MET;
-  //  TH1D *h_MHT;
+  TH1D *h_MHT;
   TH1D *h_HT;
   TH1D *h_madHT;
+  TH1D *h_NJets; 
+  TH1D *h_BTags; 
+  TH1D *h_1l_MT;
 
   vector<double> wzMETvbins={200,250,300,350,400,450,550,650,800,1200};
   vector<double> whMETvbins={200,250,300,350,400,450,550,650,800,1200};
@@ -56,10 +60,9 @@ class SignalReg : public NtupleVariables{
   TH1D *h_whmtbmin;
   TH1D *h_antiwhmtbmin;
 
-  /* TH1D *h_NJets; */
-  /* TH1D *h_BTags; */
 
-  //TH1D *h_MT;
+
+ 
   //TH1D *h_MT2J;
   /* TH1D *h_dPhiMETAK8; */
   /* TH1D *h_dPhiAK8J1J2; */
@@ -74,7 +77,7 @@ class SignalReg : public NtupleVariables{
   // CR
 
   TH1D *h_2btaggedAK8Mass, *h_non2bAK8Mass;
-  TH1D *h_2btaggedAK8ddBscore, *h_1l_MT;
+  TH1D *h_2btaggedAK8ddBscore;
 
 
   //WH SR
@@ -136,6 +139,7 @@ class SignalReg : public NtupleVariables{
   TH1D *h_whAK82bMass_RegA, *h_whAK82bMass_RegB, *h_whAK82bMass_RegC, *h_whAK82bMass_RegD;
   TH1D *h_wzMET_RegB, *h_wzMET_RegC, *h_wzMET_RegD;
   TH1D *h_wzAK82bMass_RegA, *h_wzAK82bMass_RegB, *h_wzAK82bMass_RegC, *h_wzAK82bMass_RegD;  
+  TH1D *h_dR_e_AK8nearb, *h_dR_e_AK8farb;
 
   // Mass SB
   TH1D *h_WHAK8J1MassSB, *h_WHAK8J1MassNo2bTag;
@@ -191,12 +195,13 @@ void SignalReg::BookHistogram(const char *outFileName) {
   h_filters = new TH1D("Filters","Filters: Bin1 : all nEvnts, other bins: filter pass/fail",10,0,10);
   
   h_MET = new TH1D("MET","MET",200,0,2000); 
-  /* h_MHT = new TH1D("MHT","MHT",200,0,2000); */
+  h_MHT = new TH1D("MHT","MHT",200,0,2000); 
   h_HT = new TH1D("HT","HT",100,0,5000); 
   h_madHT = new TH1D("madHT","madHT",100,0,5000); 
-
-  /* h_NJets = new TH1D("NJets","NJets with pT > 30, |eta| < 20.4",20,0,20);   */
-  /* h_BTags = new TH1D("BTags","BTags with DeepCSV MedWP",10,0,10);   */
+  h_1l_MT = new TH1D("mT","mT(e,AK8J)",200,0,2000);
+ 
+  h_NJets = new TH1D("NJets","NJets with pT > 30, |eta| < 20.4",20,0,20);   
+  h_BTags = new TH1D("BTags","BTags with DeepCSV MedWP",10,0,10);   
   
   //h_MT = new TH1D("mT","mT(MET,AK8J)",200,0,2000);
   // h_MT2J = new TH1D("mT2J","mT(MET,AK8J2)",200,0,2000);  
@@ -246,7 +251,10 @@ void SignalReg::BookHistogram(const char *outFileName) {
   h_2btaggedAK8Mass = new TH1D("2btaggedAK8Mass","2b AK8 Mass",60,0,300);
   h_non2bAK8Mass = new TH1D("non2bAK8Mass"," non 2bAK8 Mass",60,0,300);
   h_2btaggedAK8ddBscore = new TH1D("2bDisScore","2b tagged AK8 deep2b score",100,0,1);
-  h_1l_MT = new TH1D("1l_MT","mT(MET,e)",200,0,2000);
+  h_1l_MT = new TH1D("1l_MT","mT(MET,e)",20,0,200);
+  h_dR_e_AK8nearb  = new TH1D("dR_e_AK8nearb","deltaR(e,AK8near)",30,0,3);
+  h_dR_e_AK8farb = new TH1D("dR_e_AK8farb","deltaR(e,AK8far)",30,0,3);
+
 
   h_WHAK8J1Tau21 = new TH1D("WHAK8J1Tau21","AK8J1 Tau21",100,0,1);
   h_WHAK8J1wDis = new TH1D("WH_AK8J1wDis","AK8 J1 w Discr. corelated",100,0,1);

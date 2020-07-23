@@ -86,19 +86,16 @@ void SignalReg::EventLoop(const char *data,const char *inputFileList) {
     lumiInfb = 137.0;
     deepCSVvalue = 0.4184;
     deepAK8Wscore = 0.918;
-    //   if(s_data.Contains("TChiWZ_1000")){ xsec = 1.34352e-3; numEvents = 28771;}
-    //   else if(s_data.Contains("TChiWZ_800")){ xsec = 4.75843e-3; numEvents = 34036;}
-    //   cout<<"Assigning xsec as: "<<xsec<<endl;
   }
-    
+
   bool TTJets_nonHTcut = false;
   if (s_runlist.Contains("TTJets_DiLept") || s_runlist.Contains("TTJets_SingleLeptFromT") ){
     cout <<" *****  Applying madHT < 600 cut to add other HT samples > 600"<< endl;
     TTJets_nonHTcut = true;
   }
 
-  lumiInfb = 137.0;
-  cout<<"!!!! changing intLumi to 137/fb, although you should have used 2018 intLumi...."<<endl;
+  //  lumiInfb = 137.0;
+  //cout<<"!!!! changing intLumi to 137/fb, although you should have used 2018 intLumi...."<<endl;
 
   if(dataRun>0) cout<<"Processing it as "<<dataRun<<" data"<<endl;
   else if(dataRun<0) cout<<"Processing it as "<<abs(dataRun)<<" MC"<<endl;
@@ -133,6 +130,9 @@ void SignalReg::EventLoop(const char *data,const char *inputFileList) {
     //   Weight = xsec/numEvents;
     // }
     wt=Weight*1000.0*lumiInfb;
+    if(!isMC){
+      wt = 1;
+    }
 
     h_cutflow->Fill("0",1);
     h_cutflow->Fill("Weighted",wt);
@@ -157,11 +157,6 @@ void SignalReg::EventLoop(const char *data,const char *inputFileList) {
     if (TTJets_nonHTcut){
       if (madHT > 600) continue;  //madHT <= 600 for non HT
     }
-    
-    //for madHT stiching check in TTJets
-    h_1l_MT->Fill(mt,wt); 
-    h_HT->Fill(HT,wt);  
-    h_madHT->Fill(madHT,wt);      
 
     //cout<< "debug 2"<<endl;
     // Modified RA2b cuts
@@ -170,25 +165,33 @@ void SignalReg::EventLoop(const char *data,const char *inputFileList) {
        || NMuons!=1
        || NElectrons != 0                                             // Veto e,muons
        || (MHT/HT > 1.0) || !JetID                                               // MHT<HT and Veto JET ID
-       || !(DeltaPhi1 > 1.5 && DeltaPhi2 > 0.5 && DeltaPhi3 > 0.3 && DeltaPhi4 > 0.3)  //Angle cuts
+       || !(DeltaPhi1 > 0.5 && DeltaPhi2 > 0.5 && DeltaPhi3 > 0.3 && DeltaPhi4 > 0.3)  //Angle cuts
        //|| isoMuonTracks!=0
        //|| isoElectronTracks!=0
        //|| isoPionTracks!=0
        ) continue; //Veto isolated tracks
-    
-    //Boosted AK8 jet cuts
-    if (JetsAK8->size() < 2                                                     // require >=2 AK8 jets
-	//	|| (*JetsAK8)[0].Pt() < 200 || (*JetsAK8)[1].Pt() < 200                  // AK8 jets pT >200
-	//	|| abs((*JetsAK8)[0].Eta()) > 2 || abs((*JetsAK8)[1].Eta()) > 2
-	) continue; // jets |Eta| < 2	
 
+    // Baseline cuts (loose AK8 jet req.)
+    if (JetsAK8->size() < 1                                                     // require >=2 AK8 jets
+	|| (*JetsAK8)[0].Pt() < 200                   // AK8 jets pT >200
+	|| abs((*JetsAK8)[0].Eta()) > 2.4
+	) continue; // jets |Eta| < 2	
     
     //+ some additional cuts
     if(NJets > 6                                                       //AK4 jets <= 6
        || mt > 100                                                      // mt < 100
+       || !(DeltaPhi1 > 1.5) 
        //|| mtbmin < 200
        ) continue;                                        // mTbmin > 200 to reduce ttbar bkg    
     
+    // *** Plots after baseline selections.
+   
+    h_1l_MT->Fill(mt,wt); 
+    h_HT->Fill(HT,wt);  
+    h_MET->Fill(MET,wt);  
+    
+    if (JetsAK8->size() < 2) continue;   
+
     //    if(MET < 200) continue;
     //h_cutflow->Fill("MET>200",wt);
     float dphi1=4, dphi2=4, dphi3=4, dphi4=4;
@@ -243,10 +246,11 @@ void SignalReg::EventLoop(const char *data,const char *inputFileList) {
 	if(!(trgName.Contains("MET"))) continue;
 	if((*TriggerPass)[i]==1 && (trgName.Contains("HLT_PFMET100_PFMHT100_IDTight_v") || trgName.Contains("HLT_PFMET110_PFMHT110_IDTight_v") ||
 				    trgName.Contains("HLT_PFMET120_PFMHT120_IDTight_v") || trgName.Contains("HLT_PFMET130_PFMHT130_IDTight_v") ||
-				    trgName.Contains("HLT_PFMET140_PFMHT140_IDTight_v") || trgName.Contains("HLT_PFMET90_PFMHT90_IDTight_v") || 
-				    trgName.Contains("HLT_PFMETNoMu100_PFMHTNoMu100_IDTight_v") || trgName.Contains("HLT_PFMETNoMu110_PFMHTNoMu110_IDTight_v") ||
-				    trgName.Contains("HLT_PFMETNoMu120_PFMHTNoMu120_IDTight_v") || trgName.Contains("HLT_PFMETNoMu130_PFMHTNoMu130_IDTight_v") || 
-				    trgName.Contains("HLT_PFMETNoMu140_PFMHTNoMu140_IDTight_v") ||  trgName.Contains("HLT_PFMETNoMu90_PFMHTNoMu90_IDTight_v"))) trgPass = true;
+				    trgName.Contains("HLT_PFMET140_PFMHT140_IDTight_v") || trgName.Contains("HLT_PFMET90_PFMHT90_IDTight_v") 
+				    // trgName.Contains("HLT_PFMETNoMu100_PFMHTNoMu100_IDTight_v") || trgName.Contains("HLT_PFMETNoMu110_PFMHTNoMu110_IDTight_v") ||
+				    // trgName.Contains("HLT_PFMETNoMu120_PFMHTNoMu120_IDTight_v") || trgName.Contains("HLT_PFMETNoMu130_PFMHTNoMu130_IDTight_v") || 
+				    // trgName.Contains("HLT_PFMETNoMu140_PFMHTNoMu140_IDTight_v") ||  trgName.Contains("HLT_PFMETNoMu90_PFMHTNoMu90_IDTight_v"))
+				    )) trgPass = true;
       }
       if(trgPass) h_cutflow->Fill("PassedTrigger",wt);
       else continue;
@@ -556,13 +560,16 @@ void SignalReg::EventLoop(const char *data,const char *inputFileList) {
       
       if (Zcand && Wcand){
 	wz_cnt += 1;
+	h_wzmtbmin->Fill(mtbmin,wt);
 	h_wzMET->Fill(MET,wt);
 	h_wzMETvBin->Fill(MET,wt);
 	h_wzMT->Fill(mt,wt);
 	h_wzMT2J->Fill(mt2j,wt);
+	h_madHT->Fill(madHT,wt);      
       }
       
       if (Zcand_antitag && Wcand){
+	h_antiwzmtbmin->Fill(mtbmin,wt);
 	h_wzMET_RegC->Fill(MET,wt);
       }
 
@@ -576,6 +583,7 @@ void SignalReg::EventLoop(const char *data,const char *inputFileList) {
 
       if (Hcand && Wcand){
 	wh_cnt += 1;
+	h_whmtbmin->Fill(mtbmin,wt);
 	h_whMET->Fill(MET,wt);
 	h_whMETvBin->Fill(MET,wt);
 	h_whMT->Fill(mt,wt);
@@ -583,6 +591,7 @@ void SignalReg::EventLoop(const char *data,const char *inputFileList) {
       }
 
       if (Hcand_antitag && Wcand){
+	h_antiwhmtbmin->Fill(mtbmin,wt);
 	h_whMET_RegC->Fill(MET,wt);
       }
 

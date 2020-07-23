@@ -88,10 +88,6 @@ void SignalReg::EventLoop(const char *data,const char *inputFileList) {
     deepAK8Wscore = 0.918;
   }
 
-  if(s_data.Contains("Rare")){    
-    lumiInfb = 137.0;
-  }
-    
   bool TTJets_nonHTcut = false;
   if (s_runlist.Contains("TTJets_DiLept") || s_runlist.Contains("TTJets_SingleLeptFromT") ){
     cout <<" *****  Applying madHT < 600 cut to add other HT samples > 600"<< endl;
@@ -162,18 +158,14 @@ void SignalReg::EventLoop(const char *data,const char *inputFileList) {
     }
     
     //for madHT stiching check in TTJets
-    h_1l_MT->Fill(mt,wt); 
-    h_HT->Fill(HT,wt);  
-    h_MET->Fill(MET,wt);  
     
-
-    // Modified RA2b cuts
+    // Skimming cuts 
     if(NJets < 2                                                                //AK4 jets >=2
        || HT < 300 || MHT < 200 || MET < 250                                     // HT, MET, MHT cuts
        || NMuons!=0
        || NElectrons != 1                                             // Veto e,muons
        || (MHT/HT > 1.0) || !JetID                                               // MHT<HT and Veto JET ID
-       || !(DeltaPhi1 > 1.5 && DeltaPhi2 > 0.5 && DeltaPhi3 > 0.3 && DeltaPhi4 > 0.3)  //Angle cuts
+       || !(DeltaPhi1 > 0.5 && DeltaPhi2 > 0.5 && DeltaPhi3 > 0.3 && DeltaPhi4 > 0.3)  //Angle cuts
        //Isolated tracks
        //|| isoMuonTracks!=0
        //|| isoElectronTracks!=0
@@ -181,19 +173,33 @@ void SignalReg::EventLoop(const char *data,const char *inputFileList) {
        )
       continue; //Veto isolated tracks
 
-    //Boosted AK8 jet cuts
-    if (JetsAK8->size() < 2                                                     // require >=2 AK8 jets
-	//	|| (*JetsAK8)[0].Pt() < 200 || (*JetsAK8)[1].Pt() < 200                  // AK8 jets pT >200
-	//	|| abs((*JetsAK8)[0].Eta()) > 2 || abs((*JetsAK8)[1].Eta()) > 2
+    // Baseline cuts (loose AK8 jet req.)
+    if (JetsAK8->size() < 1                                                     // require >=2 AK8 jets
+	|| (*JetsAK8)[0].Pt() < 200                   // AK8 jets pT >200
+	|| abs((*JetsAK8)[0].Eta()) > 2.4
 	) continue; // jets |Eta| < 2	
 
     
     //+ some additional cuts
     if(NJets > 6                                                       //AK4 jets <= 6
-       || mt > 100                                                      // mt < 100
+       || mt > 100       
+       || !(DeltaPhi1 > 1.5)                                               // mt < 100
        // || mtbmin < 200)
        )
-       continue;                                        // mTbmin > 200 to reduce ttbar bkg    
+      continue;                                        // mTbmin > 200 to reduce ttbar bkg    
+    
+    // *** Plots after baseline selections.
+    
+    //ht, met, mht, #bjets, AK8jets mass, Njets, deltaphi
+    h_1l_MT->Fill(mt,wt); 
+    h_HT->Fill(HT,wt);  
+    h_MET->Fill(MET,wt);  
+    h_MHT->Fill(MHT,wt);  
+    h_madHT->Fill(madHT,wt);  
+    h_NJets->Fill(NJets,wt);  
+    h_BTags->Fill(BTags,wt);  
+    
+
     
     //    if(MET < 200) continue;
     //h_cutflow->Fill("MET>200",wt);
@@ -539,6 +545,18 @@ void SignalReg::EventLoop(const char *data,const char *inputFileList) {
 	       ((*JetsAK8_softDropMass)[i] < massHighW) &&                                                
 	       ((*JetsAK8_wDiscriminatorDeep)[i] > deepAK8Wscore) )
 	      Wcand = true;
+	  }
+
+	  // Checking for dR (e, AK8 jets) which are matched/ not matched to bjets in the signal mass window
+	  if(
+	     ((*JetsAK8_softDropMass)[i] > 65) &&
+	     ((*JetsAK8_softDropMass)[i] < 135) ){
+	    if(jetsAK8hasb[i]){
+	      h_dR_e_AK8nearb->Fill(abs((*Electrons)[0].DeltaR((*JetsAK8)[i])),wt); 
+	    }
+	    else{
+	      h_dR_e_AK8farb->Fill(abs((*Electrons)[0].DeltaR((*JetsAK8)[i])),wt); 
+	    }
 	  }
 	  
 	  if(jetsAK8hasb[i]){ //FOR 2b tagged AK8 mass

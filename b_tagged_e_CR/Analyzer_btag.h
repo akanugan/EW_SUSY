@@ -33,10 +33,11 @@ class SignalReg : public NtupleVariables{
   double deepCSVvalue = 0;
   double deepAK8Wscore = 0; // deepAK8W score
   double massLowW = 65., massHighW = 105.; //65-90, 55-100
-  double massLowZ = 65., massHighZ = 105.; //65-90, 55-100
+  double massLowZ = 75., massHighZ = 105.; //65-90, 55-100
   double massLowH = 105., massHighH = 135.;
   double bbscore = 0.3; //  double b score
   double deepbbscore = 0.7; // deep double b score
+  bool passHEMjetVeto(double);
 
   vector<TLorentzVector> bjets;
 
@@ -139,7 +140,12 @@ class SignalReg : public NtupleVariables{
   TH1D *h_whAK82bMass_RegA, *h_whAK82bMass_RegB, *h_whAK82bMass_RegC, *h_whAK82bMass_RegD;
   TH1D *h_wzMET_RegB, *h_wzMET_RegC, *h_wzMET_RegD;
   TH1D *h_wzAK82bMass_RegA, *h_wzAK82bMass_RegB, *h_wzAK82bMass_RegC, *h_wzAK82bMass_RegD;  
+  TH1D *h_MET_RegA, *h_MET_RegC;
   TH1D *h_dR_e_AK8nearb, *h_dR_e_AK8farb;
+  TH1D *h_dR_e_AK8;
+  TH2D *h2_dReAk8_WdisMatched;
+  TH2D *h2_dReAk8nearb_WdisMatched, *h2_dReAk8farb_WdisMatched;
+  TH2D *h2_dReAk8nearb_deep2bdis, *h2_dReAk8farb_deep2bdis;
 
   // Mass SB
   TH1D *h_WHAK8J1MassSB, *h_WHAK8J1MassNo2bTag;
@@ -255,6 +261,13 @@ void SignalReg::BookHistogram(const char *outFileName) {
   h_dR_e_AK8nearb  = new TH1D("dR_e_AK8nearb","deltaR(e,AK8near)",30,0,3);
   h_dR_e_AK8farb = new TH1D("dR_e_AK8farb","deltaR(e,AK8far)",30,0,3);
 
+  h_dR_e_AK8 = new TH1D("dR_e_AK8","deltaR(e,AK8)",30,0,3);
+  h2_dReAk8_WdisMatched = new TH2D("dReAk8_WdisMatched","x:dR(e, AK8) vs y:WdiscGenMatched",400,0,4,100,0,1);
+ 
+  h2_dReAk8nearb_WdisMatched = new TH2D("dReAk8nearb_WdisMatched","x:dR(e, AK8nearb) vs y:WdiscGenMatched",400,0,4,100,0,1);
+  h2_dReAk8farb_WdisMatched = new TH2D("dReAk8farb_WdisMatched","x:dR(e, AK8farb) vs y:WdiscGenMatched",400,0,4,100,0,1);
+  h2_dReAk8nearb_deep2bdis = new TH2D("dReAk8nearb_deep2bdis","x:dR(e, AK8nearb) vs y:deep2bdis",400,0,4,100,0,1);
+  h2_dReAk8farb_deep2bdis = new TH2D("dReAk8farb_deep2bdis","x:dR(e, AK8farb) vs y:deep2bdis",400,0,4,100,0,1);
 
   h_WHAK8J1Tau21 = new TH1D("WHAK8J1Tau21","AK8J1 Tau21",100,0,1);
   h_WHAK8J1wDis = new TH1D("WH_AK8J1wDis","AK8 J1 w Discr. corelated",100,0,1);
@@ -348,6 +361,8 @@ void SignalReg::BookHistogram(const char *outFileName) {
   h_HWAK8J1Mass_RegC = new TH1D("HWAK8J1Mass_RegC","HWAK8J1MassC",60,0,300);
   h_HWAK8J1Mass_RegD = new TH1D("HWAK8J1Mass_RegD","HWAK8J1MassD",60,0,300);
   //
+  h_MET_RegA = new TH1D("MET_RegA","MET with SR mass wi. reg a",wzMETvbins.size()-1,&(wzMETvbins[0]));
+  h_MET_RegC = new TH1D("MET_RegC","MET with SR mass wi. reg c",wzMETvbins.size()-1,&(wzMETvbins[0]));
 
   h_whMET_RegB = new TH1D("whMETvBin_RegB","MET variable bins",wzMETvbins.size()-1,&(wzMETvbins[0]));
   h_whMET_RegC = new TH1D("whMETvBin_RegC","MET variable bins",wzMETvbins.size()-1,&(wzMETvbins[0]));

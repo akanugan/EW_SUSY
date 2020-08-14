@@ -184,10 +184,10 @@ void SignalReg::EventLoop(const char *data,const char *inputFileList) {
     if(NJets > 6                                                       //AK4 jets <= 6
        || mt > 100       
        || !(DeltaPhi1 > 1.5)                                               // mt < 100
-       // || mtbmin < 200)
+       //       || mtbmin > 200                            // mTbmin < 200 to enhance ttbar bkg    
        )
-      continue;                                        // mTbmin > 200 to reduce ttbar bkg    
-    
+      continue;              
+
     // *** Plots after baseline selections.
     
     //ht, met, mht, #bjets, AK8jets mass, Njets, deltaphi
@@ -200,6 +200,7 @@ void SignalReg::EventLoop(const char *data,const char *inputFileList) {
     h_BTags->Fill(BTags,wt);  
     
 
+    if (JetsAK8->size() < 2) continue;   
     
     //    if(MET < 200) continue;
     //h_cutflow->Fill("MET>200",wt);
@@ -279,6 +280,11 @@ void SignalReg::EventLoop(const char *data,const char *inputFileList) {
 	    (abs(DeltaPhi(METPhi,(*Jets)[i].Phi())) < 0.5) ){HEMaffected = true; break;}
       }
     }
+
+    if(dataRun==-2018){//for MC 2018                                                       
+      if( (EvtNum % 1000 > 1000*21.0/59.6) && !passHEMjetVeto(30.)) HEMaffected = true;
+    }
+    
     //--------------------------end of triggers
     
     if(HEMaffected){
@@ -459,15 +465,19 @@ void SignalReg::EventLoop(const char *data,const char *inputFileList) {
       bool Hcand_SB = false;
       bool Hcand_SB_antitag = false;
       bool Wcand = false;
-      double bound1 = 30.0;
+      bool Wcand_loose = false;
+      double bound1 = 20.0;
       double bound2 = 200.0;
       double bound3 = 250.0;
       bool CR_1 = false;
+      bool dR_e_AK8nearb_0p6clean = false;
+      bool dR_e_AK8farb_0p6clean = false;
       
       
       for(int i=0;i<JetsAK8->size();i++){
 	if((*JetsAK8)[i].Pt() > 200 && abs((*JetsAK8)[i].Eta()) < 2.0){
-	 
+	  double deepWdiscGenMatched = -9999;
+
 	  if(jetsAK8hasb[i]){
 	    h_2btaggedAK8Mass->Fill((*JetsAK8_softDropMass)[i],wt);
 	    h_2btaggedAK8ddBscore->Fill((*JetsAK8_deepDoubleBDiscriminatorH)[i],wt);
@@ -542,98 +552,165 @@ void SignalReg::EventLoop(const char *data,const char *inputFileList) {
 	  else{ // W cand.
 	    if(
 	       ((*JetsAK8_softDropMass)[i] > massLowW) &&                                   	   
-	       ((*JetsAK8_softDropMass)[i] < massHighW) &&                                                
-	       ((*JetsAK8_wDiscriminatorDeep)[i] > deepAK8Wscore) )
-	      Wcand = true;
-	  }
-
-	  // Checking for dR (e, AK8 jets) which are matched/ not matched to bjets in the signal mass window
-	  if(
-	     ((*JetsAK8_softDropMass)[i] > 65) &&
-	     ((*JetsAK8_softDropMass)[i] < 135) ){
-	    if(jetsAK8hasb[i]){
-	      h_dR_e_AK8nearb->Fill(abs((*Electrons)[0].DeltaR((*JetsAK8)[i])),wt); 
-	    }
-	    else{
-	      h_dR_e_AK8farb->Fill(abs((*Electrons)[0].DeltaR((*JetsAK8)[i])),wt); 
+	       ((*JetsAK8_softDropMass)[i] < massHighW)){
+	      if ((*JetsAK8_wDiscriminatorDeep)[i] > 0.467) // 5% mistag
+		Wcand_loose = true;
+	      if ((*JetsAK8_wDiscriminatorDeep)[i] > deepAK8Wscore )
+		Wcand = true;
 	    }
 	  }
 	  
-	  if(jetsAK8hasb[i]){ //FOR 2b tagged AK8 mass
-	    if (Wcand){
+	  // Checking for dR (e, AK8 jets) which are matched/ not matched to bjets in the signal mass window
+	  
+	  // // for reco leptons:
+	  // if(jetsAK8hasb[i]){
+	  //   h_dR_e_AK8nearb->Fill(abs((*Electrons)[0].DeltaR((*JetsAK8)[i])),wt); 
+	  // }
+	  // else{
+	  //   h_dR_e_AK8farb->Fill(abs((*Electrons)[0].DeltaR((*JetsAK8)[i])),wt); 
+	  // }
+	    
+	  // Using the gen leptons
+	  
+	  if(
+	     ((*JetsAK8_softDropMass)[i] > 65) &&
+	     ((*JetsAK8_softDropMass)[i] < 105) ){
+
+	    for (int gen=0; gen < GenParticles_PdgId->size(); gen++){
+	      if( abs((*GenParticles_PdgId)[gen]) == 24 && abs(DeltaR((*GenParticles)[gen].Eta(),(*GenParticles)[gen].Phi(),(*JetsAK8)[i].Eta(),(*JetsAK8)[i].Phi())) < 0.1 ){
+		deepWdiscGenMatched = (*JetsAK8_wDiscriminatorDeep)[i];
+	      }// gen W and AK8 match
+	      // if( abs((*GenParticles_PdgId)[gen]) == 5 && abs(DeltaR((*GenParticles)[gen].Eta(),(*GenParticles)[gen].Phi(),(*JetsAK8)[i].Eta(),(*JetsAK8)[i].Phi())) < 0.1 ){
+	      // 	deep2bdiscGenMatched = (*JetsAK8_deepDoubleBDiscriminatorH)[i];
+	      // }// gen b and AK8 match
+	    }
+	  } // end if
+	  
+	  if (deepWdiscGenMatched != -9999){
+	    cout<<"Wdiscgenmatched: "<< deepWdiscGenMatched << endl;
+	  }
+	  
+	  if(
+	     ((*JetsAK8_softDropMass)[i] > 65) &&
+	     ((*JetsAK8_softDropMass)[i] < 135) ){
+	    for (int gen=0; gen < GenParticles_PdgId->size(); gen++){
+	      if( abs((*GenParticles_PdgId)[gen] == 11) ){
+		if( abs((*GenParticles_ParentId)[gen]) == 24 ){ //W to electron
+		  h_dR_e_AK8->Fill( abs(DeltaR((*GenParticles)[gen].Eta(),(*GenParticles)[gen].Phi(),(*JetsAK8)[i].Eta(),(*JetsAK8)[i].Phi())),wt); 
+		  h2_dReAk8_WdisMatched->Fill( abs(DeltaR((*GenParticles)[gen].Eta(),(*GenParticles)[gen].Phi(),(*JetsAK8)[i].Eta(),(*JetsAK8)[i].Phi())),deepWdiscGenMatched,wt); 
+		  if(jetsAK8hasb[i]){	
+		    h_dR_e_AK8nearb->Fill( abs(DeltaR((*GenParticles)[gen].Eta(),(*GenParticles)[gen].Phi(),(*JetsAK8)[i].Eta(),(*JetsAK8)[i].Phi())),wt); 
+		    h2_dReAk8nearb_WdisMatched->Fill( abs(DeltaR((*GenParticles)[gen].Eta(),(*GenParticles)[gen].Phi(),(*JetsAK8)[i].Eta(),(*JetsAK8)[i].Phi())),deepWdiscGenMatched,wt); 
+		    h2_dReAk8nearb_deep2bdis->Fill( abs(DeltaR((*GenParticles)[gen].Eta(),(*GenParticles)[gen].Phi(),(*JetsAK8)[i].Eta(),(*JetsAK8)[i].Phi())), (*JetsAK8_deepDoubleBDiscriminatorH)[i],wt); 
+		  }
+		  else{
+		    h_dR_e_AK8farb->Fill( abs(DeltaR((*GenParticles)[gen].Eta(),(*GenParticles)[gen].Phi(),(*JetsAK8)[i].Eta(),(*JetsAK8)[i].Phi())),wt); 
+		    h2_dReAk8farb_WdisMatched->Fill( abs(DeltaR((*GenParticles)[gen].Eta(),(*GenParticles)[gen].Phi(),(*JetsAK8)[i].Eta(),(*JetsAK8)[i].Phi())),deepWdiscGenMatched,wt); 
+		    h2_dReAk8farb_deep2bdis->Fill( abs(DeltaR((*GenParticles)[gen].Eta(),(*GenParticles)[gen].Phi(),(*JetsAK8)[i].Eta(),(*JetsAK8)[i].Phi())), (*JetsAK8_deepDoubleBDiscriminatorH)[i],wt);
+		  }
+		} // end W to e
+	      } // if gen e
+	    } // end for gen loop
+	  } // AK8 mass window
+	  
+	  // testing dR (e, AK8 near or far) cut
+	  if(jetsAK8hasb[i] &&  (abs((*Electrons)[0].DeltaR((*JetsAK8)[i]))) > 0.6){
+	    dR_e_AK8nearb_0p6clean = true;
+	  }
+	  
+	  if(!jetsAK8hasb[i] && (abs((*Electrons)[0].DeltaR((*JetsAK8)[i]))) > 0.6){
+	    dR_e_AK8farb_0p6clean = true;
+	  }
+	  	  
+	} //jet pt and eta
+      } // *******  loop ak8 jets
+      
+      // For pass/ fail ratio plots
+      //if (Wcand && dR_e_AK8nearb_0p6clean == true){ // check test case
+      if (Wcand_loose){ 
+	for(int i=0;i<JetsAK8->size();i++){
+	  if((*JetsAK8)[i].Pt() > 200 && abs((*JetsAK8)[i].Eta()) < 2.0){
+	    if(jetsAK8hasb[i]){ //FOR 2b tagged AK8 mass
 	      if(
 		 ((*JetsAK8_softDropMass)[i] > 20) &&
 		 ((*JetsAK8_softDropMass)[i] < 250) ){
-		if(
+		if( // pass
 		   ((*JetsAK8_deepDoubleBDiscriminatorH)[i] > deepbbscore) ){
 		  h_wzAK82bMass_RegA->Fill((*JetsAK8_softDropMass)[i],wt); 
 		}
 		else{
 		  h_wzAK82bMass_RegC->Fill((*JetsAK8_softDropMass)[i],wt);
 		}
-	      }
-	      // if(
-	      // 	 ((*JetsAK8_softDropMass)[i] > 30) &&
-	      // 	 ((*JetsAK8_softDropMass)[i] < 250) &&
-	      // 	 ((*JetsAK8_deepDoubleBDiscriminatorH)[i] > deepbbscore) ) {
-	      //  h_whAK82bMass_RegA->Fill((*JetsAK8_softDropMass)[i],wt); 	
-	      // }
+	      } //wide Msd
+	      if(
+		 ((*JetsAK8_softDropMass)[i] > 75) &&
+		 ((*JetsAK8_softDropMass)[i] < 135) ){
+		if(
+		   ((*JetsAK8_deepDoubleBDiscriminatorH)[i] > deepbbscore) ){
+		  h_MET_RegA->Fill(MET,wt);
+		}
+		else{
+		  h_MET_RegC->Fill(MET,wt);
+		  
+		}
+	      } // SR Msd for 2 btag ak8
 	    }
 	  }
-	} //jet pt and eta
-      } // loop ak8 jets
+	}
+      } // end W cand
       
+      if (dR_e_AK8nearb_0p6clean == true){ // || dR_e_AK8farb_0p6clean
+	if (Zcand && Wcand){
+	  wz_cnt += 1;
+	  cout <<"in reg A1" <<endl;
+	  h_wzmtbmin->Fill(mtbmin,wt);
+	  h_wzMET->Fill(MET,wt);
+	  h_wzMETvBin->Fill(MET,wt);
+	  h_wzMT->Fill(mt,wt);
+	  h_wzMT2J->Fill(mt2j,wt);
+	  h_madHT->Fill(madHT,wt);      
+	}
       
-      if (Zcand && Wcand){
-	wz_cnt += 1;
-	cout <<"in reg A1" <<endl;
-	h_wzmtbmin->Fill(mtbmin,wt);
-	h_wzMET->Fill(MET,wt);
-	h_wzMETvBin->Fill(MET,wt);
-	h_wzMT->Fill(mt,wt);
-	h_wzMT2J->Fill(mt2j,wt);
-	h_madHT->Fill(madHT,wt);      
-      }
+	if (Zcand_antitag && Wcand){
+	  cout <<"in reg C1" <<endl;
+	  h_antiwzmtbmin->Fill(mtbmin,wt);
+	  h_wzMET_RegC->Fill(MET,wt);
+	}
+
+	if (Zcand_SB && Wcand){
+	  h_wzMET_RegB->Fill(MET,wt);
+	}
       
-      if (Zcand_antitag && Wcand){
-	cout <<"in reg C1" <<endl;
-	h_antiwzmtbmin->Fill(mtbmin,wt);
-	h_wzMET_RegC->Fill(MET,wt);
-      }
+	if (Zcand_SB_antitag && Wcand){
+	  h_wzMET_RegD->Fill(MET,wt);
+	}
 
-      if (Zcand_SB && Wcand){
-	h_wzMET_RegB->Fill(MET,wt);
-      }
+	if (Hcand && Wcand){
+	  wh_cnt += 1;
+	  cout <<"in reg A2" <<endl;
+	  h_whmtbmin->Fill(mtbmin,wt);
+	  h_whMET->Fill(MET,wt);
+	  h_whMETvBin->Fill(MET,wt);
+	  h_whMT->Fill(mt,wt);
+	  h_whMT2J->Fill(mt2j,wt);
+	}
+
+	if (Hcand_antitag && Wcand){
+	  cout <<"in reg C2" <<endl;
+	  h_antiwhmtbmin->Fill(mtbmin,wt);
+	  h_whMET_RegC->Fill(MET,wt);
+	}
+
+	if (Hcand_SB && Wcand){
+	  h_whMET_RegB->Fill(MET,wt);
+	}
       
-      if (Zcand_SB_antitag && Wcand){
-	h_wzMET_RegD->Fill(MET,wt);
-      }
+	if (Hcand_SB_antitag && Wcand){
+	  h_whMET_RegD->Fill(MET,wt);
+	}
+      } // end test
 
-      if (Hcand && Wcand){
-	wh_cnt += 1;
-	cout <<"in reg A2" <<endl;
-	h_whmtbmin->Fill(mtbmin,wt);
-	h_whMET->Fill(MET,wt);
-	h_whMETvBin->Fill(MET,wt);
-	h_whMT->Fill(mt,wt);
-	h_whMT2J->Fill(mt2j,wt);
-      }
-
-      if (Hcand_antitag && Wcand){
-	cout <<"in reg C2" <<endl;
-	h_antiwhmtbmin->Fill(mtbmin,wt);
-	h_whMET_RegC->Fill(MET,wt);
-      }
-
-      if (Hcand_SB && Wcand){
-	h_whMET_RegB->Fill(MET,wt);
-      }
-      
-      if (Hcand_SB_antitag && Wcand){
-	h_whMET_RegD->Fill(MET,wt);
-      }
-
-    }
+    } // *** end the bool
     
           
     bool WH_SR = false;
@@ -950,6 +1027,17 @@ Double_t SignalReg::find_bjets_mtbmin(){
     return mtbmin;
   }
 }
+
+bool SignalReg::passHEMjetVeto(double ptThresh) {
+  for (int p = 0; p < Jets->size(); p++){
+    if (-3.2 <= Jets->at(p).Eta() && Jets->at(p).Eta() <= -1.2 &&
+	-1.77 <= Jets->at(p).Phi() && Jets->at(p).Phi() <= -0.67 &&
+	Jets->at(p).Pt() > ptThresh && abs(DeltaPhi(Jets->at(p).Phi(),METPhi)) < 0.5)
+      return false;
+  }
+  return true;
+}
+
 void SignalReg::print(Long64_t jentry){
   //cout<<endl;
   TLorentzVector v1,photo;

@@ -25,6 +25,7 @@ class SignalReg : public NtupleVariables{
   void     BookHistogram(const char *);
   Double_t find_bjets_mtbmin();
   void print(Long64_t);
+  bool passHEMjetVeto(double);
 
   //Variables defined
   bool isMC=true;
@@ -33,11 +34,12 @@ class SignalReg : public NtupleVariables{
   double deepCSVvalue = 0;
   double deepAK8Wscore = 0; // deepAK8W score
   double massLowW = 65., massHighW = 105.; //65-90, 55-100
-  double massLowZ = 65., massHighZ = 105.; //65-90, 55-100
+  double massLowZ = 75., massHighZ = 105.; //65-90, 55-100
   double massLowH = 105., massHighH = 135.;
   double bbscore = 0.3; //  double b score
   double deepbbscore = 0.7; // deep double b score
-
+  bool passHEMjetVeto(double);
+  
   vector<TLorentzVector> bjets;
 
   TH1D *h_filters;
@@ -51,6 +53,7 @@ class SignalReg : public NtupleVariables{
   TH1D *h_wzMETvBin;
   TH1D *h_whMETvBin;
 
+    
   /* TH1D *h_NJets; */
   /* TH1D *h_BTags; */
 
@@ -126,6 +129,8 @@ class SignalReg : public NtupleVariables{
   TH1D *h_whAK82bMass_RegA, *h_whAK82bMass_RegB, *h_whAK82bMass_RegC, *h_whAK82bMass_RegD;
   TH1D *h_wzMET_RegB, *h_wzMET_RegC, *h_wzMET_RegD;
   TH1D *h_wzAK82bMass_RegA, *h_wzAK82bMass_RegB, *h_wzAK82bMass_RegC, *h_wzAK82bMass_RegD;  
+  TH1D *h_MET_RegA, *h_MET_RegC;
+  TH1D *h_dR_e_AK8nearb, *h_dR_e_AK8farb;
 
   // Mass SB
   TH1D *h_WHAK8J1MassSB, *h_WHAK8J1MassNo2bTag;
@@ -158,7 +163,7 @@ class SignalReg : public NtupleVariables{
   /* TH1D *h_dPhi2; */
   /* TH1D *h_dPhi3; */
   /* TH1D *h_dPhi4; */
-
+  TH1F *h_lepton_flow;
   TH1F *h_cutflow;
   TFile *oFile;
   
@@ -177,6 +182,7 @@ void SignalReg::BookHistogram(const char *outFileName) {
   oFile = new TFile(outFileName, "recreate");
   TH1::SetDefaultSumw2(1);
   
+  h_lepton_flow = new TH1F("lepton_flow","gen lepton flow",7,0,7);
   h_cutflow = new TH1F("CutFlow","cut flow",25,0,25);
   h_filters = new TH1D("Filters","Filters: Bin1 : all nEvnts, other bins: filter pass/fail",10,0,10);
   
@@ -236,6 +242,9 @@ void SignalReg::BookHistogram(const char *outFileName) {
   h_WHMET = new TH1D("WHMET","MET",200,0,2000);
   h_WHMT = new TH1D("WHmT","mT(MET,AK8J)",200,0,2000);
   h_WHMT2J = new TH1D("WHmT2J","mT(MET,AK8J2)",200,0,2000);  
+  h_dR_e_AK8nearb  = new TH1D("dR_l_AK8nearb","deltaR(l,AK8nearbjet)",30,0,3);
+  h_dR_e_AK8farb = new TH1D("dR_l_AK8farb","deltaR(l,AK8farbjet)",30,0,3);
+
  
   h_whMET = new TH1D("whMET","MET",200,0,2000);
   h_whMETvBin = new TH1D("whMETvBin","MET variable bins",whMETvbins.size()-1,&(whMETvbins[0]));
@@ -323,6 +332,9 @@ void SignalReg::BookHistogram(const char *outFileName) {
   h_HWAK8J1Mass_RegC = new TH1D("HWAK8J1Mass_RegC","HWAK8J1MassC",60,0,300);
   h_HWAK8J1Mass_RegD = new TH1D("HWAK8J1Mass_RegD","HWAK8J1MassD",60,0,300);
   //
+  
+  h_MET_RegA = new TH1D("MET_RegA","MET with SR mass wi. reg a",wzMETvbins.size()-1,&(wzMETvbins[0]));
+  h_MET_RegC = new TH1D("MET_RegC","MET with SR mass wi. reg c",wzMETvbins.size()-1,&(wzMETvbins[0]));
 
   h_whMET_RegB = new TH1D("whMETvBin_RegB","MET variable bins",wzMETvbins.size()-1,&(wzMETvbins[0]));
   h_whMET_RegC = new TH1D("whMETvBin_RegC","MET variable bins",wzMETvbins.size()-1,&(wzMETvbins[0]));

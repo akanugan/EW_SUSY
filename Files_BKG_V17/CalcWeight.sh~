@@ -1,0 +1,10 @@
+#!/bin/bash
+
+inputFile="QCD_HT_MC2016.txt"
+
+while IFS= read -r line
+do
+    root -l -q 'weight.C($inputFile)'
+    echo "$line"
+
+done <"$inputFile"

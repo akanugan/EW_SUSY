@@ -1,0 +1,7 @@
+/cms/data/store/user/lpcsusyhad/SusyRA2Analysis2015/Skims/Run2ProductionV18/tree_signal/tree_TTWJetsToLNu_MC2018.root
+/cms/data/store/user/lpcsusyhad/SusyRA2Analysis2015/Skims/Run2ProductionV18/tree_signal/tree_TTWJetsToQQ_MC2018.root
+/cms/data/store/user/lpcsusyhad/SusyRA2Analysis2015/Skims/Run2ProductionV18/tree_signal/tree_TTZToLLNuNu_MC2018.root
+/cms/data/store/user/lpcsusyhad/SusyRA2Analysis2015/Skims/Run2ProductionV18/tree_signal/tree_TTZToQQ_MC2018.root
+/cms/data/store/user/lpcsusyhad/SusyRA2Analysis2015/Skims/Run2ProductionV18/tree_signal/tree_WWTo1L1Nu2Q_MC2018.root
+/cms/data/store/user/lpcsusyhad/SusyRA2Analysis2015/Skims/Run2ProductionV18/tree_signal/tree_WZTo1L3Nu_MC2018.root
+/cms/data/store/user/lpcsusyhad/SusyRA2Analysis2015/Skims/Run2ProductionV18/tree_signal/tree_ZZTo2L2Q_MC2018.root

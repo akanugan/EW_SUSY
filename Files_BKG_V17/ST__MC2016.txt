@@ -1,0 +1,3 @@
+/cms/data/store/user/lpcsusyhad/SusyRA2Analysis2015/Skims/Run2ProductionV17/tree_signal/MC2016/tree_ST_s-channel_MC2016.root
+/cms/data/store/user/lpcsusyhad/SusyRA2Analysis2015/Skims/Run2ProductionV17/tree_signal/MC2016/tree_ST_tW_antitop_MC2016.root
+/cms/data/store/user/lpcsusyhad/SusyRA2Analysis2015/Skims/Run2ProductionV17/tree_signal/MC2016/tree_ST_tW_top_MC2016.root

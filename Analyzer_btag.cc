@@ -468,6 +468,8 @@ void SignalReg::EventLoop(const char *data,const char *inputFileList) {
       bool Hcand_SB = false;
       bool Hcand_SB_antitag = false;
       bool Wcand = false;
+      bool Wcand_antitag = false;
+      bool SR = false;
       double bound1 = 20.0;
       double bound2 = 200.0;
       double bound3 = 250.0;
@@ -540,9 +542,14 @@ void SignalReg::EventLoop(const char *data,const char *inputFileList) {
 	  else{ // W cand.
 	    if(
 	       ((*JetsAK8_softDropMass)[i] > massLowW) &&                                   	   
-	       ((*JetsAK8_softDropMass)[i] < massHighW) &&                                                
-	       ((*JetsAK8_wDiscriminatorDeep)[i] > deepAK8Wscore) )
-	      Wcand = true;
+	       ((*JetsAK8_softDropMass)[i] < massHighW))                                          
+	      if(
+		 ((*JetsAK8_wDiscriminatorDeep)[i] > deepAK8Wscore) ){
+		Wcand = true;
+	      }	  
+	      else{
+		Wcand_antitag = true;
+	      }
 	  }
 	  
 	  // Checking for dR (e, AK8 jets) which are matched/ not matched to bjets in the signal mass window
@@ -636,6 +643,7 @@ void SignalReg::EventLoop(const char *data,const char *inputFileList) {
 		 ((*JetsAK8_softDropMass)[i] < 135) ){
 		if(
 		   ((*JetsAK8_deepDoubleBDiscriminatorH)[i] > deepbbscore) ){
+		  SR = true;
 		  h_MET_RegA->Fill(MET,wt);
 		}
 		else{
@@ -647,6 +655,28 @@ void SignalReg::EventLoop(const char *data,const char *inputFileList) {
 	}
       }
       
+      if(Wcand && !Zcand && !Hcand){ // WTag
+	h_WTag_MET->Fill(MET,wt);
+      }
+      if(Wcand_antitag && !Zcand && !Hcand){ // WTag CR
+	h_WTagCR_MET->Fill(MET,wt);
+      }
+
+      if(Zcand && !Wcand && !Hcand){ // ZTag
+	h_ZTag_MET->Fill(MET,wt);
+      }
+      if(Zcand_antitag && !Wcand && !Hcand){ // ZTag CR
+	h_ZTagCR_MET->Fill(MET,wt);
+      }
+
+      if(Hcand && !Zcand && !Wcand){ // HTag
+	h_HTag_MET->Fill(MET,wt);
+      }
+      if(Hcand_antitag && !Zcand && !Wcand){ // HTag CR
+	h_HTagCR_MET->Fill(MET,wt);
+      }
+
+
       if (Zcand && Wcand){
 	wz_cnt += 1;
 	h_wzMET->Fill(MET,wt);

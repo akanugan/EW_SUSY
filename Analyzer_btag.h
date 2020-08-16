@@ -38,7 +38,7 @@ class SignalReg : public NtupleVariables{
   double massLowH = 105., massHighH = 135.;
   double bbscore = 0.3; //  double b score
   double deepbbscore = 0.7; // deep double b score
-  bool passHEMjetVeto(double);
+
   
   vector<TLorentzVector> bjets;
 
@@ -117,6 +117,10 @@ class SignalReg : public NtupleVariables{
   TH1D *h_WZW4MT;
   TH1D *h_WZW4MT2J;
 
+  // Semi boosted
+  TH1D *h_WTag_MET, *h_WTagCR_MET;
+  TH1D *h_ZTag_MET, *h_ZTagCR_MET;
+  TH1D *h_HTag_MET, *h_HTagCR_MET;
 
   //Bkest_MET
   TH1D *h_WHMET_RegA, *h_WHMET_RegB, *h_WHMET_RegC, *h_WHMET_RegD;
@@ -336,6 +340,15 @@ void SignalReg::BookHistogram(const char *outFileName) {
   h_MET_RegA = new TH1D("MET_RegA","MET with SR mass wi. reg a",wzMETvbins.size()-1,&(wzMETvbins[0]));
   h_MET_RegC = new TH1D("MET_RegC","MET with SR mass wi. reg c",wzMETvbins.size()-1,&(wzMETvbins[0]));
 
+  // Semiboosted
+
+  h_WTag_MET = new TH1D("WTag_MET","W Tag MET",wzMETvbins.size()-1,&(wzMETvbins[0]));
+  h_WTagCR_MET = new TH1D("WTagCR_MET","W Tag MET CR",wzMETvbins.size()-1,&(wzMETvbins[0]));
+  h_ZTag_MET = new TH1D("ZTag_MET","Z Tag MET",wzMETvbins.size()-1,&(wzMETvbins[0]));
+  h_ZTagCR_MET = new TH1D("ZTagCR_MET","Z Tag MET CR",wzMETvbins.size()-1,&(wzMETvbins[0]));
+  h_HTag_MET = new TH1D("HTag_MET","H Tag MET",wzMETvbins.size()-1,&(wzMETvbins[0]));
+  h_HTagCR_MET = new TH1D("HTagCR_MET","H Tag MET CR",wzMETvbins.size()-1,&(wzMETvbins[0]));
+  //
   h_whMET_RegB = new TH1D("whMETvBin_RegB","MET variable bins",wzMETvbins.size()-1,&(wzMETvbins[0]));
   h_whMET_RegC = new TH1D("whMETvBin_RegC","MET variable bins",wzMETvbins.size()-1,&(wzMETvbins[0]));
   h_whMET_RegD = new TH1D("whMETvBin_RegD","MET variable bins",wzMETvbins.size()-1,&(wzMETvbins[0]));

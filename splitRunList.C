@@ -13,6 +13,8 @@ void splitRunList(string infile,int nfPerJob,int batch=1){
   string exeAna     = "signalReg";
   string datasetAna = "";
   string filesToTransfer = "";
+  string pathToV17 = "/home/akanugan/ana_cms/SUSY_EWK/CMSSW_10_3_1/src/EW_SUSY1/EW_SUSY/Files_BKG_V17/";
+  string pathToV18 = "/home/akanugan/ana_cms/SUSY_EWK/CMSSW_10_3_1/src/EW_SUSY1/EW_SUSY/Files_BKG_V18/";
   //---------------------------------------------------
   TString fileName = infile;
   if(fileName.Contains("MC2016")) datasetAna = "MC_2016";
@@ -23,13 +25,15 @@ void splitRunList(string infile,int nfPerJob,int batch=1){
   if(fileName.Contains("MET_Run2017")) datasetAna = "2017";
   if(fileName.Contains("MET_Run2018")) datasetAna = "2018";
 
-  if(fileName.Contains("TChiWZ_1000_1")) datasetAna = "TChiWZ_1000_1_"+datasetAna;
-  if(fileName.Contains("TChiWZ_800_1")) datasetAna = "TChiWZ_800_1_"+datasetAna;
-  if(fileName.Contains("TChiWZ_600_1")) datasetAna = "TChiWZ_600_1_"+datasetAna;
-  if(fileName.Contains("TChipmWW_1000_100")) datasetAna = "TChipmWW_1000_100_"+datasetAna;
-  if(fileName.Contains("TChipmWW_800_100")) datasetAna = "TChipmWW_800_100_"+datasetAna;
-  if(fileName.Contains("TChipmWW_600_100")) datasetAna = "TChipmWW_600_100_"+datasetAna;
-  if(fileName.Contains("fastsim")) datasetAna = "fastsim_"+datasetAna;
+  // if(fileName.Contains("TChiWZ_1000_1")) datasetAna = "TChiWZ_1000_1_"+datasetAna;
+  // if(fileName.Contains("TChiWZ_800_1")) datasetAna = "TChiWZ_800_1_"+datasetAna;
+  // if(fileName.Contains("TChiWZ_600_1")) datasetAna = "TChiWZ_600_1_"+datasetAna;
+  // if(fileName.Contains("TChipmWW_1000_100")) datasetAna = "TChipmWW_1000_100_"+datasetAna;
+  // if(fileName.Contains("TChipmWW_800_100")) datasetAna = "TChipmWW_800_100_"+datasetAna;
+  // if(fileName.Contains("TChipmWW_600_100")) datasetAna = "TChipmWW_600_100_"+datasetAna;
+
+  if(fileName.Contains("TChi")) datasetAna = "TChi_"+datasetAna;
+  if(fileName.Contains("fast")) datasetAna = "TChi_"+datasetAna;
   //---------------------------------------------------
   if (batch==1)
     cout<<"executable at worker node : "<<exeCondor<<endl
@@ -47,7 +51,7 @@ void splitRunList(string infile,int nfPerJob,int batch=1){
   ifstream file(infile);
   if(!file){cout<<"Couldn't Open File "<<infile<<endl;}
   string str,dataset=infile;
-  dataset.pop_back();  dataset.pop_back();  dataset.pop_back();  dataset.pop_back();
+  dataset.pop_back();  dataset.pop_back();  dataset.pop_back();  dataset.pop_back(); // removing .txt from the end
   vector<string> fname;
   while (std::getline(file, str))
     {
@@ -59,7 +63,7 @@ void splitRunList(string infile,int nfPerJob,int batch=1){
   char name[1000];
   ofstream outf;
   for(int i=0,j=0;i<fname.size();){
-    sprintf(name,"FileList_%s_job%i.txt",dataset.c_str(),jobid);
+    sprintf(name,"%sFileList_%s_job%i.txt",pathToV18.c_str(),dataset.c_str(),jobid);
     outf.open(name);
     for(j=0;j<nfPerJob && i<fname.size();j++){
       outf<<fname[i]<<endl;
@@ -105,11 +109,14 @@ void splitRunList(string infile,int nfPerJob,int batch=1){
       sprintf(name,"condor_submit %s_job%i.jdl",dataset.c_str(),i);
       system(name);
     } else {
-      sprintf(fileListName,"FileList_%s_job%i.txt",dataset.c_str(),i);
+      sprintf(fileListName,"%sFileList_%s_job%i.txt",pathToV18.c_str(),dataset.c_str(),i);
       sprintf(jobName,"%s_job%i",dataset.c_str(),i);
       sprintf(name,"qsub -N %s -o %s.stdout -e %s.stderr -v exeAna=%s,fileListName=%s,outputFile=%s.root,datasetAna=%s submit.pbs",
-	      jobName,jobName,jobName,
-	      exeAna.c_str(),fileListName,jobName,datasetAna.c_str());
+      	      jobName,jobName,jobName,
+      	      exeAna.c_str(),fileListName,jobName,datasetAna.c_str());
+      // sprintf(name,"qsub -N %s -o %s.stdout -e %s.stderr -v exeAna=%s,fileListName=%s%s,outputFile=%s.root,datasetAna=%s submit.pbs",
+      // 	      jobName,jobName,jobName,
+      // 	      exeAna.c_str(),pathToV18.c_str(),fileListName,jobName,datasetAna.c_str());
       cout << name << endl;
       system(name);
     }

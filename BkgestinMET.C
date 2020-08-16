@@ -43,31 +43,31 @@ TLegend *legend1=new TLegend(0.4501, 0.65,  0.88, 0.88);
 //TLegend *legend2=new TLegend(0.7, 0.9,  0.90, 0.65);
 //TLegend *legend2=new TLegend(0.6, 0.90,  0.98, 0.45);
 void setLastBinAsOverFlow(TH1D*);
-void BkgestinMET_tmp2(){
+void BkgestinMET(){
   double sr_Integral=0,cr_Integral=0;
   TH1::SetDefaultSumw2(1);
   gStyle->SetOptStat(0);
   gStyle->SetTitle(0);
 
-  TString varName =  "WHMET_RegA";
-  TString varName2 = "HWMET_RegA";
-  TString varName3 = "WHMET_RegB";
-  TString varName4 = "HWMET_RegB";
-  TString varName5 = "WHMET_RegC";
-  TString varName6 = "HWMET_RegC";
-  TString varName7 = "WHMET_RegD";
-  TString varName8 = "HWMET_RegD";
+  TString varName =  "wzMET";
+  TString varName2 = "wzMETvBin_RegB";
+  TString varName3 = "wzMETvBin_RegC";
+  TString varName4 = "wzMETvBin_RegD";
+
+  // TString varName5 = "WHMET_RegC";
+  // TString varName6 = "HWMET_RegC";
+  // TString varName7 = "WHMET_RegD";
+  // TString varName8 = "HWMET_RegD";
   TString xLabel = " MET (GeV)";
   int rebin=1;
 
-  f[0] = new TFile("Histos_WH_info7/ST__MC2018.root");
-  f[1] = new TFile("Histos_WH_info7/Rare_MC2018.root");
-  f[2] = new TFile("Histos_WH_info7/TTJets_MC2018.root");
-  f[3] = new TFile("Histos_WH_info7/QCD_HT_MC2018.root");
-  f[4] = new TFile("Histos_WH_info7/WJetsToLNu_HT_MC2018.root");
-  f[5] = new TFile("Histos_WH_info7/ZJetsToNuNu_HT_MC2018.root");
-  		    		  
-  f[6] = new TFile("Histos_WH_info7/Total_MC2018.root");
+  f[0] = new TFile("ST__MC2018.root");
+  f[1] = new TFile("Rare_MC2018.root");
+  f[2] = new TFile("TTJets_MC2018.root");
+  f[3] = new TFile("QCD_HT_MC2018.root");
+  f[4] = new TFile("WJetsToLNu_HT_MC2018.root");
+  f[5] = new TFile("ZJetsToNuNu_HT_MC2018.root");
+  f[6] = new TFile("Total_MC2018.root");
  
 
   gStyle->SetTextSize(2);
@@ -90,21 +90,22 @@ void BkgestinMET_tmp2(){
   TH1D *h_METTotal2=(TH1D*)f[6]->FindObjectAny(varName2);
   TH1D *h_METTotal3=(TH1D*)f[6]->FindObjectAny(varName3);
   TH1D *h_METTotal4=(TH1D*)f[6]->FindObjectAny(varName4);
-  TH1D *h_METTotal5=(TH1D*)f[6]->FindObjectAny(varName5);
-  TH1D *h_METTotal6=(TH1D*)f[6]->FindObjectAny(varName6);
-  TH1D *h_METTotal7=(TH1D*)f[6]->FindObjectAny(varName7);
-  TH1D *h_METTotal8=(TH1D*)f[6]->FindObjectAny(varName8);
+  
+  // TH1D *h_METTotal5=(TH1D*)f[6]->FindObjectAny(varName5);
+  // TH1D *h_METTotal6=(TH1D*)f[6]->FindObjectAny(varName6);
+  // TH1D *h_METTotal7=(TH1D*)f[6]->FindObjectAny(varName7);
+  // TH1D *h_METTotal8=(TH1D*)f[6]->FindObjectAny(varName8);
 
 
-  h_METTotal->Add(h_METTotal2); // region a
-  h_METTotal3->Add(h_METTotal4); //region b
-  h_METTotal5->Add(h_METTotal6); // region c
-  h_METTotal7->Add(h_METTotal8); //region d
+  // h_METTotal->Add(h_METTotal2); // region a
+  // h_METTotal3->Add(h_METTotal4); //region b
+  // h_METTotal5->Add(h_METTotal6); // region c
+  // h_METTotal7->Add(h_METTotal8); //region d
   
   TH1D* h_A = (TH1D*)h_METTotal->Rebin(numMETbins,"h_A",METbins);  
-  TH1D* h_B = (TH1D*)h_METTotal3->Rebin(numMETbins,"h_B",METbins);  
-  TH1D* h_C = (TH1D*)h_METTotal5->Rebin(numMETbins,"h_C",METbins);  
-  TH1D* h_D = (TH1D*)h_METTotal7->Rebin(numMETbins,"h_D",METbins);  
+  TH1D* h_B = (TH1D*)h_METTotal2->Rebin(numMETbins,"h_B",METbins);  
+  TH1D* h_C = (TH1D*)h_METTotal3->Rebin(numMETbins,"h_C",METbins);  
+  TH1D* h_D = (TH1D*)h_METTotal4->Rebin(numMETbins,"h_D",METbins);  
 
   TH1D* overlay = new TH1D("overlay","Predicted BC/D",numMETbins,METbins);
  
@@ -152,38 +153,38 @@ void BkgestinMET_tmp2(){
     
     //    printf("%d\n",i);
     
-    TH1D *h_MET=(TH1D*)f[i]->FindObjectAny(varName); //reg a
-    TH1D *h_MET2=(TH1D*)f[i]->FindObjectAny(varName2); //reg a
-    
+    TH1D *h_MET=(TH1D*)f[i]->FindObjectAny(varName);
+    TH1D *h_MET2=(TH1D*)f[i]->FindObjectAny(varName2);
     TH1D *h_MET3=(TH1D*)f[i]->FindObjectAny(varName3);
     TH1D *h_MET4=(TH1D*)f[i]->FindObjectAny(varName4);
-    TH1D *h_MET5=(TH1D*)f[i]->FindObjectAny(varName5);
-    TH1D *h_MET6=(TH1D*)f[i]->FindObjectAny(varName6);
-    TH1D *h_MET7=(TH1D*)f[i]->FindObjectAny(varName7);
-    TH1D *h_MET8=(TH1D*)f[i]->FindObjectAny(varName8);
 
-    h_MET->Add(h_MET2); // region a
+    // TH1D *h_MET5=(TH1D*)f[i]->FindObjectAny(varName5);
+    // TH1D *h_MET6=(TH1D*)f[i]->FindObjectAny(varName6);
+    // TH1D *h_MET7=(TH1D*)f[i]->FindObjectAny(varName7);
+    // TH1D *h_MET8=(TH1D*)f[i]->FindObjectAny(varName8);
+
+    // h_MET->Add(h_MET2); // region a
     
-    h_MET3->Add(h_MET4); //region b
-    h_MET5->Add(h_MET6); // region c
-    h_MET7->Add(h_MET8); //region d
+    // h_MET3->Add(h_MET4); //region b
+    // h_MET5->Add(h_MET6); // region c
+    // h_MET7->Add(h_MET8); //region d
         
     TH1D* h_MET_binned = (TH1D*)h_MET->Rebin(numMETbins,"h_MET_binned",METbins);
  
+    TH1D* h_MET2_binned = (TH1D*)h_MET2->Rebin(numMETbins,"h_MET2_binned",METbins);
     TH1D* h_MET3_binned = (TH1D*)h_MET3->Rebin(numMETbins,"h_MET3_binned",METbins);
-    TH1D* h_MET5_binned = (TH1D*)h_MET5->Rebin(numMETbins,"h_MET5_binned",METbins);
-    TH1D* h_MET7_binned = (TH1D*)h_MET7->Rebin(numMETbins,"h_MET7_binned",METbins);
+    TH1D* h_MET4_binned = (TH1D*)h_MET4->Rebin(numMETbins,"h_MET4_binned",METbins);
  
     cout<<"Bkg:  "<< f[i]->GetName() <<endl;
     cout <<"A in 1st bin is: " <<h_MET_binned->GetBinContent(1)<<" +/- "<<h_MET_binned->GetBinError(1)<<endl; 
-    cout <<"B in 1st bin is: " <<h_MET3_binned->GetBinContent(1)<<" +/- "<<h_MET3_binned->GetBinError(1)<<endl; 
-    cout <<"C in 1st bin is: " <<h_MET5_binned->GetBinContent(1)<<" +/- "<<h_MET5_binned->GetBinError(1)<<endl; 
-    cout <<"D in 1st bin is: " <<h_MET7_binned->GetBinContent(1)<<" +/- "<<h_MET7_binned->GetBinError(1)<<endl; 
+    cout <<"B in 1st bin is: " <<h_MET2_binned->GetBinContent(1)<<" +/- "<<h_MET2_binned->GetBinError(1)<<endl; 
+    cout <<"C in 1st bin is: " <<h_MET3_binned->GetBinContent(1)<<" +/- "<<h_MET3_binned->GetBinError(1)<<endl; 
+    cout <<"D in 1st bin is: " <<h_MET4_binned->GetBinContent(1)<<" +/- "<<h_MET4_binned->GetBinError(1)<<endl; 
     cout<<" \n  "<<endl;
     cout <<"A in 2nd bin is: " <<h_MET_binned->GetBinContent(2)<<" +/- "<<h_MET_binned->GetBinError(2)<<endl; 
-    cout <<"B in 2nd bin is: " <<h_MET3_binned->GetBinContent(2)<<" +/- "<<h_MET3_binned->GetBinError(2)<<endl; 
-    cout <<"C in 2nd bin is: " <<h_MET5_binned->GetBinContent(2)<<" +/- "<<h_MET5_binned->GetBinError(2)<<endl; 
-    cout <<"D in 2nd bin is: " <<h_MET7_binned->GetBinContent(2)<<" +/- "<<h_MET7_binned->GetBinError(2)<<endl; 
+    cout <<"B in 2nd bin is: " <<h_MET2_binned->GetBinContent(2)<<" +/- "<<h_MET2_binned->GetBinError(2)<<endl; 
+    cout <<"C in 2nd bin is: " <<h_MET3_binned->GetBinContent(2)<<" +/- "<<h_MET3_binned->GetBinError(2)<<endl; 
+    cout <<"D in 2nd bin is: " <<h_MET4_binned->GetBinContent(2)<<" +/- "<<h_MET4_binned->GetBinError(2)<<endl; 
     cout<<" ***  \n  "<<endl;
 
  

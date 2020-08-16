@@ -15,18 +15,17 @@
 #include "TMath.h"
 #include "TGraphErrors.h"
 
-void ABCDratios(){
+void tmp(){
   TFile * file_inputdistributions;
   TFile * file_inputdistributions2;
   TFile * file_inputdistributions3;
   TFile * file_output;
-  TString filename = "POFinNonTopBkg";     //file name to be saved
+  TString filename = "topbytotalMC";     //file name to be saved
   TString name;
   
 
-  file_inputdistributions = new TFile("nontopbkg.root", "READ");
-  //file_inputdistributions2 = new TFile("totalbkg.root", "READ");
-  //file_inputdistributions = new TFile("TTJets_MC2018.root", "READ");
+  file_inputdistributions = new TFile("tmp.root", "READ");
+  file_inputdistributions2 = new TFile("tmp1.root", "READ");
   //BKG_WX_conditions1a/ Histos_deep2b_mtbcut_massSB/
   //ST__MC2018.root //     TTJets_MC2018.root
   // file_inputdistributions1 = new TFile("BKG_baseline+Msd45to65_NoT21/ZJetsToNuNu_HT_MC2018.root", "READ");
@@ -37,7 +36,7 @@ void ABCDratios(){
   // file_inputdistributions3 = new TFile("BKG_baseline+T21greaterthan0.5_Nomasscut/ZJetsToNuNu_HT_MC2018.root", "READ");
 
   TH1F * h_Bkg1 = (TH1F*) file_inputdistributions->Get("MET_RegA");
-  TH1F * h_Bkg2 = (TH1F*) file_inputdistributions->Get("MET_RegC");  //WHAK8J1MassNo2bTag      //WHAK8J1Massnobtag
+  TH1F * h_Bkg2 = (TH1F*) file_inputdistributions2->Get("MET_RegA");  //WHAK8J1MassNo2bTag      //WHAK8J1Massnobtag
   // TH1F * h_Bkg3 = (TH1F*) file_inputdistributions->Get("HWAK8J1MassSB");
   // TH1F * h_Bkg4 = (TH1F*) file_inputdistributions->Get("HWAK8J1MassNo2bTag");
 
@@ -53,8 +52,8 @@ void ABCDratios(){
   h_varbin->GetXaxis()->SetRange(0,300);
   h_varbin->GetYaxis()->SetRangeUser(0.,2.4);
   h_varbin->SetTitle("");
-  h_varbin->GetXaxis()->SetTitle("Softdrop Mass (GeV)");
-  h_varbin->GetYaxis()->SetTitle("Ratio {pass/fail}");
+  h_varbin->GetXaxis()->SetTitle("MET (GeV)");
+  h_varbin->GetYaxis()->SetTitle("top/total MC");
   h_varbin->SetStats(0);
   h_varbin->GetXaxis()->SetTitleSize(.7);
   h_varbin->GetYaxis()->SetTitleSize(.7);
@@ -69,10 +68,10 @@ void ABCDratios(){
   
   h_Bkg1->Divide(h_Bkg2); // bin by bin
   h_Bkg1->GetXaxis()->SetRange(0,300);
-  h_Bkg1->GetYaxis()->SetRangeUser(0.,3.4);
+  h_Bkg1->GetYaxis()->SetRangeUser(0.,1.2);
   h_Bkg1->SetTitle(""); // gStyle->SetOptTitle(0);
   h_Bkg1->GetXaxis()->SetTitle("MET (GeV)");
-  h_Bkg1->GetYaxis()->SetTitle(" Pass/Fail in top BG");
+  h_Bkg1->GetYaxis()->SetTitle("top/total MC");
   h_Bkg1->SetStats(0);
   h_Bkg1->GetXaxis()->SetTitleSize(20);
   h_Bkg1->GetYaxis()->SetTitleSize(20);
@@ -88,9 +87,9 @@ void ABCDratios(){
   //c1->GetFrame()->SetFillColor(21);
   c1->GetFrame()->SetBorderSize(12);
   
-  h_Bkg1->Draw("HIST text");
+  h_Bkg1->Draw("text HIST");
   c1->Print(filename+"i_deepbb.png");
-  h_varbin->Draw("E");
+  h_varbin->Draw("text");
   c1->Print(filename+"_deepbb.png");
   c1->Update();
   //c1->SaveAs(filename+".pdf");

@@ -24,7 +24,7 @@ TString name3;
 TLatex textOnTop,intLumiE;
 const int nfiles=1,nBG=1;    //Specify no. of files
 TFile *f[nfiles];
-int col[14]={kPink+1,kTeal+9,kGreen,kYellow,kOrange,kBlue,kCyan,kRed,kBlue+2,kMagenta,kPink+1,kOrange+1,kGreen+3,kBlue+7};  //Specify Colors b's
+int col[14]={kBlue,kOrange,kPink+1,kTeal+9,kGreen,kYellow,kCyan,kRed,kBlue+2,kMagenta,kPink+1,kOrange+1,kGreen+3,kBlue+7};  //Specify Colors b's
 
 TCanvas *c_cA=new TCanvas("kinVar","",1500,900);
 
@@ -32,8 +32,8 @@ void decorate(TH1D*,int,const char*);
 void decorate(THStack*,int,const char*);
 void drawlegend(TH1D*,int,const char*);
 void printInt(TH1D*,int,const char*);
-//TLegend *legend1=new TLegend(0.4501, 0.65,  0.88, 0.88);
-TLegend *legend1=new TLegend(0.1,0.7,0.48,0.9);
+TLegend *legend1=new TLegend(0.7, 0.7,  0.88, 0.88);
+//TLegend *legend1=new TLegend(0.1,0.7,0.48,0.9);
 //TLegend *legend1=new TLegend(0.1,0.7,0.48,0.9);
 
 //TLegend *legend2=new TLegend(0.7, 0.9,  0.90, 0.65);
@@ -47,8 +47,8 @@ void Bkgplot(){
   //TString varName = "AK8J2wDis";
   //  TString varName = "AK8J2wDisnoBtag";
   //  TString varName = "AK8J1wDiscase2";
-  TString varName = "AK8J1wDiscase2noBtag";
-  TString xLabel = "case2:J1Wdis_J2noBtag";
+  TString varName = "MET_RegA";
+  TString xLabel = "MET in SR";
   int rebin=1;
 
   //f[0] = new TFile("BKGhistos_allcuts/ST__MC2018.root");
@@ -57,7 +57,7 @@ void Bkgplot(){
   // f[2] = new TFile("BKGhistos_allcuts/TTJets_MC2018.root");
   // f[4] = new TFile("BKGhistos_allcuts/WJetsToLNu_HT_MC2018.root");
   // f[5] = new TFile("BKGhistos_allcuts/ZJetsToNuNu_HT_MC2018.root");
-  f[0] = new TFile("BKG_conditions2/ZJetsToNuNu_HT_MC2018.root");
+  f[0] = new TFile("tmp.root");
 
   // f[6] = new TFile("TChiWZ_600_100_MC2018.root");
   // f[7] = new TFile("TChiWZ_800_100_MC2018.root");
@@ -89,34 +89,35 @@ void Bkgplot(){
     //    h_MET->SetMinimum(100);
     decorate(h_MET,i,f[i]->GetName());
     
-    if(i<=(nBG-1))  hs_var->Add(h_MET);
 
     if(i==nBG-1) {
       c_cA->cd();
-      hs_var->Draw("BAR HIST");
+      //      hs_var->Draw("BAR HIST");
       //hs_var->Draw("colz");
-      hs_var->Draw("HIST");
-      hs_var->SetMinimum(0.8);
-      hs_var->SetMaximum(hs_var->GetMaximum()*10);
-      decorate(hs_var,i,f[i]->GetName()); 
+      h_MET->SetMarkerStyle(kFullCircle);
+      h_MET->SetMarkerColor(kBlack);
+      h_MET->SetLineColor(kBlack);
+      h_MET->SetLineWidth(1);
+      //h_MET->Draw("PLC PMC"); // use for data points
+      h_MET->Draw("text"); // use for data points
+      //    decorate(hs_var,i,f[i]->GetName()); 
       //hs_var->GetYaxis()->SetRangeUser(100.5,20000);
     }
-    if(i>=nBG){ 
-      c_cA->cd(); 
-      h_MET->SetMarkerStyle(20);
-      h_MET->SetMarkerColor(col[i]);
-      h_MET->SetLineColor(col[i]);
-      h_MET->SetLineWidth(3);
-      h_MET->Draw("hist same");
-      //h_MET->Draw("colz");
-      //      h_MET->GetYaxis()->SetRangeUser(0.5,20000);
-      //      h_MET->GetYaxis()->SetRangeUser(100.5,20000);
-    }
+    // if(i>=nBG){ 
+    //   c_cA->cd(); 
+    //   h_MET->SetMarkerStyle(20);
+    //   h_MET->Draw("hist same");
+    //   //h_MET->Draw("colz");
+    //   //      h_MET->GetYaxis()->SetRangeUser(0.5,20000);
+    //   //      h_MET->GetYaxis()->SetRangeUser(100.5,20000);
+    // }
     drawlegend(h_MET,i,f[i]->GetName());
     if(i==nfiles-1){
       //hs_var->GetXaxis()->SetRangeUser(0,1500); 
       //hs_var->GetXaxis()->SetTitleOffset(.90);
-      hs_var->GetXaxis()->SetTitle(xLabel); hs_var->GetYaxis()->SetTitle("Events");hs_var->SetTitle(0);
+      h_MET->GetXaxis()->SetTitle(xLabel);
+      h_MET->GetYaxis()->SetTitle("Events");
+      h_MET->SetTitle(0);
     }
   }
   legend1->SetNColumns(2);
@@ -133,7 +134,7 @@ void Bkgplot(){
   sprintf(name2,"#bf{%0.1f fb^{-1} (13 TeV)}",intLumi);
   intLumiE.DrawLatexNDC(0.68,0.91,name2);
 
-  name3 = varName+".pdf";
+  name3 = varName+"TChiWH_800_100.pdf";
   c_cA->SaveAs(name3);
   cout<<"*****************************************************"<<endl;
   cout<<"Int Lumi(inv.fb) for file1:"<<setprecision(4)<<intLumi<<endl;

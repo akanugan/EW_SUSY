@@ -37,68 +37,56 @@ void decorate(THStack*,int,const char*);
 void drawlegend(TH1D*,int,const char*);
 void printInt(TH1D*,int,const char*);
 
-TLegend *legend1=new TLegend(0.6, 0.7,  0.93, 0.88);
+TLegend *legend1=new TLegend(0.6, 0.7,  0.93, 0.85);
 //TLegend *legend1=new TLegend(0.1,0.7,0.48,0.9);
 //TLegend *legend1=new TLegend(0.1,0.7,0.48,0.9);
 
 //TLegend *legend2=new TLegend(0.7, 0.9,  0.90, 0.65);
 //TLegend *legend2=new TLegend(0.6, 0.90,  0.98, 0.45);
 void setLastBinAsOverFlow(TH1D*);
-void plotKinStack_KH(){
+void KinStack(){
   double sr_Integral=0,cr_Integral=0;
   TH1::SetDefaultSumw2(1);
   gStyle->SetOptStat(0);
   gStyle->SetTitle(0);
-  TString varName = "MET_RegC";
+  TString varName = "WHMET";
   TString varName2 = "HWMET";
-  bool secondSig = false;
-  TString xLabel = "MET in  Reg C (GeV)";
-  int rebin=1;
+  TString xLabel = "MET (GeV)";
+  int rebin=5;
 
   //MC 2018 only
-  // f[0] = new TFile("ST__MC2018.root");
-  // f[1] = new TFile("QCD_HT_MC2018.root");
-  // f[2] = new TFile("TTJets_MC2018.root");
-  // f[3] = new TFile("WJetsToLNu_HT_MC2018.root");
-  // f[4] = new TFile("ZJetsToNuNu_HT_MC2018.root");
-  // f[5] = new TFile("Rare_MC2018.root");
-  // f[6] = new TFile("TChiWH_600_100_MC2018.root");
-  // f[7] = new TFile("TChiWH_800_100_MC2018.root");
-  // f[8] = new TFile("TChiWH_1000_100_MC2018.root");
+  // f[0] = new TFile("Histos_WZ/b-veto/ST__MC2018.root");
+  // f[1] = new TFile("Histos_WZ/b-veto/QCD_HT_MC2018.root");
+  // f[2] = new TFile("Histos_WZ/b-veto/TTJets_MC2018.root");
+  // f[3] = new TFile("Histos_WZ/b-veto/WJetsToLNu_HT_MC2018.root");
+  // f[4] = new TFile("Histos_WZ/b-veto/ZJetsToNuNu_HT_MC2018.root");
+  // f[5] = new TFile("Histos_WZ/b-veto/Rare_MC2018.root");
+  // f[6] = new TFile("Histos_WZ/b-veto/TChiWZ_600_100_MC2018.root");
+  // f[7] = new TFile("Histos_WZ/b-veto/TChiWZ_800_100_MC2018.root");
+  // f[8] = new TFile("Histos_WZ/b-veto/TChiWZ_1000_100_MC2018.root");
 
   // Ful run 2
-  f[0] = new TFile("ST__MCRun2.root");
-  f[1] = new TFile("QCD_HT_MCRun2.root");
-  f[2] = new TFile("TTJets_MCRun2.root");
-  f[3] = new TFile("WJetsToLNu_HT_MCRun2.root");
-  f[4] = new TFile("ZJetsToNuNu_HT_MCRun2.root");
-  f[5] = new TFile("Rare_MCRun2.root");  
-  f[6] = new TFile("TChiWZ_600_100_MC2018.root");
-  f[7] = new TFile("TChiWZ_800_100_MC2018.root");
-  f[8] = new TFile("TChiWZ_1000_100_MC2018.root");
-
-
-  // f[6] = new TFile("SIG_TChiWH_baseline/TChiWH_600_100_MC2018.root");
-  // f[7] = new TFile("SIG_TChiWH_baseline/TChiWH_800_100_MC2018.root");
-  // f[8] = new TFile("SIG_TChiWH_baseline/TChiWH_1000_100_MC2018.root");
-  
-  // f[6] = new TFile("SIG_WW_tightmass_vetoB/TChipmWW_600_100_MC2018.root");  
-  // f[7] = new TFile("SIG_WW_tightmass_vetoB/TChipmWW_800_100_MC2018.root");
-  // f[8] = new TFile("SIG_WW_tightmass_vetoB/TChipmWW_1000_100_MC2018.root");
+  f[0] = new TFile("Histos_Run2/ST__MCRun2.root");
+  f[1] = new TFile("Histos_Run2/QCD_HT_MCRun2.root");
+  f[2] = new TFile("Histos_Run2/TTJets_MCRun2.root");
+  f[3] = new TFile("Histos_Run2/WJetsToLNu_HT_MCRun2.root");
+  f[4] = new TFile("Histos_Run2/ZJetsToNuNu_HT_MCRun2.root");
+  f[5] = new TFile("Histos_Run2/Rare_MCRun2.root");  
+  f[6] = new TFile("Histos_Run2/TChiWH_600_100_MC2018.root");
+  f[7] = new TFile("Histos_Run2/TChiWH_800_100_MC2018.root");
+  f[8] = new TFile("Histos_Run2/TChiWH_1000_100_MC2018.root");
 
   TH1D *h_Sig=(TH1D*)f[6]->FindObjectAny(varName);
   TH1D *h_Sig1=(TH1D*)f[7]->FindObjectAny(varName);
   TH1D *h_Sig2=(TH1D*)f[8]->FindObjectAny(varName);
+   
+  TH1D *h_sig=(TH1D*)f[6]->FindObjectAny(varName2);
+  TH1D *h_sig1=(TH1D*)f[7]->FindObjectAny(varName2);
+  TH1D *h_sig2=(TH1D*)f[8]->FindObjectAny(varName2);
   
-  if(secondSig){  
-    cout <<"Adding Sig2 "<<endl;
-    TH1D *h_sig=(TH1D*)f[6]->FindObjectAny(varName2);
-    TH1D *h_sig1=(TH1D*)f[7]->FindObjectAny(varName2);
-    TH1D *h_sig2=(TH1D*)f[8]->FindObjectAny(varName2);
-    h_Sig->Add(h_sig);
-    h_Sig1->Add(h_sig1);
-    h_Sig2->Add(h_sig2);
-  }
+  // h_Sig->Add(h_sig);
+  // h_Sig1->Add(h_sig1);
+  // h_Sig2->Add(h_sig2);
 
   // Top panel
   
@@ -113,27 +101,25 @@ void plotKinStack_KH(){
   gStyle->SetTextSize(2);
   THStack *hs_var=new THStack("var_Stack","");
   TH1D *h_total;
-  //TH1D *h_R;
-  TH1D *h_MET_R[nfiles];
-  for(int i=0;i<nfiles;i++){
-    sprintf(name,"hist_file%i",i);
-    h_MET_R[i]=new TH1D(name,name,21,0.5,21.5);
-  }
-  vector<double> Bcnt;
+
+  // TH1D *h_MET_R[nfiles];
+  // for(int i=0;i<nfiles;i++){
+  //   sprintf(name,"hist_file%i",i);
+  //   h_MET_R[i]=new TH1D(name,name,21,0.5,21.5);
+  // }
+  // vector<double> Bcnt;
   double intLumi=137;
   TLatex tl1;
   for(int i=0;i<nfiles;i++){
         
     TH1D *h_MET=(TH1D*)f[i]->FindObjectAny(varName);
     h_MET->Rebin(rebin);  
-
-    if(secondSig){
-      if(i<=(nBG-1)){
-	TH1D *h_MET2=(TH1D*)f[i]->FindObjectAny(varName2);
-	h_MET2->Rebin(rebin);
-	h_MET->Add(h_MET2);
-      }
-    }
+    
+    //if(i<=(nBG-1)){
+    TH1D *h_MET2=(TH1D*)f[i]->FindObjectAny(varName2);
+    h_MET2->Rebin(rebin);
+    h_MET->Add(h_MET2);
+      //}
     
     h_MET->GetYaxis()->SetRangeUser(100.5,20000);
     h_MET->SetMinimum(100);
@@ -164,7 +150,7 @@ void plotKinStack_KH(){
       h_MET->SetMarkerColor(col[i]);
       h_MET->SetLineColor(col[i]);
       h_MET->SetLineWidth(3);
-      //      h_MET->Draw("hist same");
+      h_MET->Draw("hist same e");
       //      h_MET->GetYaxis()->SetRangeUser(0.5,20000);
       //      h_MET->GetYaxis()->SetRangeUser(100.5,20000);
     }
@@ -176,9 +162,6 @@ void plotKinStack_KH(){
     }
   }
   
-  // AR
-  //TH1D *hRatio = (TH1D*)h_Sig ->Clone();
-  //TH1* hRatio = new TH1I("h1", "h1 title", 100, 0.0, 4.0);
   TH1 *stack_sum = static_cast<TH1*>(hs_var->GetStack()->Last());
   TH1 *sstack_sum = (TH1D*)h_Sig ->Clone(); // just to have same bin content
   TH1 *sigbkg_sum = (TH1D*)h_Sig ->Clone(); // just to have same bin content
@@ -187,8 +170,8 @@ void plotKinStack_KH(){
   bool sBkg =false;
   if (stack_sum->Integral() !=0){
   for (int bin=0;bin<=stack_sum->GetNcells();++bin) {
-    double bgsum = (stack_sum->GetBinContent(bin)>0.) ? stack_sum->GetBinContent(bin) : 1e-6;
-    cout<< "Stack sum in bin: "<<bin <<" : " << bgsum<< endl;
+    double bgsum = (stack_sum->GetBinContent(bin) >0.) ? stack_sum->GetBinContent(bin) : 1e-6;
+    cout<< "Stack sum: " <<bgsum<< endl;
     sstack_sum->SetBinContent(bin,sqrt(bgsum));
     double sigbg = ((stack_sum->GetBinContent(bin)+h_Sig->GetBinContent(bin))>0.) ? (stack_sum->GetBinContent(bin)+h_Sig->GetBinContent(bin)) : 1e-6;
     sigbkg_sum->SetBinContent(bin,sqrt(sigbg));
@@ -227,17 +210,8 @@ void plotKinStack_KH(){
   // hRatio1->Divide(sstack_sum);
   //hRatio2->Divide(sstack_sum);
   // 
-  cout<< "Bkg total: " << stack_sum->Integral() << endl;
-  cout<< "Bkg total 0to4 bins " << stack_sum->Integral(0,4) << endl;
-  cout<< "Bkg total 5tolast bins " << stack_sum->Integral(5,101) << endl;
-  cout<< "Sig (600,100) total: " << h_Sig->Integral() << endl;
-  cout<< "Sig (800,100) total: " << h_Sig1->Integral() << endl;
-  cout<< "Sig (1000,100) total: " << h_Sig2->Integral() << endl;
-  
-  cout <<"Ratio (600,100) total: "<<hRatio->Integral() << endl;
-  cout <<"Ratio (800,100) total: "<<hRatio1->Integral() << endl;
-  cout <<"Ratio (1000,100) total: "<<hRatio2->Integral() << endl;
-  
+ 
+  printf("%f\n",static_cast<float>(sstack_sum->Integral()));
   //hRatio->Divide(static_cast<TH1*>(hs_var->GetStack()->Last()));
   //printf("%f\n",static_cast<float>(static_cast<TH1*>(hs_var->GetStack()->Last())->Integral()));
 
@@ -248,14 +222,14 @@ void plotKinStack_KH(){
   h_total->SetFillColor(kBlack);
   h_total->Draw("e2 same");
 
-  h_Sig->Draw("hist same e");
-  h_Sig1->Draw("hist same e");
-  h_Sig2->Draw("hist same e");
+  // h_Sig->Draw("hist same e");
+  // h_Sig1->Draw("hist same e");
+  // h_Sig2->Draw("hist same e");
   hs_var->SetTitle("");
   hs_var->GetXaxis()->CenterTitle(true);
   hs_var->GetYaxis()->CenterTitle(true);
   hs_var->GetYaxis()->SetTitle("# of events");
-  hs_var->GetXaxis()->SetTitle(xLabel);
+  //hs_var->GetXaxis()->SetTitle("mT (GeV)");
   hs_var->GetYaxis()->SetTitleOffset(1.0);
   hs_var->GetYaxis()->SetTitleFont(42);
   hs_var->GetYaxis()->SetTitleSize(0.045);
@@ -324,16 +298,16 @@ void plotKinStack_KH(){
   hRatio->GetXaxis()->SetTickLength(0.08);
   
   //hRatio->SetLineWidth(5);
-  hRatio->SetMaximum(3.4);
+  hRatio->SetMaximum(4.9);
   hRatio->Draw("hist");
   hRatio1->Draw("hist same");
   hRatio2->Draw("hist same");
   Double_t Gmax=hRatio->GetXaxis()->GetBinUpEdge(hRatio->GetNbinsX()-5);
   Double_t Gmin=hRatio->GetXaxis()->GetXmin();
-  //printf("%f\n",Gmax);
-  TLine *line = new TLine(0,2,2000,2);
+  printf("%f\n",Gmax);
+  TLine *line = new TLine(Gmin,2,2000,2);
   line->SetLineColor(kBlue);
-  //  line->Draw();
+  line->Draw();
   
   name3 = varName+".pdf";
   c_cA->SaveAs(name3);

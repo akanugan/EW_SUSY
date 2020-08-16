@@ -111,6 +111,10 @@ class SignalReg : public NtupleVariables{
   TH1D *h_WZW4MT;
   TH1D *h_WZW4MT2J;
 
+  // semi boosted
+  TH1D *h_2T2MCR_METvBin;
+  TH1D *h_1T2M_METvBin, *h_1T2MCR_METvBin;
+  TH1D *h_1T1M_METvBin, *h_1T1MCR_METvBin;
 
   //Bkest_MET
   TH1D *h_WHMET_RegA, *h_WHMET_RegB, *h_WHMET_RegC, *h_WHMET_RegD;
@@ -217,7 +221,17 @@ void SignalReg::BookHistogram(const char *outFileName) {
   /* h_AK8J2Mass4 = new TH1D("AK8J2Mass4","AK8j2 Mass4",60,0,300);   */
 
   h_METvBin = new TH1D("METvBin","MET variable bins",METvbins.size()-1,&(METvbins[0])); 
-  // ---for wh----
+  // semi boosted
+
+  h_2T2MCR_METvBin = new TH1D("2T2MCR_METvBin","2T2M MET in CR",METvbins.size()-1,&(METvbins[0])); 
+  h_1T2M_METvBin = new TH1D("1T2M_METvBin","1T2M MET",METvbins.size()-1,&(METvbins[0])); 
+  h_1T2MCR_METvBin = new TH1D("1T2MCR_METvBin","1T2M CR MET",METvbins.size()-1,&(METvbins[0])); 
+  h_1T1M_METvBin = new TH1D("1T1M_METvBin","1T1M MET",METvbins.size()-1,&(METvbins[0])); 
+  h_1T1MCR_METvBin = new TH1D("1T1MCR_METvBin","1T1M CRMET",METvbins.size()-1,&(METvbins[0])); 
+
+
+
+ // ---for wh----
   h_WHAK8J1Pt = new TH1D("WHAK8J1Pt","leading AK8 jets Pt",200,0,2000);
   h_WHAK8J1Eta = new TH1D("WHAK8J1Eta","AK8J1 Eta",120,-6,6);
   h_WHAK8J1Mass = new TH1D("WHAK8J1Mass","AK8J1 Mass",60,0,300);

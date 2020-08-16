@@ -92,14 +92,18 @@ void SignalReg::EventLoop(const char *data,const char *inputFileList) {
     //   cout<<"Assigning xsec as: "<<xsec<<endl;
   }
   
+  if(s_data.Contains("Rare")){    
+    lumiInfb = 137.0;
+  }
+
   bool TTJets_nonHTcut = false;
   if (s_runlist.Contains("TTJets_DiLept") || s_runlist.Contains("TTJets_SingleLeptFromT") ){
     cout <<" *****  Applying madHT < 600 cut to add other HT samples > 600"<< endl;
     TTJets_nonHTcut = true;
   }
-
-  lumiInfb = 137.0;
-  cout<<"!!!! changing intLumi to 137/fb, although you should have used 2018 intLumi...."<<endl;
+  
+  //  lumiInfb = 137.0;
+  // cout<<"!!!! changing intLumi to 137/fb, although you should have used 2018 intLumi...."<<endl;
 
   if(dataRun>0) cout<<"Processing it as "<<dataRun<<" data"<<endl;
   else if(dataRun<0) cout<<"Processing it as "<<abs(dataRun)<<" MC"<<endl;
@@ -556,14 +560,24 @@ void SignalReg::EventLoop(const char *data,const char *inputFileList) {
       // if(Wdismax >0)  cout<<"W dis MD max "<<   WdisMDmax <<endl;	
       
       bool Wcand = false;
+      bool Wcand_antitag = false;
       bool worZcand = false;
+      bool twoT2MCR = false;
+      bool twoT2MCR_1 = false;
+      int AK8withmass = 0;
+      bool oneT2M = false;
+      bool oneT2M_1 = false;
+      bool oneT2MCR = false;
+      bool oneT1M = false;
+      bool oneT1MCR = false;
       bool disandtau21 = false;
       bool nothighWdisc = false;
       bool exception = false;
       int widx = 99;
       for(int i=0; i < JetsAK8->size(); i++){ // W
       	if ( Wdismax > 0 &&
-	     (*JetsAK8_wDiscriminatorDeep)[i] == Wdismax &&  // For max W-tag
+	     //	     (*JetsAK8_wDiscriminatorDeep)[i] == Wdismax &&  // For max W-tag
+	     abs( (*JetsAK8_wDiscriminatorDeep)[i] - Wdismax ) < 1e-6 &&  // For max W-tag
 	     //(*JetsAK8_wDiscriminatorDeepDecorrel)[i] == WdisMDmax &&
 	     ((*JetsAK8_softDropMass)[i] > 65) &&     // ?? already passes by above cut
 	     ((*JetsAK8_softDropMass)[i] < 105) &&
@@ -577,20 +591,61 @@ void SignalReg::EventLoop(const char *data,const char *inputFileList) {
       }
       // cout<<"w idx  " <<widx<<endl;
       
+
+
+      for(int i=0; i < JetsAK8->size(); i++){ // W
+      	if ( Wdis.size() == 0 &&
+	     ((*JetsAK8_softDropMass)[i] > 65) && 
+	     ((*JetsAK8_softDropMass)[i] < 105) &&
+	     ((*JetsAK8)[i].Pt()) > 200 &&                                                                      
+	     (abs((*JetsAK8)[i].Eta()) < 2) ){ 
+	  Wcand_antitag = true;
+	}
+      }
+
+      if( (((*JetsAK8_NsubjettinessTau2)[widx]/(*JetsAK8_NsubjettinessTau1)[widx]) > 0.35) ){
+	oneT2M_1 = true;
+      }
+      if( (((*JetsAK8_NsubjettinessTau2)[widx]/(*JetsAK8_NsubjettinessTau1)[widx]) > 0.45) ){
+	twoT2MCR_1 = true;
+      }
+      
       for(int j=0; j < JetsAK8->size(); j++){  //W/Z
 	//if( (*JetsAK8_wDiscriminatorDeep)[j] > 0.918 || (*JetsAK8_zDiscriminatorDeep)[j] > 0.918 ){
 	if( (j != widx) &&
 	    // (*JetsAK8_wDiscriminatorDeepDecorrel)[j] > 0.704 &&
-	    (((*JetsAK8_NsubjettinessTau2)[j]/(*JetsAK8_NsubjettinessTau1)[j]) < 0.35) &&
 	    ((*JetsAK8_softDropMass)[j] > 65) &&
 	    ((*JetsAK8_softDropMass)[j] < 105) &&
 	    ((*JetsAK8)[j].Pt()) > 200 &&                                                                      
 	    (abs((*JetsAK8)[j].Eta()) < 2) ){ // score W/Z cand.
-	  //  cout<<" j "<< j<<endl;
-	  worZcand=true;
-	  //cout<<"worZcand true"<<endl;
-	} // fails if the highest Wdisc. cand also passes tau21
+	  if( (((*JetsAK8_NsubjettinessTau2)[j]/(*JetsAK8_NsubjettinessTau1)[j]) < 0.35) ){
+	    worZcand=true;
+	    //cout<<"worZcand true"<<endl;
+	  } // fails if the highest Wdisc. cand also passes tau21
+	  
+	  if( (((*JetsAK8_NsubjettinessTau2)[j]/(*JetsAK8_NsubjettinessTau1)[j]) > 0.45) && twoT2MCR_1 ){
+	    twoT2MCR = true;
+	  }
+	  
+	  if( (((*JetsAK8_NsubjettinessTau2)[j]/(*JetsAK8_NsubjettinessTau1)[j]) > 0.35) && (((*JetsAK8_NsubjettinessTau2)[j]/(*JetsAK8_NsubjettinessTau1)[j]) < 0.45) && oneT2M_1 ){
+	    oneT2M = true;
+	  }
+	}
       }
+
+      for(int j=0; j < JetsAK8->size(); j++){  //W/Z
+	if(
+	   ((*JetsAK8_softDropMass)[j] > 65) &&
+	   ((*JetsAK8_softDropMass)[j] < 105) &&
+	   ((*JetsAK8)[j].Pt()) > 200 &&                                                                      
+	   (abs((*JetsAK8)[j].Eta()) < 2) ){
+	  AK8withmass += 1;
+	}
+      }
+      
+      if (AK8withmass == 1 && Wdis.size() == 1) oneT1M =true;
+      if (AK8withmass == 1 && Wdis.size() == 0) oneT1MCR =true;
+      if (AK8withmass == 2 && Wdis.size() == 0) oneT2MCR =true;
 
       for(int k=0; k < JetsAK8->size(); k++){  //W/Z
 	if( (k == widx) &&
@@ -616,13 +671,34 @@ void SignalReg::EventLoop(const char *data,const char *inputFileList) {
 	}
       }
 	
-      if(Wcand && (worZcand || exception) ){
+      if(Wcand && (worZcand || exception) ){ //2T2M SR
 	//	cout<<"both true"<<endl;
 	h_WZW1MET->Fill(MET,wt);
 	h_METvBin->Fill(MET,wt);
 	h_WZW1MT->Fill(mt,wt);
 	h_WZW1MT2J->Fill(mt2j,wt);
       }
+      
+      if( Wcand && twoT2MCR ){ // twoT2MCR 
+      	h_2T2MCR_METvBin->Fill(MET,wt);
+      }
+
+      if( Wcand && oneT2M ){ // oneT2M SR 
+	h_1T2M_METvBin->Fill(MET,wt);
+      }
+
+      if(oneT2MCR){
+	h_1T2MCR_METvBin->Fill(MET,wt);
+      }
+
+      if (oneT1M){
+	h_1T1M_METvBin->Fill(MET,wt);
+      }
+
+      if (oneT1MCR){
+	h_1T1MCR_METvBin->Fill(MET,wt);
+      }
+      
       //      cout<<"******"<<endl;
       /*  
 	  if(

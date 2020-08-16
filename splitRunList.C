@@ -63,7 +63,8 @@ void splitRunList(string infile,int nfPerJob,int batch=1){
   char name[1000];
   ofstream outf;
   for(int i=0,j=0;i<fname.size();){
-    sprintf(name,"%sFileList_%s_job%i.txt",pathToV18.c_str(),dataset.c_str(),jobid);
+    //    sprintf(name,"%sFileList_%s_job%i.txt",pathToV18.c_str(),dataset.c_str(),jobid); // Takes V17/ V18 files
+    sprintf(name,"FileList_%s_job%i.txt",dataset.c_str(),jobid);    
     outf.open(name);
     for(j=0;j<nfPerJob && i<fname.size();j++){
       outf<<fname[i]<<endl;
@@ -109,7 +110,8 @@ void splitRunList(string infile,int nfPerJob,int batch=1){
       sprintf(name,"condor_submit %s_job%i.jdl",dataset.c_str(),i);
       system(name);
     } else {
-      sprintf(fileListName,"%sFileList_%s_job%i.txt",pathToV18.c_str(),dataset.c_str(),i);
+      //      sprintf(fileListName,"%sFileList_%s_job%i.txt",pathToV18.c_str(),dataset.c_str(),i);
+      sprintf(fileListName,"FileList_%s_job%i.txt",dataset.c_str(),i);
       sprintf(jobName,"%s_job%i",dataset.c_str(),i);
       sprintf(name,"qsub -N %s -o %s.stdout -e %s.stderr -v exeAna=%s,fileListName=%s,outputFile=%s.root,datasetAna=%s submit.pbs",
       	      jobName,jobName,jobName,
